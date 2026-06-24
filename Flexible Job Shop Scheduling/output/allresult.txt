@@ -1,0 +1,8 @@
+================================================================================
+ GAME-THEORETIC FLEXIBLE JOB SHOP SCHEDULING - CUMULATIVE RESULTS
+ (jobs are selfish players minimising their own completion time;
+  the makespan emerges from the Nash equilibrium of the routing/sequencing game)
+================================================================================
+
+Instance      Group        Jobs  Mch   Ops     InitCmax  OurCmax  BestKnown     Gap%  Status
+------------------------------------------------------------------------------------------------
