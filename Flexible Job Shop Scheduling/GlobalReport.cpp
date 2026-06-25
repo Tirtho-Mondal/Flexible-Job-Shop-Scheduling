@@ -12,13 +12,13 @@ using namespace std;
 namespace fjs {
 
 GlobalReport::GlobalReport(const string& allResultPath)
-    : out_(allResultPath) {
-    out_ << "================================================================================\n";
-    out_ << " GAME-THEORETIC FLEXIBLE JOB SHOP SCHEDULING - CUMULATIVE RESULTS\n";
-    out_ << " (jobs are selfish players minimising their own completion time;\n";
-    out_ << "  the makespan emerges from the Nash equilibrium of the routing/sequencing game)\n";
-    out_ << "================================================================================\n\n";
-    out_ << left
+    : out(allResultPath) {
+    out << "================================================================================\n";
+    out << " GAME-THEORETIC FLEXIBLE JOB SHOP SCHEDULING - CUMULATIVE RESULTS\n";
+    out << " (jobs are selfish players minimising their own completion time;\n";
+    out << "  the makespan emerges from the Nash equilibrium of the routing/sequencing game)\n";
+    out << "================================================================================\n\n";
+    out << left
          << setw(14) << "Instance"
          << setw(13) << "Group"
          << setw(6)  << "Jobs"
@@ -30,20 +30,20 @@ GlobalReport::GlobalReport(const string& allResultPath)
          << setw(11) << "BestKnown"
          << setw(9)  << "Gap%"
          << "  Status\n";
-    out_ << string(96, '-') << "\n";
-    out_.flush();
+    out << string(96, '-') << "\n";
+    out.flush();
 }
 
 void GlobalReport::append(const Instance& inst, const SolveResult& result, int bestKnown) {
     ResultRow row;
-    row.name = inst.name();  row.group = inst.group();
+    row.name = inst.name;  row.group = inst.group;
     row.jobs = inst.numJobs(); row.machines = inst.numMachines();
     row.operations = inst.totalOperations();
     row.initialMakespan = result.initialMakespan;
     row.ourMakespan = result.bestMakespan;
     row.bestKnown = bestKnown;
     row.equilibrium = result.equilibriumReached;
-    rows_.push_back(row);
+    rows.push_back(row);
 
     ostringstream gap, status;
     if (bestKnown >= 0) {
@@ -57,7 +57,7 @@ void GlobalReport::append(const Instance& inst, const SolveResult& result, int b
         status << "no published BKS";
     }
 
-    out_ << left
+    out << left
          << setw(14) << row.name
          << setw(13) << row.group
          << setw(6)  << row.jobs
@@ -69,7 +69,7 @@ void GlobalReport::append(const Instance& inst, const SolveResult& result, int b
          << setw(11) << (bestKnown >= 0 ? to_string(bestKnown) : string("N/A"))
          << setw(9)  << gap.str()
          << "  " << status.str() << "\n";
-    out_.flush();
+    out.flush();
 }
 
 void GlobalReport::writeReadme(const string& readmePath) const {
@@ -102,7 +102,7 @@ void GlobalReport::writeReadme(const string& readmePath) const {
     md << "|---|---:|---:|---:|---:|---:|\n";
 
     map<string, vector<const ResultRow*>> byGroup;
-    for (const ResultRow& r : rows_) byGroup[r.group].push_back(&r);
+    for (const ResultRow& r : rows) byGroup[r.group].push_back(&r);
 
     for (auto& kv : byGroup) {
         int withBks = 0, matched = 0, beaten = 0; double sumGap = 0;
@@ -127,7 +127,7 @@ void GlobalReport::writeReadme(const string& readmePath) const {
     md << "| Instance | Group | Jobs | Mch | Ops | Init Cmax | Our Cmax | Best-known | Gap % | Eq |\n";
     md << "|---|---|---:|---:|---:|---:|---:|---:|---:|:--:|\n";
     md << fixed << setprecision(2);
-    for (const ResultRow& r : rows_) {
+    for (const ResultRow& r : rows) {
         md << "| " << r.name << " | " << r.group << " | " << r.jobs << " | "
            << r.machines << " | " << r.operations << " | " << r.initialMakespan
            << " | " << r.ourMakespan << " | ";

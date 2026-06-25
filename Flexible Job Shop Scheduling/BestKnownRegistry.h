@@ -35,7 +35,7 @@ public:
 
 private:
     void add(const string& group, const string& name, int value);
-    unordered_map<string, int> table_;
+    unordered_map<string, int> table;
 };
 
 } // namespace fjs

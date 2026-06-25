@@ -73,9 +73,9 @@ void GanttChart::write(const string& path, const Instance& inst, const Schedule&
 
     // ---- title ---------------------------------------------------------
     f << "<text x='" << marginL << "' y='28' font-size='18' font-weight='bold'>"
-      << esc(inst.name()) << "  -  Gantt chart  (Cmax = " << sched.makespan() << ")</text>\n";
+      << esc(inst.name) << "  -  Gantt chart  (Cmax = " << sched.makespan() << ")</text>\n";
     f << "<text x='" << marginL << "' y='46' font-size='12' fill='#555'>group: "
-      << esc(inst.group()) << "   jobs: " << nJobs << "   machines: " << m
+      << esc(inst.group) << "   jobs: " << nJobs << "   machines: " << m
       << "   (each job = one colour)</text>\n";
 
     // ---- time grid + axis labels --------------------------------------
@@ -102,7 +102,7 @@ void GanttChart::write(const string& path, const Instance& inst, const Schedule&
     for (int j = 0; j < nJobs; ++j) {
         const string col = jobColor(j, nJobs);
         for (const Operation& op : inst.job(j).operations()) {
-            const int gid = op.globalId();
+            const int gid = op.globalId;
             const int mc  = sched.machineOf(gid);
             const int st  = sched.startOf(gid);
             const int en  = sched.endOf(gid);
@@ -116,7 +116,7 @@ void GanttChart::write(const string& path, const Instance& inst, const Schedule&
             if (w >= 22)
                 f << "<text x='" << (x + w / 2) << "' y='" << (y + rowH * 0.66)
                   << "' font-size='10' fill='#111' text-anchor='middle'>J" << (j + 1)
-                  << "." << (op.positionInJob() + 1) << "</text>\n";
+                  << "." << (op.positionInJob + 1) << "</text>\n";
         }
     }
 

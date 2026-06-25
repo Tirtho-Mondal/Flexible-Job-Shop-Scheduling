@@ -22,12 +22,12 @@ Schedule ScheduleBuilder::build(const Instance& inst, const StrategyProfile& sta
     vector<vector<pair<int,int>>> busy(numMachines);
     vector<int> jobLastEnd(numJobs, 0); // finish of a job's latest op so far
 
-    for (int gid : state.sequence()) {
+    for (int gid : state.sequence) {
         const Operation& op = inst.operationByGlobalId(gid);
         const int alt     = state.alternativeOf(gid);
         const int machine = op.machineOfAlternative(alt);
         const int ptime   = op.timeOfAlternative(alt);
-        const int job     = op.jobIndex();
+        const int job     = op.jobIndex;
 
         const int release = jobLastEnd[job];      // earliest the part is ready
         auto& iv = busy[machine];

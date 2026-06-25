@@ -22,44 +22,44 @@ namespace fjs {
 class Schedule {
 public:
     Schedule(int operationCount, int jobCount)
-        : machine_(operationCount, -1),
-          start_(operationCount, 0),
-          end_(operationCount, 0),
-          completion_(jobCount, 0) {}
+        : machine(operationCount, -1),
+          start(operationCount, 0),
+          end(operationCount, 0),
+          completion(jobCount, 0) {}
 
     // Filled in by the ScheduleBuilder while it lays operations onto machines.
-    void recordOperation(int gid, int machine, int start, int end) {
-        machine_[gid] = machine;
-        start_[gid]   = start;
-        end_[gid]     = end;
+    void recordOperation(int gid, int mc, int st, int en) {
+        machine[gid] = mc;
+        start[gid]   = st;
+        end[gid]     = en;
     }
-    void setJobCompletion(int job, int c) { completion_[job] = c; }
-    void setMakespan(int c)               { makespan_ = c; }
+    void setJobCompletion(int job, int c) { completion[job] = c; }
+    void setMakespan(int c)               { cmax = c; }
 
     // ---- Objective values ----------------------------------------------
-    int makespan()             const { return makespan_; }
-    int jobCompletion(int job) const { return completion_[job]; }
+    int makespan()             const { return cmax; }
+    int jobCompletion(int job) const { return completion[job]; }
 
     // ---- Per-operation timing ------------------------------------------
-    int machineOf(int gid) const { return machine_[gid]; }
-    int startOf(int gid)   const { return start_[gid]; }
-    int endOf(int gid)     const { return end_[gid]; }
+    int machineOf(int gid) const { return machine[gid]; }
+    int startOf(int gid)   const { return start[gid]; }
+    int endOf(int gid)     const { return end[gid]; }
 
     // Sum of every player's completion time - a social-welfare measure and a
     // handy secondary objective for breaking ties between equal-makespan
     // equilibria.
     long long totalCompletion() const {
         long long s = 0;
-        for (int c : completion_) s += c;
+        for (int c : completion) s += c;
         return s;
     }
 
 private:
-    vector<int> machine_;     // gid -> machine it ran on
-    vector<int> start_;       // gid -> start time
-    vector<int> end_;         // gid -> finish time
-    vector<int> completion_;  // job -> completion time C_i
-    int              makespan_ = 0;
+    vector<int> machine;      // gid -> machine it ran on
+    vector<int> start;        // gid -> start time
+    vector<int> end;          // gid -> finish time
+    vector<int> completion;   // job -> completion time C_i
+    int              cmax = 0;     // the makespan (returned by makespan())
 };
 
 } // namespace fjs

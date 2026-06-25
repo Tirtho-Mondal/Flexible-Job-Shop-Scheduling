@@ -14,49 +14,49 @@ using namespace std;
 
 namespace fjs {
 
-Player::Player(const Instance& inst, int jobIndex)
-    : inst_(&inst), index_(jobIndex), label_(inst.job(jobIndex).label()) {}
+Player::Player(const Instance& instance, int jobIndex)
+    : inst(&instance), index(jobIndex), name(instance.job(jobIndex).label()) {}
 
 int Player::operationCount() const {
-    return inst_->job(index_).operationCount();
+    return inst->job(index).operationCount();
 }
 
 Strategy Player::strategy(const StrategyProfile& profile, const Schedule& sched,
                           const PayoffFunction& payoff) const {
-    return Strategy::fromProfile(*inst_, profile, sched, payoff, index_);
+    return Strategy::fromProfile(*inst, profile, sched, payoff, index);
 }
 
 int Player::completion(const Schedule& sched) const {
-    return sched.jobCompletion(index_);
+    return sched.jobCompletion(index);
 }
 
 double Player::waiting(const Schedule& sched, const PayoffFunction& payoff) const {
-    return payoff.forPlayer(sched, *inst_, index_).waiting;
+    return payoff.forPlayer(sched, *inst, index).waiting;
 }
 
 double Player::conflict(const Schedule& sched, const PayoffFunction& payoff) const {
-    return payoff.forPlayer(sched, *inst_, index_).conflict;
+    return payoff.forPlayer(sched, *inst, index).conflict;
 }
 
 double Player::utility(const Schedule& sched, const PayoffFunction& payoff) const {
-    return payoff.forPlayer(sched, *inst_, index_).utility;
+    return payoff.forPlayer(sched, *inst, index).utility;
 }
 
 bool Player::canImprove(const StrategyProfile& profile, const PayoffFunction& payoff,
                         string* how) const {
     // Fitness of the current joint outcome.
-    const long long baseFit = payoff.fitness(ScheduleBuilder::build(*inst_, profile));
+    const long long baseFit = payoff.fitness(ScheduleBuilder::build(*inst, profile));
 
     // Try every unilateral single-operation re-route of THIS player's operations.
-    const Job& job = inst_->job(index_);
+    const Job& job = inst->job(index);
     for (const Operation& op : job.operations()) {
-        const int gid = op.globalId();
+        const int gid = op.globalId;
         const int cur = profile.alternativeOf(gid);
         for (int a = 0; a < op.alternativeCount(); ++a) {
             if (a == cur) continue;
             StrategyProfile deviation = profile;          // copy, change one choice
             deviation.setAlternativeOf(gid, a);
-            Schedule s = ScheduleBuilder::build(*inst_, deviation);
+            Schedule s = ScheduleBuilder::build(*inst, deviation);
             if (payoff.fitness(s) < baseFit) {
                 if (how) {
                     ostringstream os;

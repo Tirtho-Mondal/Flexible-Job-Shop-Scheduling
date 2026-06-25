@@ -8,9 +8,9 @@
 //  explore their best responses; one decoded profile becomes a Solution.
 //
 //  Two vectors describe a profile:
-//      routing_  : for each operation (addressed by its globalId) the index of
+//      routing   : for each operation (addressed by its globalId) the index of
 //                  the eligible alternative the owning job currently picks (MAV);
-//      sequence_ : a precedence-feasible global dispatch order of all operations
+//      sequence  : a precedence-feasible global dispatch order of all operations
 //                  - the order a list-scheduler hands them to machines (OSV).
 //
 //  "Precedence-feasible" means the operations of any single job appear in their
@@ -34,17 +34,16 @@ class StrategyProfile {
 public:
     StrategyProfile() = default;
     StrategyProfile(int operationCount)
-        : routing_(operationCount, 0), sequence_() {
-        sequence_.reserve(operationCount);
+        : routing(operationCount, 0), sequence() {
+        sequence.reserve(operationCount);
     }
 
-    vector<int>&       routing()        { return routing_; }
-    const vector<int>& routing()  const { return routing_; }
-    vector<int>&       sequence()       { return sequence_; }
-    const vector<int>& sequence() const { return sequence_; }
+    // The two profile vectors are public data (routing = MAV, sequence = OSV).
+    vector<int> routing;    // op globalId -> chosen eligible-alternative index
+    vector<int> sequence;   // precedence-feasible global dispatch order
 
-    int  alternativeOf(int globalId) const { return routing_[globalId]; }
-    void setAlternativeOf(int globalId, int alt) { routing_[globalId] = alt; }
+    int  alternativeOf(int globalId) const { return routing[globalId]; }
+    void setAlternativeOf(int globalId, int alt) { routing[globalId] = alt; }
 
     // ---- strategy moves (named operations on the strategy data) --------
     // A move is one player changing its strategy. These edit the profile's two
@@ -52,23 +51,19 @@ public:
     // and a swap / mutual reroute is just two of these applied to a rival pair.
 
     // ROUTING move (MAV): pick a different eligible machine for one operation.
-    void reroute(int globalId, int alt) { routing_[globalId] = alt; }
+    void reroute(int globalId, int alt) { routing[globalId] = alt; }
 
     // SEQUENCING move (OSV): a copy of the dispatch order with the operation at
     // index `fromPos` moved to index `toPos`. Used for re-sequence and for the
     // pairwise swap (move the later rival just ahead of the earlier one).
     vector<int> resequenced(int fromPos, int toPos) const {
-        vector<int> r = sequence_;
+        vector<int> r = sequence;
         int g = r[fromPos];
         r.erase(r.begin() + fromPos);
         int t = (toPos > fromPos) ? toPos - 1 : toPos;
         r.insert(r.begin() + t, g);
         return r;
     }
-
-private:
-    vector<int> routing_;
-    vector<int> sequence_;
 };
 
 } // namespace fjs

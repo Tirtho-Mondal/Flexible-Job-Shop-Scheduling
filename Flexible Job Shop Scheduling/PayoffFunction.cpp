@@ -15,7 +15,7 @@ Payoff PayoffFunction::forPlayer(const Schedule& s, const Instance& inst, int jo
     // C_i and W_i: completion, and waiting = completion - time actually processed.
     long proc = 0;
     for (const Operation& op : inst.job(job).operations()) {
-        const int gid = op.globalId();
+        const int gid = op.globalId;
         proc += s.endOf(gid) - s.startOf(gid);
     }
     const double Ci = s.jobCompletion(job);
@@ -29,14 +29,14 @@ Payoff PayoffFunction::forPlayer(const Schedule& s, const Instance& inst, int jo
         load[s.machineOf(gid)] += s.endOf(gid) - s.startOf(gid);
     double Conf = 0;
     for (const Operation& op : inst.job(job).operations())
-        Conf += (double)load[s.machineOf(op.globalId())];
+        Conf += (double)load[s.machineOf(op.globalId)];
 
     Payoff p;
     p.completion = Ci;
     p.waiting    = Wi;
     p.conflict   = Conf;
     p.makespan   = s.makespan();
-    p.cost       = alpha_ * Ci + beta_ * Wi + gamma_ * Conf + delta_ * p.makespan;
+    p.cost       = alpha * Ci + beta * Wi + gamma * Conf + delta * p.makespan;
     p.utility    = 1.0 / (1.0 + p.cost);
     return p;
 }

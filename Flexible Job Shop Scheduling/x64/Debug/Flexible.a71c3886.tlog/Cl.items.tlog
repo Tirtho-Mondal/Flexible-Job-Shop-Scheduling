@@ -1,8 +1,14 @@
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Machine.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\Machine.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Operation.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\Operation.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Job.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\Job.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Player.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\Player.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Instance.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\Instance.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\ScheduleBuilder.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\ScheduleBuilder.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\TaskPool.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\TaskPool.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\RandomKick.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\RandomKick.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Strategy.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\Strategy.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Solution.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\Solution.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\StableSolution.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\StableSolution.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\PayoffFunction.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\PayoffFunction.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\GameSolver.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\GameSolver.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\FjsInstanceReader.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\FjsInstanceReader.obj
@@ -11,4 +17,5 @@ D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\BestKnownReg
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\InstanceReport.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\InstanceReport.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\GlobalReport.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\GlobalReport.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\CodeExplanation.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\CodeExplanation.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\GanttChart.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\GanttChart.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\main.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Debug\main.obj

@@ -43,9 +43,12 @@ public:
 
 class PayoffFunction {
 public:
+    // The four payoff weights are public data (a, b, g, d in U_i's cost term).
+    double alpha, beta, gamma, delta;
+
     PayoffFunction(double alpha = 1.0, double beta = 0.3,
                    double gamma = 0.05, double delta = 0.5)
-        : alpha_(alpha), beta_(beta), gamma_(gamma), delta_(delta) {}
+        : alpha(alpha), beta(beta), gamma(gamma), delta(delta) {}
 
     // THE payoff function: player `job`'s payoff U_i (and its parts) under `s`.
     Payoff forPlayer(const Schedule& s, const Instance& inst, int job) const;
@@ -57,15 +60,7 @@ public:
     // The reported social objective.
     int socialObjective(const Schedule& s) const { return s.makespan(); }
 
-    double alpha() const { return alpha_; }
-    double beta()  const { return beta_; }
-    double gamma() const { return gamma_; }
-    double delta() const { return delta_; }
-
     std::string description() const;
-
-private:
-    double alpha_, beta_, gamma_, delta_;
 };
 
 } // namespace fjs

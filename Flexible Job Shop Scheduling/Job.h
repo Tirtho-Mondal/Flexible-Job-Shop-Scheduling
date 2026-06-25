@@ -35,23 +35,22 @@ public:
     // so the reader can register its eligible machines.
     Operation& addOperation(int globalId);
 
-    int index() const { return index_; }
+    int index = 0;   // 0-based job/player id (public data)
 
-    int                           operationCount() const { return (int)ops_.size(); }
-    Operation&                    operation(int k)        { return ops_[k]; }
-    const Operation&              operation(int k)  const { return ops_[k]; }
-    vector<Operation>&       operations()            { return ops_; }
-    const vector<Operation>& operations()      const { return ops_; }
+    int                           operationCount() const { return (int)ops.size(); }
+    Operation&                    operation(int k)        { return ops[k]; }
+    const Operation&              operation(int k)  const { return ops[k]; }
+    vector<Operation>&       operations()            { return ops; }
+    const vector<Operation>& operations()      const { return ops; }
 
     // Total processing time of the route under the currently chosen routing -
     // a natural lower bound on this player's completion time.
     int routeWorkload() const;
 
-    string label() const { return "J" + to_string(index_ + 1); }
+    string label() const { return "J" + to_string(index + 1); }
 
 private:
-    int index_;
-    vector<Operation> ops_;
+    vector<Operation> ops;
 };
 
 } // namespace fjs

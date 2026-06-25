@@ -33,18 +33,13 @@ public:
     StableSolution(const Instance& inst, const StrategyProfile& profile,
                    const PayoffFunction& payoff);
 
-    bool             isStable()            const { return stable_; }
-    const Solution&  solution()            const { return solution_; }
-    int              makespan()            const { return solution_.makespan(); }
-    long long        fitness()             const { return solution_.fitness(); }
+    // ---- public data: the decoded solution and its stability verdict ----
+    Solution solution;                  // the decoded Nash candidate
+    bool     isStable = true;           // true when no job can improve alone
+    string   profitableDeviation;       // an improving deviation, else empty
 
-    // A human-readable improving deviation, or empty when the solution is stable.
-    const string&    profitableDeviation() const { return deviation_; }
-
-private:
-    Solution solution_;
-    bool     stable_ = true;
-    string   deviation_;
+    int       makespan() const { return solution.makespan(); }
+    long long fitness()  const { return solution.fitness; }
 };
 
 } // namespace fjs

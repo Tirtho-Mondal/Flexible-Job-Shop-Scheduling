@@ -34,35 +34,31 @@ public:
     static Solution decode(const Instance& inst, const StrategyProfile& profile,
                            const PayoffFunction& payoff);
 
-    // ---- the chosen strategies ----------------------------------------
-    const StrategyProfile& profile()           const { return profile_; }
-    const vector<int>&     operationSequence() const { return profile_.sequence(); } // OSV
-    const vector<int>&     machineAssignment() const { return machine_; }            // MAV (machine ids)
+    // ---- public data: the realised outcome of the game ----------------
+    StrategyProfile  profile;           // OSV + MAV (alternative indices)
+    Schedule         schedule;          // start/finish/makespan
+    long long        fitness     = 0;   // makespan-dominated selection key
+    double           totalPayoff = 0.0; // sum of every U_i
+
+    const vector<int>&     operationSequence() const { return profile.sequence; }  // OSV
+    const vector<int>&     machineAssignment() const { return machine; }           // MAV (machine ids)
 
     // ---- the timing ----------------------------------------------------
-    const Schedule& schedule()      const { return schedule_; }
-    int  startTime(int gid)         const { return schedule_.startOf(gid); }
-    int  finishTime(int gid)        const { return schedule_.endOf(gid); }
+    int  startTime(int gid)         const { return schedule.startOf(gid); }
+    int  finishTime(int gid)        const { return schedule.endOf(gid); }
 
-    // ---- the objective values -----------------------------------------
-    int       makespan()    const { return schedule_.makespan(); }
-    long long fitness()     const { return fitness_; }
-    double    totalPayoff() const { return totalPayoff_; }   // sum of every U_i
+    // ---- the objective value computed from the schedule ----------------
+    int       makespan()    const { return schedule.makespan(); }
 
     // ---- the per-player view ------------------------------------------
-    int                     numJobs()             const { return (int)jobStrategies_.size(); }
-    const Strategy&         jobStrategy(int job)  const { return jobStrategies_[job]; }
-    const vector<Strategy>& jobStrategies()       const { return jobStrategies_; }
+    int                     numJobs()             const { return (int)jobStrategies.size(); }
+    const Strategy&         jobStrategy(int job)  const { return jobStrategies[job]; }
 
 private:
     Solution(const StrategyProfile& profile, const Schedule& sched);
 
-    StrategyProfile  profile_;          // OSV + MAV (alternative indices)
-    Schedule         schedule_;         // start/finish/makespan
-    vector<int>      machine_;          // MAV decoded to actual machine ids
-    vector<Strategy> jobStrategies_;    // one Strategy per job-player
-    long long        fitness_     = 0;
-    double           totalPayoff_ = 0.0;
+    vector<int>      machine;           // MAV decoded to actual machine ids
+    vector<Strategy> jobStrategies;     // one Strategy per job-player
 };
 
 } // namespace fjs

@@ -37,8 +37,8 @@ public:
     Player(const Instance& inst, int jobIndex);
 
     // ---- identity ------------------------------------------------------
-    int           index() const { return index_; }   // 0-based job/player id
-    const string& label() const { return label_; }   // e.g. "J3"
+    int           index = 0;                          // 0-based job/player id (public data)
+    const string& label() const { return name; }      // e.g. "J3"
     int           operationCount() const;
 
     // ---- the action this player currently plays ------------------------
@@ -62,9 +62,8 @@ public:
                     string* how = nullptr) const;
 
 private:
-    const Instance* inst_;
-    int    index_;
-    string label_;
+    const Instance* inst;
+    string name;   // player label, e.g. "J3"
 };
 
 } // namespace fjs

@@ -4,6 +4,7 @@ d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\globalreport.obj
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\instancereport.obj
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\bestknownregistry.obj
+d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\beliefmodel.obj
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\fjsinstancereader.obj
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\gamesolver.obj
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\payofffunction.obj
@@ -12,7 +13,13 @@ d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\job.obj
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\operation.obj
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\machine.obj
-d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\beliefmodel.obj
+d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\stablesolution.obj
+d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\solution.obj
+d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\strategy.obj
+d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\player.obj
+d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\ganttchart.obj
+d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\randomkick.obj
+d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\taskpool.obj
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\x64\release\flexible job shop scheduling.exe
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\x64\release\flexible job shop scheduling.pdb
 d:\thesis\flexible job shop scheduling\flexible job shop scheduling\flexible.a71c3886\x64\release\flexible job shop scheduling.ipdb

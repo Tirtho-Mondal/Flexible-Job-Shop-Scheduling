@@ -25,25 +25,11 @@ every `.fjs` instance and writes everything under `output/`:
 
 | Group | Instances | With BKS | Matched | Beaten | Avg gap % (where known) |
 |---|---:|---:|---:|---:|---:|
-| brandimarte | 15 | 15 | 4 | 0 | 6.19 |
+| brandimarte | 1 | 1 | 1 | 0 | 0.00 |
 
 ## Full results
 
 | Instance | Group | Jobs | Mch | Ops | Init Cmax | Our Cmax | Best-known | Gap % | Eq |
 |---|---|---:|---:|---:|---:|---:|---:|---:|:--:|
-| mk01 | brandimarte | 10 | 6 | 55 | 86 | 42 | 40 | 5.00 | Y |
-| mk02 | brandimarte | 10 | 6 | 58 | 62 | 27 | 26 | 3.85 | Y |
-| mk03 | brandimarte | 15 | 8 | 150 | 351 | 204 | 204 | 0.00 | Y |
-| mk04 | brandimarte | 15 | 8 | 90 | 142 | 65 | 60 | 8.33 | Y |
-| mk05 | brandimarte | 15 | 4 | 106 | 307 | 177 | 172 | 2.91 | Y |
-| mk06 | brandimarte | 10 | 15 | 150 | 194 | 70 | 57 | 22.81 | Y |
-| mk07 | brandimarte | 20 | 5 | 100 | 278 | 144 | 139 | 3.60 | Y |
-| mk08 | brandimarte | 20 | 10 | 225 | 743 | 523 | 523 | 0.00 | Y |
-| mk09 | brandimarte | 20 | 10 | 240 | 559 | 311 | 307 | 1.30 | Y |
-| mk10 | brandimarte | 20 | 15 | 240 | 510 | 234 | 193 | 21.24 | Y |
-| mk11 | brandimarte | 30 | 5 | 179 | 886 | 618 | 609 | 1.48 | Y |
-| mk12 | brandimarte | 30 | 10 | 193 | 960 | 508 | 508 | 0.00 | Y |
-| mk13 | brandimarte | 30 | 10 | 231 | 918 | 419 | 386 | 8.55 | Y |
-| mk14 | brandimarte | 30 | 15 | 277 | 1271 | 694 | 694 | 0.00 | Y |
-| mk15 | brandimarte | 30 | 15 | 284 | 636 | 379 | 333 | 13.81 | Y |
+| Mk01 | brandimarte | 10 | 6 | 55 | 115 | 40 | 40 | 0.00 | Y |
 

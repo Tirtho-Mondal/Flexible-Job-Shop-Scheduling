@@ -27,11 +27,8 @@ class Machine {
 public:
     explicit Machine(int index);
 
-    int         index() const { return index_; }   // 0-based machine id
+    int index = 0;                             // 0-based machine id (public data)
     string label() const;                      // "M3" for the report
-
-private:
-    int index_;
 };
 
 } // namespace fjs

@@ -145,6 +145,8 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="ScheduleBuilder.cpp" />
+    <ClCompile Include="TaskPool.cpp" />
+    <ClCompile Include="RandomKick.cpp" />
     <ClCompile Include="Strategy.cpp" />
     <ClCompile Include="Solution.cpp" />
     <ClCompile Include="StableSolution.cpp" />
@@ -171,6 +173,8 @@
     <ClInclude Include="StableSolution.h" />
     <ClInclude Include="Schedule.h" />
     <ClInclude Include="ScheduleBuilder.h" />
+    <ClInclude Include="TaskPool.h" />
+    <ClInclude Include="RandomKick.h" />
     <ClInclude Include="PayoffFunction.h" />
     <ClInclude Include="GameSolver.h" />
     <ClInclude Include="FjsInstanceReader.h" />

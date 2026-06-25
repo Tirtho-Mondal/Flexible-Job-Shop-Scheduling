@@ -8,43 +8,43 @@ using namespace std;
 namespace fjs {
 
 void Instance::setMachineCount(int m) {
-    machines_.clear();
-    machines_.reserve(m);
+    machines.clear();
+    machines.reserve(m);
     for (int i = 0; i < m; ++i)
-        machines_.emplace_back(i);
+        machines.emplace_back(i);
 }
 
 Job& Instance::addJob() {
-    jobs_.emplace_back((int)jobs_.size());
-    return jobs_.back();
+    jobs.emplace_back((int)jobs.size());
+    return jobs.back();
 }
 
 void Instance::finalise() {
     // Default every operation to its first eligible machine and build the flat
     // globalId -> (job, position) lookup.  After this point no jobs/operations
     // are added, so references stay stable for the rest of the run.
-    opJob_.assign(nextGlobalId_, -1);
-    opPos_.assign(nextGlobalId_, -1);
-    for (Job& j : jobs_) {
+    opJob.assign(nextGlobalId, -1);
+    opPos.assign(nextGlobalId, -1);
+    for (Job& j : jobs) {
         for (Operation& op : j.operations()) {
             op.chooseAlternative(0);
-            opJob_[op.globalId()] = op.jobIndex();
-            opPos_[op.globalId()] = op.positionInJob();
+            opJob[op.globalId] = op.jobIndex;
+            opPos[op.globalId] = op.positionInJob;
         }
     }
 }
 
 Operation& Instance::operationByGlobalId(int gid) {
-    return jobs_[opJob_[gid]].operation(opPos_[gid]);
+    return jobs[opJob[gid]].operation(opPos[gid]);
 }
 
 const Operation& Instance::operationByGlobalId(int gid) const {
-    return jobs_[opJob_[gid]].operation(opPos_[gid]);
+    return jobs[opJob[gid]].operation(opPos[gid]);
 }
 
 int Instance::totalWork() const {
     int sum = 0;
-    for (const Job& j : jobs_)
+    for (const Job& j : jobs)
         for (const Operation& op : j.operations())
             sum += op.assignedProcessingTime();
     return sum;

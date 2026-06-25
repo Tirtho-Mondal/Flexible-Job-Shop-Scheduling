@@ -42,8 +42,8 @@ public:
     void writeReadme(const string& readmePath) const;
 
 private:
-    ofstream           out_;
-    vector<ResultRow>  rows_;
+    ofstream           out;
+    vector<ResultRow>  rows;
 };
 
 } // namespace fjs

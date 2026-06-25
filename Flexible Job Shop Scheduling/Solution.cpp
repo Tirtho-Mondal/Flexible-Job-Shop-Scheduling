@@ -11,7 +11,7 @@ using namespace std;
 namespace fjs {
 
 Solution::Solution(const StrategyProfile& profile, const Schedule& sched)
-    : profile_(profile), schedule_(sched) {}
+    : profile(profile), schedule(sched) {}
 
 Solution Solution::decode(const Instance& inst, const StrategyProfile& profile,
                           const PayoffFunction& payoff) {
@@ -21,23 +21,23 @@ Solution Solution::decode(const Instance& inst, const StrategyProfile& profile,
 
     // 2. decode the MAV to actual machine ids
     const int n = inst.totalOperations();
-    sol.machine_.assign(n, -1);
+    sol.machine.assign(n, -1);
     for (int gid = 0; gid < n; ++gid) {
         const Operation& op = inst.operationByGlobalId(gid);
-        sol.machine_[gid] = op.machineOfAlternative(profile.alternativeOf(gid));
+        sol.machine[gid] = op.machineOfAlternative(profile.alternativeOf(gid));
     }
 
     // 3. each player's own strategy + the total payoff (sum of U_i)
     double total = 0.0;
     for (int j = 0; j < inst.numJobs(); ++j) {
         Strategy s = Strategy::fromProfile(inst, profile, sched, payoff, j);
-        total += s.payoff();
-        sol.jobStrategies_.push_back(s);
+        total += s.payoff;
+        sol.jobStrategies.push_back(s);
     }
-    sol.totalPayoff_ = total;
+    sol.totalPayoff = total;
 
     // 4. the makespan-dominated fitness used to keep the best solution
-    sol.fitness_ = payoff.fitness(sched);
+    sol.fitness = payoff.fitness(sched);
     return sol;
 }
 

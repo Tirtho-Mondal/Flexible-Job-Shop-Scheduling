@@ -26,6 +26,8 @@
 #include "StrategyProfile.h"
 #include "PayoffFunction.h"
 #include "BeliefModel.h"
+#include "TaskPool.h"
+#include "RandomKick.h"
 #include <vector>
 #include <string>
 #include <random>
@@ -45,6 +47,21 @@ public:
     double      newCost   = 0;     // makespan after the move
     int         makespan  = 0;     // makespan after the move (== newCost)
     long long   sumCompletion = 0; // sum of all completion times after the move
+
+    // ---- two-player interaction detail (a swap / mutual reroute between two rival jobs) ----
+    int    rival          = -1;    // the rival job in a two-player move, else -1 (solo move)
+    int    contestMachine = -1;    // the contested machine (0-based) for a two-player move
+    string moveType;          // "reroute" | "resequence" | "swap" | "mutual"
+    int    moverCBefore   = 0, moverCAfter = 0;   // mover job's completion C before/after
+    int    rivalCBefore   = 0, rivalCAfter = 0;   // rival job's completion C before/after
+
+    // ---- full per-iteration detail (captured only for the first few moves so the
+    //      report can re-draw the bimatrix / calculation the solver faced) ----
+    bool   hasDetail = false;
+    int    moverOp = -1, rivalOp = -1;            // operation global ids involved
+    int    moverAltBefore = -1, moverAltAfter = -1;
+    int    rivalAltBefore = -1, rivalAltAfter = -1;
+    StrategyProfile stateBefore;                  // the profile just before this move
 };
 
 // Everything the reports need about one solved instance.
@@ -80,7 +97,6 @@ private:
     void      fillRandomSequence(StrategyProfile& state);        // precedence-feasible order
     StrategyProfile greedyGlobalProfile();   // load-balancing machine selection (Reijnen "Global")
     StrategyProfile greedyLocalProfile();    // shortest-processing-time machine selection ("Local")
-    StrategyProfile taskPoolProfile();       // task-pool constructor: ready ops compete (earliest completion)
     StrategyProfile beliefProfile(const BeliefModel& belief);    // fictitious-play seeded start
     Schedule  evaluate(const StrategyProfile& state);            // decode + count
 
@@ -93,20 +109,17 @@ private:
     void descend(StrategyProfile& state, int run,
                  SolveResult& result, long long& bestFit, int& iteration);
 
-    // Diversification kick for iterated local search; if `belief` is non-null the
-    // re-routing part is drawn from the players' beliefs (intensification).
-    void perturb(StrategyProfile& state, int strength, const BeliefModel* belief);
-
     // Consider `cand` as the new global incumbent.
     void considerIncumbent(SolveResult& result, long long& bestFit,
                            const StrategyProfile& state, const Schedule& sched);
 
-    const Instance&       inst_;
-    const PayoffFunction& payoff_;
-    mt19937          rng_;
+    const Instance&       inst;
+    const PayoffFunction& payoff;
+    mt19937          rng;
 
-    long evals_        = 0;   // schedule decodes performed (reported, not a cap)
-    int  maxTraceRows_ = 2500;
+    long evals        = 0;   // schedule decodes performed (reported, not a cap)
+    int  maxTraceRows = 2500;
+    int  detailRows   = 2500; // = maxTraceRows: capture full detail for EVERY traced move
 };
 
 } // namespace fjs

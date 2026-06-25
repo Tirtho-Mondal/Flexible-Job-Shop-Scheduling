@@ -38,8 +38,8 @@ public:
     // Offer an equilibrium to the elite pool (kept if good and not a duplicate).
     void consider(const StrategyProfile& state, int makespan);
 
-    bool ready()       const { return !pool_.empty(); }
-    int  eliteCount()  const { return (int)pool_.size(); }
+    bool ready()       const { return !pool.empty(); }
+    int  eliteCount()  const { return (int)pool.size(); }
     int  bestMakespan() const;
 
     // A routing vector sampled from the current beliefs (one machine per op).
@@ -52,11 +52,11 @@ public:
 private:
     void rebuild();   // recompute the frequency maps from the pool
 
-    const Instance&                  inst_;
-    int                              capacity_;
-    vector<StrategyProfile>           pool_;       // elite equilibria
-    vector<int>                 makespans_;  // their makespans
-    vector<vector<double>> freq_;       // gid -> alt -> probability
+    const Instance&                  inst;
+    int                              capacity;
+    vector<StrategyProfile>           pool;        // elite equilibria
+    vector<int>                 makespans;   // their makespans
+    vector<vector<double>> freq;        // gid -> alt -> probability
 };
 
 } // namespace fjs

@@ -9,6 +9,18 @@ Operations          : 106
 Avg. flexibility    : 1.71 machines/operation
 Best-known makespan : 172
 
+GAME-THEORY MODEL (a microeconomics view of FJSP)
+-------------------------------------------------
+  Player      : a job - the decision-maker
+  Strategy    : its machine choice per operation + its dispatch positions
+  Payoff      : U_i = 1/(1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)  (higher = better)
+  Game        : all jobs competing for the shared machines
+  Solution    : the decoded schedule once every job fixes its strategy
+  Equilibrium : a stable schedule where no job can raise its payoff alone
+Two jobs interact whenever their operations meet on the same machine: the
+earlier one delays the other, so each job re-routes / re-sequences to raise
+its OWN payoff, and the schedule settles at an equilibrium.
+
 MODEL
 -----
 ONE payoff function. Each job is a self-interested player; machines are
@@ -2559,13 +2571,1892 @@ Iter   Run  Job   Action (critical-path deviation)               Cmax_old Cmax_n
 2500   7    J3    reroute O(3,3): M4 -> M1                            187      181       2118
 ... (1149 further moves omitted; trace capped for readability)
 
+TWO-PLAYER INTERACTION MOVES (which two jobs clashed, the change, the benefit)
+----------------------------------------------------------------------------
+Filtered from the trace above: only the moves where TWO rival jobs that share a
+machine act together. 'swap' = the two jobs exchange order on the contested
+machine; 'mutual' = both reroute off it. Such a move is accepted only when it
+lowers the shared makespan Cmax, so it shows exactly how resolving the clash
+benefits the players. C = a job's completion time (lower = better payoff).
+
+  [iter 1]  J14  vs  J7   on M4   (mutual)
+      change  : mutual reroute O(14,3)->M1, O(7,2)->M3
+      J14      : C 137 -> 123  (finishes earlier - gains)
+      J7      : C 146 -> 148  (gives ground)
+      shared  : Cmax 307 -> 293   (clash resolved; the shared makespan drops)
+
+  [iter 2]  J14  vs  J13   on M4   (mutual)
+      change  : mutual reroute O(14,5)->M1, O(13,3)->M1
+      J14      : C 123 -> 112  (finishes earlier - gains)
+      J13      : C 120 -> 96  (finishes earlier - gains)
+      shared  : Cmax 293 -> 282   (clash resolved; the shared makespan drops)
+
+  [iter 3]  J15  vs  J14   on M4   (mutual)
+      change  : mutual reroute O(15,2)->M1, O(14,6)->M2
+      J15      : C 249 -> 235  (finishes earlier - gains)
+      J14      : C 112 -> 112  (unchanged)
+      shared  : Cmax 282 -> 268   (clash resolved; the shared makespan drops)
+
+  [iter 22]  J4  vs  J8   on M3   (mutual)
+      change  : mutual reroute O(4,2)->M4, O(8,1)->M1
+      J4      : C 184 -> 188  (gives ground)
+      J8      : C 184 -> 188  (gives ground)
+      shared  : Cmax 202 -> 200   (clash resolved; the shared makespan drops)
+
+  [iter 23]  J5  vs  J11   on M4   (mutual)
+      change  : mutual reroute O(5,2)->M2, O(11,7)->M3
+      J5      : C 182 -> 191  (gives ground)
+      J11      : C 129 -> 106  (finishes earlier - gains)
+      shared  : Cmax 200 -> 197   (clash resolved; the shared makespan drops)
+
+  [iter 24]  J15  vs  J5   on M1   (mutual)
+      change  : mutual reroute O(15,6)->M2, O(5,6)->M2
+      J15      : C 197 -> 183  (finishes earlier - gains)
+      J5      : C 191 -> 159  (finishes earlier - gains)
+      shared  : Cmax 197 -> 193   (clash resolved; the shared makespan drops)
+
+  [iter 26]  J5  vs  J8   on M3   (swap)
+      change  : swap O(5,4) ahead of O(8,5) on M3
+      J5      : C 182 -> 159  (finishes earlier - gains)
+      J8      : C 177 -> 177  (unchanged)
+      shared  : Cmax 192 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 38]  J11  vs  J15   on M3   (mutual)
+      change  : mutual reroute O(11,7)->M4, O(15,3)->M4
+      J11      : C 121 -> 127  (gives ground)
+      J15      : C 192 -> 196  (gives ground)
+      shared  : Cmax 218 -> 198   (clash resolved; the shared makespan drops)
+
+  [iter 40]  J7  vs  J11   on M3   (swap)
+      change  : swap O(7,5) ahead of O(11,6) on M3
+      J7      : C 114 -> 106  (finishes earlier - gains)
+      J11      : C 127 -> 127  (unchanged)
+      shared  : Cmax 198 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 41]  J7  vs  J12   on M3   (swap)
+      change  : swap O(7,5) ahead of O(12,5) on M3
+      J7      : C 106 -> 98  (finishes earlier - gains)
+      J12      : C 116 -> 116  (unchanged)
+      shared  : Cmax 198 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 42]  J7  vs  J1   on M3   (swap)
+      change  : swap O(7,5) ahead of O(1,4) on M3
+      J7      : C 98 -> 91  (finishes earlier - gains)
+      J1      : C 148 -> 148  (unchanged)
+      shared  : Cmax 198 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 44]  J7  vs  J11   on M3   (swap)
+      change  : swap O(7,5) ahead of O(11,4) on M3
+      J7      : C 82 -> 75  (finishes earlier - gains)
+      J11      : C 127 -> 128  (gives ground)
+      shared  : Cmax 198 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 47]  J7  vs  J3   on M3   (swap)
+      change  : swap O(7,5) ahead of O(3,2) on M3
+      J7      : C 60 -> 55  (finishes earlier - gains)
+      J3      : C 198 -> 198  (unchanged)
+      shared  : Cmax 198 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 48]  J7  vs  J3   on M3   (swap)
+      change  : swap O(7,5) ahead of O(3,1) on M3
+      J7      : C 55 -> 46  (finishes earlier - gains)
+      J3      : C 198 -> 198  (unchanged)
+      shared  : Cmax 198 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 56]  J7  vs  J15   on M3   (swap)
+      change  : swap O(7,5) ahead of O(15,3) on M3
+      J7      : C 119 -> 113  (finishes earlier - gains)
+      J15      : C 182 -> 182  (unchanged)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 64]  J8  vs  J7   on M3   (swap)
+      change  : swap O(8,2) ahead of O(7,5) on M3
+      J8      : C 179 -> 177  (finishes earlier - gains)
+      J7      : C 116 -> 124  (gives ground)
+      shared  : Cmax 188 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 65]  J1  vs  J4   on M4   (swap)
+      change  : swap O(1,6) ahead of O(4,4) on M4
+      J1      : C 122 -> 114  (finishes earlier - gains)
+      J4      : C 148 -> 148  (unchanged)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 91]  J11  vs  J5   on M1   (mutual)
+      change  : mutual reroute O(11,1)->M2, O(5,1)->M3
+      J11      : C 104 -> 110  (gives ground)
+      J5      : C 163 -> 154  (finishes earlier - gains)
+      shared  : Cmax 196 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 104]  J10  vs  J9   on M1   (mutual)
+      change  : mutual reroute O(10,3)->M4, O(9,8)->M2
+      J10      : C 219 -> 197  (finishes earlier - gains)
+      J9      : C 181 -> 192  (gives ground)
+      shared  : Cmax 219 -> 198   (clash resolved; the shared makespan drops)
+
+  [iter 119]  J9  vs  J10   on M1   (mutual)
+      change  : mutual reroute O(9,7)->M4, O(10,2)->M4
+      J9      : C 188 -> 198  (gives ground)
+      J10      : C 227 -> 203  (finishes earlier - gains)
+      shared  : Cmax 227 -> 204   (clash resolved; the shared makespan drops)
+
+  [iter 120]  J8  vs  J15   on M3   (swap)
+      change  : swap O(8,2) ahead of O(15,3) on M3
+      J8      : C 188 -> 188  (unchanged)
+      J15      : C 194 -> 181  (finishes earlier - gains)
+      shared  : Cmax 204 -> 198   (clash resolved; the shared makespan drops)
+
+  [iter 143]  J8  vs  J15   on M3   (swap)
+      change  : swap O(8,2) ahead of O(15,3) on M3
+      J8      : C 173 -> 177  (gives ground)
+      J15      : C 179 -> 183  (gives ground)
+      shared  : Cmax 185 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 157]  J9  vs  J4   on M4   (swap)
+      change  : swap O(9,3) ahead of O(4,4) on M4
+      J9      : C 180 -> 180  (unchanged)
+      J4      : C 151 -> 151  (unchanged)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 160]  J8  vs  J15   on M3   (swap)
+      change  : swap O(8,2) ahead of O(15,3) on M3
+      J8      : C 172 -> 177  (gives ground)
+      J15      : C 178 -> 183  (gives ground)
+      shared  : Cmax 185 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 164]  J8  vs  J15   on M3   (swap)
+      change  : swap O(8,2) ahead of O(15,3) on M3
+      J8      : C 172 -> 177  (gives ground)
+      J15      : C 178 -> 183  (gives ground)
+      shared  : Cmax 185 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 180]  J5  vs  J15   on M2   (swap)
+      change  : swap O(5,6) ahead of O(15,5) on M2
+      J5      : C 165 -> 157  (finishes earlier - gains)
+      J15      : C 181 -> 181  (unchanged)
+      shared  : Cmax 183 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 188]  J6  vs  J9   on M1   (mutual)
+      change  : mutual reroute O(6,9)->M4, O(9,6)->M4
+      J6      : C 149 -> 150  (gives ground)
+      J9      : C 180 -> 203  (gives ground)
+      shared  : Cmax 226 -> 209   (clash resolved; the shared makespan drops)
+
+  [iter 202]  J9  vs  J4   on M4   (swap)
+      change  : swap O(9,2) ahead of O(4,7) on M4
+      J9      : C 197 -> 196  (finishes earlier - gains)
+      J4      : C 136 -> 139  (gives ground)
+      shared  : Cmax 206 -> 202   (clash resolved; the shared makespan drops)
+
+  [iter 204]  J6  vs  J4   on M4   (swap)
+      change  : swap O(6,6) ahead of O(4,4) on M4
+      J6      : C 138 -> 130  (finishes earlier - gains)
+      J4      : C 139 -> 139  (unchanged)
+      shared  : Cmax 201 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 232]  J9  vs  J4   on M4   (swap)
+      change  : swap O(9,2) ahead of O(4,2) on M4
+      J9      : C 190 -> 190  (unchanged)
+      J4      : C 133 -> 133  (unchanged)
+      shared  : Cmax 190 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 237]  J4  vs  J14   on M1   (swap)
+      change  : swap O(4,3) ahead of O(14,5) on M1
+      J4      : C 136 -> 135  (finishes earlier - gains)
+      J14      : C 165 -> 164  (finishes earlier - gains)
+      shared  : Cmax 190 -> 189   (clash resolved; the shared makespan drops)
+
+  [iter 248]  J15  vs  J11   on M3   (swap)
+      change  : swap O(15,1) ahead of O(11,6) on M3
+      J15      : C 170 -> 170  (unchanged)
+      J11      : C 132 -> 132  (unchanged)
+      shared  : Cmax 187 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 273]  J15  vs  J9   on M2   (swap)
+      change  : swap O(15,7) ahead of O(9,8) on M2
+      J15      : C 173 -> 167  (finishes earlier - gains)
+      J9      : C 183 -> 183  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 288]  J4  vs  J13   on M4   (swap)
+      change  : swap O(4,7) ahead of O(13,5) on M4
+      J4      : C 180 -> 144  (finishes earlier - gains)
+      J13      : C 187 -> 187  (unchanged)
+      shared  : Cmax 189 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 290]  J6  vs  J9   on M1   (swap)
+      change  : swap O(6,9) ahead of O(9,6) on M1
+      J6      : C 144 -> 136  (finishes earlier - gains)
+      J9      : C 182 -> 182  (unchanged)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 294]  J14  vs  J13   on M4   (swap)
+      change  : swap O(14,7) ahead of O(13,5) on M4
+      J14      : C 178 -> 153  (finishes earlier - gains)
+      J13      : C 183 -> 183  (unchanged)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 300]  J3  vs  J1   on M3   (swap)
+      change  : swap O(3,1) ahead of O(1,4) on M3
+      J3      : C 178 -> 177  (finishes earlier - gains)
+      J1      : C 51 -> 60  (gives ground)
+      shared  : Cmax 186 -> 185   (clash resolved; the shared makespan drops)
+
+  [iter 306]  J14  vs  J11   on M1   (swap)
+      change  : swap O(14,3) ahead of O(11,2) on M1
+      J14      : C 143 -> 143  (unchanged)
+      J11      : C 137 -> 137  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 314]  J15  vs  J6   on M1   (swap)
+      change  : swap O(15,2) ahead of O(6,9) on M1
+      J15      : C 166 -> 166  (unchanged)
+      J6      : C 128 -> 136  (gives ground)
+      shared  : Cmax 184 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 315]  J4  vs  J10   on M3   (swap)
+      change  : swap O(4,2) ahead of O(10,6) on M3
+      J4      : C 140 -> 139  (finishes earlier - gains)
+      J10      : C 183 -> 183  (unchanged)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 330]  J1  vs  J10   on M2   (swap)
+      change  : swap O(1,3) ahead of O(10,1) on M2
+      J1      : C 51 -> 54  (gives ground)
+      J10      : C 186 -> 178  (finishes earlier - gains)
+      shared  : Cmax 195 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 341]  J15  vs  J11   on M3   (swap)
+      change  : swap O(15,1) ahead of O(11,7) on M3
+      J15      : C 165 -> 164  (finishes earlier - gains)
+      J11      : C 114 -> 122  (gives ground)
+      shared  : Cmax 182 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 342]  J8  vs  J5   on M3   (swap)
+      change  : swap O(8,2) ahead of O(5,4) on M3
+      J8      : C 133 -> 133  (unchanged)
+      J5      : C 79 -> 84  (gives ground)
+      shared  : Cmax 200 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 346]  J4  vs  J14   on M1   (swap)
+      change  : swap O(4,3) ahead of O(14,5) on M1
+      J4      : C 137 -> 137  (unchanged)
+      J14      : C 152 -> 152  (unchanged)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 347]  J15  vs  J11   on M3   (swap)
+      change  : swap O(15,1) ahead of O(11,7) on M3
+      J15      : C 165 -> 164  (finishes earlier - gains)
+      J11      : C 114 -> 122  (gives ground)
+      shared  : Cmax 182 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 352]  J3  vs  J13   on M4   (swap)
+      change  : swap O(3,6) ahead of O(13,5) on M4
+      J3      : C 195 -> 185  (finishes earlier - gains)
+      J13      : C 194 -> 186  (finishes earlier - gains)
+      shared  : Cmax 195 -> 192   (clash resolved; the shared makespan drops)
+
+  [iter 355]  J14  vs  J13   on M4   (swap)
+      change  : swap O(14,7) ahead of O(13,5) on M4
+      J14      : C 181 -> 175  (finishes earlier - gains)
+      J13      : C 187 -> 192  (gives ground)
+      shared  : Cmax 192 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 363]  J4  vs  J8   on M1   (swap)
+      change  : swap O(4,3) ahead of O(8,4) on M1
+      J4      : C 143 -> 142  (finishes earlier - gains)
+      J8      : C 167 -> 166  (finishes earlier - gains)
+      shared  : Cmax 184 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 373]  J3  vs  J13   on M4   (swap)
+      change  : swap O(3,6) ahead of O(13,5) on M4
+      J3      : C 196 -> 179  (finishes earlier - gains)
+      J13      : C 195 -> 187  (finishes earlier - gains)
+      shared  : Cmax 196 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 382]  J15  vs  J11   on M3   (swap)
+      change  : swap O(15,1) ahead of O(11,7) on M3
+      J15      : C 165 -> 164  (finishes earlier - gains)
+      J11      : C 114 -> 122  (gives ground)
+      shared  : Cmax 182 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 387]  J4  vs  J8   on M1   (swap)
+      change  : swap O(4,3) ahead of O(8,4) on M1
+      J4      : C 140 -> 139  (finishes earlier - gains)
+      J8      : C 133 -> 132  (finishes earlier - gains)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 389]  J3  vs  J1   on M2   (swap)
+      change  : swap O(3,2) ahead of O(1,3) on M2
+      J3      : C 184 -> 174  (finishes earlier - gains)
+      J1      : C 52 -> 53  (gives ground)
+      shared  : Cmax 191 -> 182   (clash resolved; the shared makespan drops)
+
+  [iter 402]  J12  vs  J15   on M3   (swap)
+      change  : swap O(12,2) ahead of O(15,4) on M3
+      J12      : C 185 -> 185  (unchanged)
+      J15      : C 167 -> 170  (gives ground)
+      shared  : Cmax 194 -> 190   (clash resolved; the shared makespan drops)
+
+  [iter 406]  J12  vs  J15   on M3   (swap)
+      change  : swap O(12,2) ahead of O(15,3) on M3
+      J12      : C 177 -> 175  (finishes earlier - gains)
+      J15      : C 185 -> 183  (finishes earlier - gains)
+      shared  : Cmax 185 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 417]  J4  vs  J2   on M2   (mutual)
+      change  : mutual reroute O(4,5)->M1, O(2,5)->M1
+      J4      : C 148 -> 144  (finishes earlier - gains)
+      J2      : C 120 -> 124  (gives ground)
+      shared  : Cmax 204 -> 192   (clash resolved; the shared makespan drops)
+
+  [iter 438]  J14  vs  J13   on M4   (swap)
+      change  : swap O(14,7) ahead of O(13,2) on M4
+      J14      : C 129 -> 120  (finishes earlier - gains)
+      J13      : C 181 -> 181  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 439]  J4  vs  J8   on M1   (swap)
+      change  : swap O(4,3) ahead of O(8,4) on M1
+      J4      : C 143 -> 143  (unchanged)
+      J8      : C 169 -> 169  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 459]  J6  vs  J4   on M4   (mutual)
+      change  : mutual reroute O(6,2)->M2, O(4,1)->M1
+      J6      : C 122 -> 124  (gives ground)
+      J4      : C 134 -> 149  (gives ground)
+      shared  : Cmax 194 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 470]  J14  vs  J4   on M1   (swap)
+      change  : swap O(14,3) ahead of O(4,3) on M1
+      J14      : C 124 -> 124  (unchanged)
+      J4      : C 148 -> 148  (unchanged)
+      shared  : Cmax 187 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 485]  J4  vs  J14   on M1   (swap)
+      change  : swap O(4,3) ahead of O(14,5) on M1
+      J4      : C 146 -> 146  (unchanged)
+      J14      : C 123 -> 123  (unchanged)
+      shared  : Cmax 190 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 487]  J4  vs  J8   on M1   (swap)
+      change  : swap O(4,3) ahead of O(8,4) on M1
+      J4      : C 143 -> 143  (unchanged)
+      J8      : C 169 -> 169  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 488]  J8  vs  J15   on M4   (mutual)
+      change  : mutual reroute O(8,7)->M3, O(15,2)->M1
+      J8      : C 156 -> 148  (finishes earlier - gains)
+      J15      : C 185 -> 178  (finishes earlier - gains)
+      shared  : Cmax 224 -> 206   (clash resolved; the shared makespan drops)
+
+  [iter 506]  J6  vs  J4   on M3   (swap)
+      change  : swap O(6,3) ahead of O(4,2) on M3
+      J6      : C 125 -> 124  (finishes earlier - gains)
+      J4      : C 146 -> 146  (unchanged)
+      shared  : Cmax 188 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 514]  J8  vs  J9   on M4   (mutual)
+      change  : mutual reroute O(8,7)->M3, O(9,6)->M1
+      J8      : C 170 -> 149  (finishes earlier - gains)
+      J9      : C 179 -> 189  (gives ground)
+      shared  : Cmax 203 -> 189   (clash resolved; the shared makespan drops)
+
+  [iter 515]  J12  vs  J6   on M4   (swap)
+      change  : swap O(12,1) ahead of O(6,6) on M4
+      J12      : C 184 -> 183  (finishes earlier - gains)
+      J6      : C 110 -> 123  (gives ground)
+      shared  : Cmax 189 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 530]  J6  vs  J3   on M4   (swap)
+      change  : swap O(6,6) ahead of O(3,6) on M4
+      J6      : C 188 -> 177  (finishes earlier - gains)
+      J3      : C 173 -> 173  (unchanged)
+      shared  : Cmax 196 -> 195   (clash resolved; the shared makespan drops)
+
+  [iter 537]  J13  vs  J1   on M2   (swap)
+      change  : swap O(13,6) ahead of O(1,3) on M2
+      J13      : C 172 -> 154  (finishes earlier - gains)
+      J1      : C 178 -> 178  (unchanged)
+      shared  : Cmax 190 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 545]  J3  vs  J8   on M4   (swap)
+      change  : swap O(3,1) ahead of O(8,3) on M4
+      J3      : C 177 -> 172  (finishes earlier - gains)
+      J8      : C 156 -> 144  (finishes earlier - gains)
+      shared  : Cmax 211 -> 194   (clash resolved; the shared makespan drops)
+
+  [iter 546]  J2  vs  J8   on M3   (swap)
+      change  : swap O(2,1) ahead of O(8,2) on M3
+      J2      : C 172 -> 177  (gives ground)
+      J8      : C 154 -> 147  (finishes earlier - gains)
+      shared  : Cmax 209 -> 199   (clash resolved; the shared makespan drops)
+
+  [iter 548]  J11  vs  J5   on M3   (swap)
+      change  : swap O(11,6) ahead of O(5,1) on M3
+      J11      : C 108 -> 107  (finishes earlier - gains)
+      J5      : C 191 -> 190  (finishes earlier - gains)
+      shared  : Cmax 195 -> 194   (clash resolved; the shared makespan drops)
+
+  [iter 559]  J10  vs  J6   on M1   (swap)
+      change  : swap O(10,3) ahead of O(6,7) on M1
+      J10      : C 192 -> 192  (unchanged)
+      J6      : C 166 -> 166  (unchanged)
+      shared  : Cmax 192 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 560]  J13  vs  J12   on M3   (swap)
+      change  : swap O(13,2) ahead of O(12,2) on M3
+      J13      : C 176 -> 153  (finishes earlier - gains)
+      J12      : C 128 -> 124  (finishes earlier - gains)
+      shared  : Cmax 208 -> 193   (clash resolved; the shared makespan drops)
+
+  [iter 566]  J2  vs  J13   on M1   (mutual)
+      change  : mutual reroute O(2,5)->M2, O(13,7)->M3
+      J2      : C 171 -> 168  (finishes earlier - gains)
+      J13      : C 176 -> 143  (finishes earlier - gains)
+      shared  : Cmax 208 -> 197   (clash resolved; the shared makespan drops)
+
+  [iter 579]  J3  vs  J1   on M3   (swap)
+      change  : swap O(3,8) ahead of O(1,4) on M3
+      J3      : C 159 -> 152  (finishes earlier - gains)
+      J1      : C 173 -> 173  (unchanged)
+      shared  : Cmax 187 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 583]  J4  vs  J6   on M4   (swap)
+      change  : swap O(4,4) ahead of O(6,6) on M4
+      J4      : C 174 -> 174  (unchanged)
+      J6      : C 168 -> 168  (unchanged)
+      shared  : Cmax 187 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 605]  J3  vs  J12   on M2   (swap)
+      change  : swap O(3,2) ahead of O(12,4) on M2
+      J3      : C 166 -> 164  (finishes earlier - gains)
+      J12      : C 180 -> 175  (finishes earlier - gains)
+      shared  : Cmax 193 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 607]  J11  vs  J8   on M3   (swap)
+      change  : swap O(11,6) ahead of O(8,5) on M3
+      J11      : C 109 -> 104  (finishes earlier - gains)
+      J8      : C 181 -> 179  (finishes earlier - gains)
+      shared  : Cmax 184 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 614]  J4  vs  J2   on M4   (swap)
+      change  : swap O(4,4) ahead of O(2,3) on M4
+      J4      : C 169 -> 168  (finishes earlier - gains)
+      J2      : C 164 -> 164  (unchanged)
+      shared  : Cmax 180 -> 179   (clash resolved; the shared makespan drops)
+
+  [iter 627]  J3  vs  J6   on M4   (swap)
+      change  : swap O(3,6) ahead of O(6,6) on M4
+      J3      : C 158 -> 150  (finishes earlier - gains)
+      J6      : C 161 -> 167  (gives ground)
+      shared  : Cmax 203 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 630]  J11  vs  J4   on M4   (swap)
+      change  : swap O(11,5) ahead of O(4,2) on M4
+      J11      : C 96 -> 89  (finishes earlier - gains)
+      J4      : C 165 -> 165  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 639]  J11  vs  J4   on M4   (swap)
+      change  : swap O(11,5) ahead of O(4,2) on M4
+      J11      : C 96 -> 89  (finishes earlier - gains)
+      J4      : C 163 -> 163  (unchanged)
+      shared  : Cmax 179 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 653]  J8  vs  J4   on M4   (swap)
+      change  : swap O(8,3) ahead of O(4,2) on M4
+      J8      : C 176 -> 176  (unchanged)
+      J4      : C 163 -> 163  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 669]  J8  vs  J10   on M3   (swap)
+      change  : swap O(8,5) ahead of O(10,4) on M3
+      J8      : C 183 -> 176  (finishes earlier - gains)
+      J10      : C 186 -> 179  (finishes earlier - gains)
+      shared  : Cmax 186 -> 179   (clash resolved; the shared makespan drops)
+
+  [iter 674]  J9  vs  J4   on M4   (swap)
+      change  : swap O(9,2) ahead of O(4,1) on M4
+      J9      : C 188 -> 185  (finishes earlier - gains)
+      J4      : C 177 -> 174  (finishes earlier - gains)
+      shared  : Cmax 188 -> 185   (clash resolved; the shared makespan drops)
+
+  [iter 689]  J12  vs  J6   on M1   (swap)
+      change  : swap O(12,6) ahead of O(6,9) on M1
+      J12      : C 169 -> 140  (finishes earlier - gains)
+      J6      : C 161 -> 161  (unchanged)
+      shared  : Cmax 182 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 696]  J3  vs  J8   on M3   (swap)
+      change  : swap O(3,8) ahead of O(8,7) on M3
+      J3      : C 161 -> 170  (gives ground)
+      J8      : C 178 -> 181  (gives ground)
+      shared  : Cmax 187 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 705]  J4  vs  J6   on M4   (swap)
+      change  : swap O(4,4) ahead of O(6,6) on M4
+      J4      : C 164 -> 164  (unchanged)
+      J6      : C 160 -> 168  (gives ground)
+      shared  : Cmax 180 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 722]  J2  vs  J10   on M3   (swap)
+      change  : swap O(2,1) ahead of O(10,4) on M3
+      J2      : C 172 -> 170  (finishes earlier - gains)
+      J10      : C 187 -> 186  (finishes earlier - gains)
+      shared  : Cmax 187 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 726]  J3  vs  J8   on M3   (swap)
+      change  : swap O(3,8) ahead of O(8,7) on M3
+      J3      : C 158 -> 167  (gives ground)
+      J8      : C 175 -> 178  (gives ground)
+      shared  : Cmax 184 -> 182   (clash resolved; the shared makespan drops)
+
+  [iter 727]  J12  vs  J6   on M1   (swap)
+      change  : swap O(12,6) ahead of O(6,9) on M1
+      J12      : C 169 -> 140  (finishes earlier - gains)
+      J6      : C 161 -> 161  (unchanged)
+      shared  : Cmax 182 -> 180   (clash resolved; the shared makespan drops)
+
+  [iter 730]  J6  vs  J9   on M4   (swap)
+      change  : swap O(6,1) ahead of O(9,5) on M4
+      J6      : C 161 -> 161  (unchanged)
+      J9      : C 178 -> 178  (unchanged)
+      shared  : Cmax 179 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 734]  J12  vs  J6   on M4   (swap)
+      change  : swap O(12,3) ahead of O(6,2) on M4
+      J12      : C 148 -> 148  (unchanged)
+      J6      : C 161 -> 161  (unchanged)
+      shared  : Cmax 195 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 735]  J9  vs  J4   on M4   (swap)
+      change  : swap O(9,2) ahead of O(4,1) on M4
+      J9      : C 180 -> 180  (unchanged)
+      J4      : C 165 -> 165  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 737]  J9  vs  J1   on M2   (swap)
+      change  : swap O(9,8) ahead of O(1,5) on M2
+      J9      : C 180 -> 179  (finishes earlier - gains)
+      J1      : C 174 -> 178  (gives ground)
+      shared  : Cmax 180 -> 179   (clash resolved; the shared makespan drops)
+
+  [iter 738]  J4  vs  J6   on M4   (swap)
+      change  : swap O(4,4) ahead of O(6,6) on M4
+      J4      : C 168 -> 168  (unchanged)
+      J6      : C 156 -> 164  (gives ground)
+      shared  : Cmax 179 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 754]  J10  vs  J4   on M2   (swap)
+      change  : swap O(10,5) ahead of O(4,5) on M2
+      J10      : C 179 -> 179  (unchanged)
+      J4      : C 168 -> 168  (unchanged)
+      shared  : Cmax 183 -> 180   (clash resolved; the shared makespan drops)
+
+  [iter 758]  J11  vs  J4   on M4   (swap)
+      change  : swap O(11,5) ahead of O(4,2) on M4
+      J11      : C 96 -> 89  (finishes earlier - gains)
+      J4      : C 171 -> 168  (finishes earlier - gains)
+      shared  : Cmax 199 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 773]  J4  vs  J6   on M4   (swap)
+      change  : swap O(4,4) ahead of O(6,6) on M4
+      J4      : C 171 -> 171  (unchanged)
+      J6      : C 159 -> 167  (gives ground)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 812]  J3  vs  J8   on M3   (swap)
+      change  : swap O(3,8) ahead of O(8,7) on M3
+      J3      : C 179 -> 173  (finishes earlier - gains)
+      J8      : C 180 -> 184  (gives ground)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 813]  J3  vs  J10   on M3   (swap)
+      change  : swap O(3,8) ahead of O(10,7) on M3
+      J3      : C 173 -> 166  (finishes earlier - gains)
+      J10      : C 181 -> 184  (gives ground)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 817]  J12  vs  J11   on M4   (swap)
+      change  : swap O(12,3) ahead of O(11,5) on M4
+      J12      : C 137 -> 132  (finishes earlier - gains)
+      J11      : C 90 -> 89  (finishes earlier - gains)
+      shared  : Cmax 197 -> 185   (clash resolved; the shared makespan drops)
+
+  [iter 826]  J7  vs  J11   on M3   (swap)
+      change  : swap O(7,2) ahead of O(11,4) on M3
+      J7      : C 100 -> 98  (finishes earlier - gains)
+      J11      : C 83 -> 91  (gives ground)
+      shared  : Cmax 190 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 830]  J12  vs  J3   on M2   (swap)
+      change  : swap O(12,4) ahead of O(3,5) on M2
+      J12      : C 143 -> 141  (finishes earlier - gains)
+      J3      : C 141 -> 140  (finishes earlier - gains)
+      shared  : Cmax 189 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 837]  J8  vs  J6   on M4   (swap)
+      change  : swap O(8,6) ahead of O(6,6) on M4
+      J8      : C 180 -> 180  (unchanged)
+      J6      : C 156 -> 164  (gives ground)
+      shared  : Cmax 180 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 858]  J6  vs  J13   on M1   (mutual)
+      change  : mutual reroute O(6,7)->M2, O(13,6)->M2
+      J6      : C 172 -> 162  (finishes earlier - gains)
+      J13      : C 177 -> 145  (finishes earlier - gains)
+      shared  : Cmax 190 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 876]  J6  vs  J9   on M4   (swap)
+      change  : swap O(6,1) ahead of O(9,5) on M4
+      J6      : C 164 -> 164  (unchanged)
+      J9      : C 174 -> 179  (gives ground)
+      shared  : Cmax 204 -> 179   (clash resolved; the shared makespan drops)
+
+  [iter 882]  J1  vs  J13   on M2   (swap)
+      change  : swap O(1,3) ahead of O(13,6) on M2
+      J1      : C 184 -> 184  (unchanged)
+      J13      : C 169 -> 169  (unchanged)
+      shared  : Cmax 191 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 884]  J5  vs  J4   on M4   (swap)
+      change  : swap O(5,3) ahead of O(4,7) on M4
+      J5      : C 197 -> 191  (finishes earlier - gains)
+      J4      : C 169 -> 176  (gives ground)
+      shared  : Cmax 197 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 887]  J3  vs  J2   on M2   (swap)
+      change  : swap O(3,7) ahead of O(2,2) on M2
+      J3      : C 134 -> 131  (finishes earlier - gains)
+      J2      : C 162 -> 162  (unchanged)
+      shared  : Cmax 187 -> 180   (clash resolved; the shared makespan drops)
+
+  [iter 888]  J14  vs  J2   on M4   (swap)
+      change  : swap O(14,7) ahead of O(2,3) on M4
+      J14      : C 150 -> 144  (finishes earlier - gains)
+      J2      : C 162 -> 162  (unchanged)
+      shared  : Cmax 180 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 889]  J14  vs  J6   on M4   (swap)
+      change  : swap O(14,7) ahead of O(6,6) on M4
+      J14      : C 144 -> 136  (finishes earlier - gains)
+      J6      : C 159 -> 165  (gives ground)
+      shared  : Cmax 180 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 892]  J4  vs  J6   on M4   (mutual)
+      change  : mutual reroute O(4,2)->M3, O(6,5)->M2
+      J4      : C 192 -> 179  (finishes earlier - gains)
+      J6      : C 208 -> 195  (finishes earlier - gains)
+      shared  : Cmax 261 -> 248   (clash resolved; the shared makespan drops)
+
+  [iter 894]  J9  vs  J5   on M4   (mutual)
+      change  : mutual reroute O(9,3)->M2, O(5,3)->M3
+      J9      : C 197 -> 187  (finishes earlier - gains)
+      J5      : C 127 -> 136  (gives ground)
+      shared  : Cmax 238 -> 230   (clash resolved; the shared makespan drops)
+
+  [iter 895]  J7  vs  J14   on M4   (mutual)
+      change  : mutual reroute O(7,4)->M2, O(14,5)->M1
+      J7      : C 194 -> 172  (finishes earlier - gains)
+      J14      : C 199 -> 188  (finishes earlier - gains)
+      shared  : Cmax 230 -> 219   (clash resolved; the shared makespan drops)
+
+  [iter 896]  J6  vs  J14   on M4   (mutual)
+      change  : mutual reroute O(6,9)->M1, O(14,6)->M2
+      J6      : C 176 -> 155  (finishes earlier - gains)
+      J14      : C 188 -> 177  (finishes earlier - gains)
+      shared  : Cmax 219 -> 213   (clash resolved; the shared makespan drops)
+
+  [iter 899]  J5  vs  J10   on M3   (swap)
+      change  : swap O(5,4) ahead of O(10,4) on M3
+      J5      : C 134 -> 134  (unchanged)
+      J10      : C 179 -> 179  (unchanged)
+      shared  : Cmax 206 -> 205   (clash resolved; the shared makespan drops)
+
+  [iter 903]  J15  vs  J4   on M4   (swap)
+      change  : swap O(15,5) ahead of O(4,6) on M4
+      J15      : C 157 -> 151  (finishes earlier - gains)
+      J4      : C 160 -> 160  (unchanged)
+      shared  : Cmax 201 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 908]  J6  vs  J12   on M4   (mutual)
+      change  : mutual reroute O(6,2)->M2, O(12,3)->M3
+      J6      : C 121 -> 129  (gives ground)
+      J12      : C 93 -> 97  (gives ground)
+      shared  : Cmax 213 -> 202   (clash resolved; the shared makespan drops)
+
+  [iter 914]  J15  vs  J5   on M3   (swap)
+      change  : swap O(15,1) ahead of O(5,3) on M3
+      J15      : C 166 -> 166  (unchanged)
+      J5      : C 123 -> 123  (unchanged)
+      shared  : Cmax 193 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 921]  J6  vs  J8   on M3   (swap)
+      change  : swap O(6,3) ahead of O(8,2) on M3
+      J6      : C 172 -> 171  (finishes earlier - gains)
+      J8      : C 169 -> 169  (unchanged)
+      shared  : Cmax 192 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 929]  J10  vs  J8   on M2   (mutual)
+      change  : mutual reroute O(10,9)->M4, O(8,8)->M1
+      J10      : C 165 -> 164  (finishes earlier - gains)
+      J8      : C 170 -> 165  (finishes earlier - gains)
+      shared  : Cmax 206 -> 194   (clash resolved; the shared makespan drops)
+
+  [iter 939]  J15  vs  J10   on M3   (swap)
+      change  : swap O(15,3) ahead of O(10,4) on M3
+      J15      : C 130 -> 133  (gives ground)
+      J10      : C 166 -> 166  (unchanged)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 947]  J15  vs  J12   on M3   (swap)
+      change  : swap O(15,1) ahead of O(12,3) on M3
+      J15      : C 154 -> 154  (unchanged)
+      J12      : C 93 -> 93  (unchanged)
+      shared  : Cmax 192 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 950]  J14  vs  J3   on M4   (swap)
+      change  : swap O(14,7) ahead of O(3,6) on M4
+      J14      : C 177 -> 170  (finishes earlier - gains)
+      J3      : C 187 -> 188  (gives ground)
+      shared  : Cmax 192 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 964]  J5  vs  J4   on M3   (swap)
+      change  : swap O(5,4) ahead of O(4,2) on M3
+      J5      : C 100 -> 92  (finishes earlier - gains)
+      J4      : C 154 -> 154  (unchanged)
+      shared  : Cmax 189 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 966]  J15  vs  J10   on M3   (swap)
+      change  : swap O(15,3) ahead of O(10,4) on M3
+      J15      : C 138 -> 138  (unchanged)
+      J10      : C 180 -> 186  (gives ground)
+      shared  : Cmax 199 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 969]  J15  vs  J10   on M3   (swap)
+      change  : swap O(15,4) ahead of O(10,4) on M3
+      J15      : C 138 -> 137  (finishes earlier - gains)
+      J10      : C 183 -> 183  (unchanged)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 982]  J4  vs  J10   on M4   (swap)
+      change  : swap O(4,6) ahead of O(10,8) on M4
+      J4      : C 173 -> 169  (finishes earlier - gains)
+      J10      : C 181 -> 181  (unchanged)
+      shared  : Cmax 188 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 999]  J2  vs  J1   on M3   (swap)
+      change  : swap O(2,1) ahead of O(1,1) on M3
+      J2      : C 73 -> 60  (finishes earlier - gains)
+      J1      : C 134 -> 134  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1001]  J2  vs  J12   on M3   (swap)
+      change  : swap O(2,1) ahead of O(12,2) on M3
+      J2      : C 77 -> 74  (finishes earlier - gains)
+      J12      : C 77 -> 77  (unchanged)
+      shared  : Cmax 202 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 1003]  J1  vs  J10   on M3   (swap)
+      change  : swap O(1,4) ahead of O(10,4) on M3
+      J1      : C 134 -> 128  (finishes earlier - gains)
+      J10      : C 173 -> 186  (gives ground)
+      shared  : Cmax 210 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 1006]  J15  vs  J1   on M1   (swap)
+      change  : swap O(15,2) ahead of O(1,2) on M1
+      J15      : C 125 -> 124  (finishes earlier - gains)
+      J1      : C 121 -> 120  (finishes earlier - gains)
+      shared  : Cmax 185 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 1011]  J1  vs  J12   on M3   (swap)
+      change  : swap O(1,1) ahead of O(12,2) on M3
+      J1      : C 134 -> 139  (gives ground)
+      J12      : C 67 -> 65  (finishes earlier - gains)
+      shared  : Cmax 202 -> 189   (clash resolved; the shared makespan drops)
+
+  [iter 1021]  J8  vs  J9   on M1   (mutual)
+      change  : mutual reroute O(8,8)->M2, O(9,6)->M4
+      J8      : C 155 -> 154  (finishes earlier - gains)
+      J9      : C 184 -> 179  (finishes earlier - gains)
+      shared  : Cmax 219 -> 206   (clash resolved; the shared makespan drops)
+
+  [iter 1027]  J6  vs  J9   on M2   (swap)
+      change  : swap O(6,7) ahead of O(9,8) on M2
+      J6      : C 191 -> 185  (finishes earlier - gains)
+      J9      : C 179 -> 185  (gives ground)
+      shared  : Cmax 191 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1044]  J1  vs  J10   on M3   (swap)
+      change  : swap O(1,4) ahead of O(10,4) on M3
+      J1      : C 140 -> 134  (finishes earlier - gains)
+      J10      : C 183 -> 183  (unchanged)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1046]  J6  vs  J1   on M2   (swap)
+      change  : swap O(6,5) ahead of O(1,5) on M2
+      J6      : C 179 -> 182  (gives ground)
+      J1      : C 136 -> 141  (gives ground)
+      shared  : Cmax 193 -> 190   (clash resolved; the shared makespan drops)
+
+  [iter 1050]  J13  vs  J3   on M2   (swap)
+      change  : swap O(13,6) ahead of O(3,2) on M2
+      J13      : C 112 -> 107  (finishes earlier - gains)
+      J3      : C 188 -> 188  (unchanged)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1056]  J8  vs  J6   on M1   (mutual)
+      change  : mutual reroute O(8,8)->M2, O(6,8)->M4
+      J8      : C 162 -> 161  (finishes earlier - gains)
+      J6      : C 175 -> 169  (finishes earlier - gains)
+      shared  : Cmax 210 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 1061]  J8  vs  J4   on M3   (swap)
+      change  : swap O(8,2) ahead of O(4,2) on M3
+      J8      : C 150 -> 150  (unchanged)
+      J4      : C 145 -> 145  (unchanged)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1071]  J5  vs  J7   on M3   (swap)
+      change  : swap O(5,4) ahead of O(7,1) on M3
+      J5      : C 114 -> 106  (finishes earlier - gains)
+      J7      : C 188 -> 188  (unchanged)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1084]  J15  vs  J12   on M1   (swap)
+      change  : swap O(15,2) ahead of O(12,6) on M1
+      J15      : C 96 -> 96  (unchanged)
+      J12      : C 50 -> 50  (unchanged)
+      shared  : Cmax 186 -> 185   (clash resolved; the shared makespan drops)
+
+  [iter 1095]  J15  vs  J12   on M1   (swap)
+      change  : swap O(15,2) ahead of O(12,6) on M1
+      J15      : C 153 -> 91  (finishes earlier - gains)
+      J12      : C 50 -> 50  (unchanged)
+      shared  : Cmax 207 -> 190   (clash resolved; the shared makespan drops)
+
+  [iter 1101]  J11  vs  J14   on M4   (swap)
+      change  : swap O(11,5) ahead of O(14,7) on M4
+      J11      : C 183 -> 178  (finishes earlier - gains)
+      J14      : C 163 -> 169  (gives ground)
+      shared  : Cmax 190 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1105]  J11  vs  J14   on M4   (swap)
+      change  : swap O(11,5) ahead of O(14,7) on M4
+      J11      : C 182 -> 177  (finishes earlier - gains)
+      J14      : C 162 -> 168  (gives ground)
+      shared  : Cmax 189 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1109]  J7  vs  J6   on M2   (swap)
+      change  : swap O(7,4) ahead of O(6,7) on M2
+      J7      : C 189 -> 189  (unchanged)
+      J6      : C 181 -> 184  (gives ground)
+      shared  : Cmax 190 -> 189   (clash resolved; the shared makespan drops)
+
+  [iter 1112]  J2  vs  J12   on M3   (swap)
+      change  : swap O(2,1) ahead of O(12,2) on M3
+      J2      : C 74 -> 51  (finishes earlier - gains)
+      J12      : C 43 -> 50  (gives ground)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1133]  J7  vs  J6   on M2   (swap)
+      change  : swap O(7,4) ahead of O(6,7) on M2
+      J7      : C 183 -> 183  (unchanged)
+      J6      : C 175 -> 179  (gives ground)
+      shared  : Cmax 184 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 1142]  J13  vs  J15   on M3   (swap)
+      change  : swap O(13,2) ahead of O(15,4) on M3
+      J13      : C 100 -> 99  (finishes earlier - gains)
+      J15      : C 149 -> 151  (gives ground)
+      shared  : Cmax 190 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 1164]  J10  vs  J3   on M1   (mutual)
+      change  : mutual reroute O(10,5)->M2, O(3,3)->M4
+      J10      : C 184 -> 182  (finishes earlier - gains)
+      J3      : C 187 -> 185  (finishes earlier - gains)
+      shared  : Cmax 190 -> 185   (clash resolved; the shared makespan drops)
+
+  [iter 1165]  J7  vs  J15   on M3   (swap)
+      change  : swap O(7,1) ahead of O(15,4) on M3
+      J7      : C 171 -> 171  (unchanged)
+      J15      : C 100 -> 96  (finishes earlier - gains)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1167]  J13  vs  J12   on M3   (swap)
+      change  : swap O(13,2) ahead of O(12,5) on M3
+      J13      : C 130 -> 100  (finishes earlier - gains)
+      J12      : C 52 -> 58  (gives ground)
+      shared  : Cmax 187 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 1172]  J2  vs  J12   on M3   (swap)
+      change  : swap O(2,1) ahead of O(12,5) on M3
+      J2      : C 74 -> 66  (finishes earlier - gains)
+      J12      : C 53 -> 60  (gives ground)
+      shared  : Cmax 187 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 1196]  J11  vs  J14   on M4   (swap)
+      change  : swap O(11,5) ahead of O(14,7) on M4
+      J11      : C 178 -> 174  (finishes earlier - gains)
+      J14      : C 158 -> 159  (gives ground)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1230]  J8  vs  J10   on M3   (swap)
+      change  : swap O(8,7) ahead of O(10,7) on M3
+      J8      : C 164 -> 160  (finishes earlier - gains)
+      J10      : C 183 -> 183  (unchanged)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1234]  J8  vs  J3   on M3   (swap)
+      change  : swap O(8,5) ahead of O(3,2) on M3
+      J8      : C 181 -> 181  (unchanged)
+      J3      : C 183 -> 183  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1235]  J2  vs  J9   on M1   (swap)
+      change  : swap O(2,5) ahead of O(9,6) on M1
+      J2      : C 135 -> 127  (finishes earlier - gains)
+      J9      : C 156 -> 156  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1236]  J2  vs  J1   on M1   (swap)
+      change  : swap O(2,5) ahead of O(1,6) on M1
+      J2      : C 127 -> 93  (finishes earlier - gains)
+      J1      : C 119 -> 119  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1242]  J11  vs  J14   on M4   (swap)
+      change  : swap O(11,5) ahead of O(14,7) on M4
+      J11      : C 182 -> 181  (finishes earlier - gains)
+      J14      : C 162 -> 168  (gives ground)
+      shared  : Cmax 188 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 1254]  J13  vs  J12   on M4   (swap)
+      change  : swap O(13,1) ahead of O(12,3) on M4
+      J13      : C 105 -> 105  (unchanged)
+      J12      : C 45 -> 45  (unchanged)
+      shared  : Cmax 186 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 1260]  J1  vs  J6   on M3   (swap)
+      change  : swap O(1,4) ahead of O(6,3) on M3
+      J1      : C 119 -> 111  (finishes earlier - gains)
+      J6      : C 176 -> 176  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1273]  J1  vs  J6   on M3   (swap)
+      change  : swap O(1,4) ahead of O(6,3) on M3
+      J1      : C 112 -> 104  (finishes earlier - gains)
+      J6      : C 183 -> 183  (unchanged)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1279]  J13  vs  J1   on M1   (swap)
+      change  : swap O(13,3) ahead of O(1,2) on M1
+      J13      : C 119 -> 105  (finishes earlier - gains)
+      J1      : C 122 -> 119  (finishes earlier - gains)
+      shared  : Cmax 188 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 1281]  J15  vs  J8   on M3   (swap)
+      change  : swap O(15,4) ahead of O(8,2) on M3
+      J15      : C 114 -> 106  (finishes earlier - gains)
+      J8      : C 186 -> 186  (unchanged)
+      shared  : Cmax 187 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1286]  J11  vs  J6   on M4   (swap)
+      change  : swap O(11,5) ahead of O(6,6) on M4
+      J11      : C 177 -> 177  (unchanged)
+      J6      : C 175 -> 180  (gives ground)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1288]  J1  vs  J6   on M3   (swap)
+      change  : swap O(1,4) ahead of O(6,3) on M3
+      J1      : C 121 -> 113  (finishes earlier - gains)
+      J6      : C 180 -> 180  (unchanged)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1293]  J10  vs  J9   on M3   (swap)
+      change  : swap O(10,7) ahead of O(9,9) on M3
+      J10      : C 180 -> 180  (unchanged)
+      J9      : C 156 -> 162  (gives ground)
+      shared  : Cmax 184 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 1295]  J7  vs  J3   on M4   (swap)
+      change  : swap O(7,2) ahead of O(3,1) on M4
+      J7      : C 169 -> 167  (finishes earlier - gains)
+      J3      : C 183 -> 183  (unchanged)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1303]  J14  vs  J10   on M2   (swap)
+      change  : swap O(14,4) ahead of O(10,5) on M2
+      J14      : C 166 -> 160  (finishes earlier - gains)
+      J10      : C 184 -> 178  (finishes earlier - gains)
+      shared  : Cmax 187 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 1305]  J1  vs  J6   on M3   (swap)
+      change  : swap O(1,4) ahead of O(6,3) on M3
+      J1      : C 118 -> 110  (finishes earlier - gains)
+      J6      : C 179 -> 178  (finishes earlier - gains)
+      shared  : Cmax 186 -> 185   (clash resolved; the shared makespan drops)
+
+  [iter 1318]  J11  vs  J14   on M4   (swap)
+      change  : swap O(11,5) ahead of O(14,7) on M4
+      J11      : C 184 -> 184  (unchanged)
+      J14      : C 162 -> 163  (gives ground)
+      shared  : Cmax 189 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 1320]  J15  vs  J6   on M2   (swap)
+      change  : swap O(15,6) ahead of O(6,5) on M2
+      J15      : C 149 -> 149  (unchanged)
+      J6      : C 182 -> 182  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1353]  J9  vs  J4   on M4   (swap)
+      change  : swap O(9,2) ahead of O(4,7) on M4
+      J9      : C 197 -> 196  (finishes earlier - gains)
+      J4      : C 136 -> 139  (gives ground)
+      shared  : Cmax 206 -> 202   (clash resolved; the shared makespan drops)
+
+  [iter 1355]  J6  vs  J4   on M4   (swap)
+      change  : swap O(6,6) ahead of O(4,4) on M4
+      J6      : C 138 -> 130  (finishes earlier - gains)
+      J4      : C 139 -> 139  (unchanged)
+      shared  : Cmax 201 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1360]  J12  vs  J4   on M4   (swap)
+      change  : swap O(12,1) ahead of O(4,7) on M4
+      J12      : C 191 -> 191  (unchanged)
+      J4      : C 138 -> 142  (gives ground)
+      shared  : Cmax 200 -> 197   (clash resolved; the shared makespan drops)
+
+  [iter 1361]  J15  vs  J11   on M3   (swap)
+      change  : swap O(15,1) ahead of O(11,7) on M3
+      J15      : C 172 -> 170  (finishes earlier - gains)
+      J11      : C 125 -> 133  (gives ground)
+      shared  : Cmax 197 -> 196   (clash resolved; the shared makespan drops)
+
+  [iter 1374]  J14  vs  J11   on M1   (swap)
+      change  : swap O(14,3) ahead of O(11,3) on M1
+      J14      : C 193 -> 191  (finishes earlier - gains)
+      J11      : C 167 -> 167  (unchanged)
+      shared  : Cmax 193 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 1386]  J7  vs  J9   on M3   (swap)
+      change  : swap O(7,5) ahead of O(9,9) on M3
+      J7      : C 189 -> 159  (finishes earlier - gains)
+      J9      : C 182 -> 182  (unchanged)
+      shared  : Cmax 189 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 1389]  J14  vs  J11   on M1   (swap)
+      change  : swap O(14,3) ahead of O(11,2) on M1
+      J14      : C 186 -> 186  (unchanged)
+      J11      : C 188 -> 188  (unchanged)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1393]  J10  vs  J12   on M3   (swap)
+      change  : swap O(10,7) ahead of O(12,5) on M3
+      J10      : C 189 -> 182  (finishes earlier - gains)
+      J12      : C 178 -> 179  (gives ground)
+      shared  : Cmax 189 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 1405]  J11  vs  J12   on M3   (swap)
+      change  : swap O(11,7) ahead of O(12,5) on M3
+      J11      : C 170 -> 162  (finishes earlier - gains)
+      J12      : C 172 -> 178  (gives ground)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1418]  J1  vs  J8   on M1   (swap)
+      change  : swap O(1,6) ahead of O(8,4) on M1
+      J1      : C 102 -> 97  (finishes earlier - gains)
+      J8      : C 136 -> 136  (unchanged)
+      shared  : Cmax 179 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1419]  J1  vs  J11   on M1   (swap)
+      change  : swap O(1,6) ahead of O(11,3) on M1
+      J1      : C 97 -> 91  (finishes earlier - gains)
+      J11      : C 157 -> 157  (unchanged)
+      shared  : Cmax 179 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1422]  J1  vs  J4   on M1   (swap)
+      change  : swap O(1,6) ahead of O(4,3) on M1
+      J1      : C 75 -> 67  (finishes earlier - gains)
+      J4      : C 137 -> 137  (unchanged)
+      shared  : Cmax 179 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1424]  J13  vs  J4   on M4   (swap)
+      change  : swap O(13,2) ahead of O(4,7) on M4
+      J13      : C 182 -> 179  (finishes earlier - gains)
+      J4      : C 142 -> 148  (gives ground)
+      shared  : Cmax 183 -> 180   (clash resolved; the shared makespan drops)
+
+  [iter 1431]  J11  vs  J10   on M3   (swap)
+      change  : swap O(11,7) ahead of O(10,7) on M3
+      J11      : C 163 -> 156  (finishes earlier - gains)
+      J10      : C 184 -> 184  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1437]  J11  vs  J10   on M3   (swap)
+      change  : swap O(11,7) ahead of O(10,7) on M3
+      J11      : C 157 -> 150  (finishes earlier - gains)
+      J10      : C 178 -> 178  (unchanged)
+      shared  : Cmax 178 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1438]  J5  vs  J14   on M2   (swap)
+      change  : swap O(5,6) ahead of O(14,4) on M2
+      J5      : C 108 -> 102  (finishes earlier - gains)
+      J14      : C 178 -> 178  (unchanged)
+      shared  : Cmax 178 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1456]  J5  vs  J7   on M2   (swap)
+      change  : swap O(5,6) ahead of O(7,4) on M2
+      J5      : C 96 -> 89  (finishes earlier - gains)
+      J7      : C 97 -> 103  (gives ground)
+      shared  : Cmax 185 -> 178   (clash resolved; the shared makespan drops)
+
+  [iter 1461]  J7  vs  J10   on M3   (swap)
+      change  : swap O(7,1) ahead of O(10,4) on M3
+      J7      : C 107 -> 103  (finishes earlier - gains)
+      J10      : C 182 -> 178  (finishes earlier - gains)
+      shared  : Cmax 182 -> 178   (clash resolved; the shared makespan drops)
+
+  [iter 1468]  J6  vs  J2   on M2   (mutual)
+      change  : mutual reroute O(6,2)->M4, O(2,2)->M1
+      J6      : C 126 -> 132  (gives ground)
+      J2      : C 34 -> 40  (gives ground)
+      shared  : Cmax 193 -> 189   (clash resolved; the shared makespan drops)
+
+  [iter 1474]  J5  vs  J4   on M4   (swap)
+      change  : swap O(5,3) ahead of O(4,2) on M4
+      J5      : C 94 -> 89  (finishes earlier - gains)
+      J4      : C 142 -> 142  (unchanged)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1481]  J11  vs  J8   on M3   (swap)
+      change  : swap O(11,6) ahead of O(8,7) on M3
+      J11      : C 152 -> 150  (finishes earlier - gains)
+      J8      : C 136 -> 136  (unchanged)
+      shared  : Cmax 180 -> 178   (clash resolved; the shared makespan drops)
+
+  [iter 1483]  J1  vs  J6   on M2   (swap)
+      change  : swap O(1,5) ahead of O(6,5) on M2
+      J1      : C 62 -> 62  (unchanged)
+      J6      : C 128 -> 126  (finishes earlier - gains)
+      shared  : Cmax 188 -> 178   (clash resolved; the shared makespan drops)
+
+  [iter 1493]  J5  vs  J4   on M4   (swap)
+      change  : swap O(5,3) ahead of O(4,2) on M4
+      J5      : C 85 -> 84  (finishes earlier - gains)
+      J4      : C 148 -> 145  (finishes earlier - gains)
+      shared  : Cmax 197 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 1500]  J15  vs  J8   on M3   (swap)
+      change  : swap O(15,3) ahead of O(8,7) on M3
+      J15      : C 164 -> 164  (unchanged)
+      J8      : C 139 -> 145  (gives ground)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1510]  J9  vs  J13   on M1   (mutual)
+      change  : mutual reroute O(9,8)->M2, O(13,3)->M4
+      J9      : C 179 -> 179  (unchanged)
+      J13      : C 195 -> 186  (finishes earlier - gains)
+      shared  : Cmax 195 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 1518]  J11  vs  J15   on M3   (swap)
+      change  : swap O(11,7) ahead of O(15,4) on M3
+      J11      : C 151 -> 144  (finishes earlier - gains)
+      J15      : C 169 -> 168  (finishes earlier - gains)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1522]  J14  vs  J13   on M4   (swap)
+      change  : swap O(14,7) ahead of O(13,5) on M4
+      J14      : C 174 -> 168  (finishes earlier - gains)
+      J13      : C 185 -> 185  (unchanged)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1529]  J11  vs  J5   on M2   (mutual)
+      change  : mutual reroute O(11,1)->M1, O(5,6)->M1
+      J11      : C 155 -> 162  (gives ground)
+      J5      : C 89 -> 109  (gives ground)
+      shared  : Cmax 192 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 1539]  J12  vs  J3   on M4   (swap)
+      change  : swap O(12,1) ahead of O(3,1) on M4
+      J12      : C 174 -> 177  (gives ground)
+      J3      : C 169 -> 172  (gives ground)
+      shared  : Cmax 183 -> 182   (clash resolved; the shared makespan drops)
+
+  [iter 1545]  J14  vs  J10   on M4   (mutual)
+      change  : mutual reroute O(14,3)->M1, O(10,4)->M3
+      J14      : C 185 -> 173  (finishes earlier - gains)
+      J10      : C 150 -> 144  (finishes earlier - gains)
+      shared  : Cmax 246 -> 221   (clash resolved; the shared makespan drops)
+
+  [iter 1549]  J15  vs  J12   on M3   (swap)
+      change  : swap O(15,4) ahead of O(12,3) on M3
+      J15      : C 126 -> 125  (finishes earlier - gains)
+      J12      : C 154 -> 154  (unchanged)
+      shared  : Cmax 213 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1551]  J13  vs  J2   on M3   (swap)
+      change  : swap O(13,2) ahead of O(2,1) on M3
+      J13      : C 153 -> 153  (unchanged)
+      J2      : C 146 -> 146  (unchanged)
+      shared  : Cmax 213 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1562]  J12  vs  J8   on M3   (swap)
+      change  : swap O(12,5) ahead of O(8,2) on M3
+      J12      : C 133 -> 127  (finishes earlier - gains)
+      J8      : C 194 -> 194  (unchanged)
+      shared  : Cmax 209 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1570]  J8  vs  J5   on M1   (mutual)
+      change  : mutual reroute O(8,1)->M3, O(5,1)->M3
+      J8      : C 184 -> 188  (gives ground)
+      J5      : C 66 -> 75  (gives ground)
+      shared  : Cmax 211 -> 204   (clash resolved; the shared makespan drops)
+
+  [iter 1589]  J8  vs  J5   on M1   (mutual)
+      change  : mutual reroute O(8,1)->M3, O(5,1)->M3
+      J8      : C 189 -> 188  (finishes earlier - gains)
+      J5      : C 58 -> 68  (gives ground)
+      shared  : Cmax 204 -> 203   (clash resolved; the shared makespan drops)
+
+  [iter 1605]  J13  vs  J5   on M3   (swap)
+      change  : swap O(13,2) ahead of O(5,4) on M3
+      J13      : C 92 -> 85  (finishes earlier - gains)
+      J5      : C 70 -> 69  (finishes earlier - gains)
+      shared  : Cmax 195 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1612]  J2  vs  J4   on M1   (swap)
+      change  : swap O(2,5) ahead of O(4,3) on M1
+      J2      : C 152 -> 140  (finishes earlier - gains)
+      J4      : C 195 -> 195  (unchanged)
+      shared  : Cmax 195 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1620]  J12  vs  J11   on M1   (swap)
+      change  : swap O(12,6) ahead of O(11,2) on M1
+      J12      : C 124 -> 116  (finishes earlier - gains)
+      J11      : C 185 -> 185  (unchanged)
+      shared  : Cmax 192 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1625]  J15  vs  J12   on M3   (swap)
+      change  : swap O(15,4) ahead of O(12,5) on M3
+      J15      : C 114 -> 112  (finishes earlier - gains)
+      J12      : C 99 -> 125  (gives ground)
+      shared  : Cmax 196 -> 194   (clash resolved; the shared makespan drops)
+
+  [iter 1636]  J10  vs  J9   on M2   (swap)
+      change  : swap O(10,9) ahead of O(9,4) on M2
+      J10      : C 92 -> 120  (gives ground)
+      J9      : C 200 -> 198  (finishes earlier - gains)
+      shared  : Cmax 200 -> 198   (clash resolved; the shared makespan drops)
+
+  [iter 1638]  J4  vs  J10   on M3   (swap)
+      change  : swap O(4,2) ahead of O(10,7) on M3
+      J4      : C 200 -> 196  (finishes earlier - gains)
+      J10      : C 96 -> 105  (gives ground)
+      shared  : Cmax 216 -> 205   (clash resolved; the shared makespan drops)
+
+  [iter 1648]  J12  vs  J4   on M1   (swap)
+      change  : swap O(12,6) ahead of O(4,3) on M1
+      J12      : C 149 -> 141  (finishes earlier - gains)
+      J4      : C 182 -> 182  (unchanged)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1653]  J1  vs  J14   on M4   (swap)
+      change  : swap O(1,6) ahead of O(14,7) on M4
+      J1      : C 177 -> 171  (finishes earlier - gains)
+      J14      : C 172 -> 177  (gives ground)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1683]  J14  vs  J4   on M2   (swap)
+      change  : swap O(14,6) ahead of O(4,5) on M2
+      J14      : C 168 -> 163  (finishes earlier - gains)
+      J4      : C 184 -> 184  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1684]  J1  vs  J4   on M4   (swap)
+      change  : swap O(1,6) ahead of O(4,6) on M4
+      J1      : C 173 -> 168  (finishes earlier - gains)
+      J4      : C 184 -> 184  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1687]  J1  vs  J9   on M1   (swap)
+      change  : swap O(1,6) ahead of O(9,7) on M1
+      J1      : C 162 -> 154  (finishes earlier - gains)
+      J9      : C 180 -> 180  (unchanged)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1688]  J1  vs  J9   on M1   (swap)
+      change  : swap O(1,6) ahead of O(9,6) on M1
+      J1      : C 154 -> 146  (finishes earlier - gains)
+      J9      : C 180 -> 180  (unchanged)
+      shared  : Cmax 183 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1695]  J15  vs  J14   on M1   (mutual)
+      change  : mutual reroute O(15,2)->M4, O(14,2)->M3
+      J15      : C 190 -> 194  (gives ground)
+      J14      : C 162 -> 170  (gives ground)
+      shared  : Cmax 217 -> 198   (clash resolved; the shared makespan drops)
+
+  [iter 1701]  J5  vs  J15   on M1   (mutual)
+      change  : mutual reroute O(5,1)->M3, O(15,2)->M4
+      J5      : C 74 -> 76  (gives ground)
+      J15      : C 183 -> 188  (gives ground)
+      shared  : Cmax 212 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 1708]  J1  vs  J4   on M4   (swap)
+      change  : swap O(1,6) ahead of O(4,6) on M4
+      J1      : C 173 -> 168  (finishes earlier - gains)
+      J4      : C 179 -> 179  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1710]  J15  vs  J14   on M1   (mutual)
+      change  : mutual reroute O(15,2)->M4, O(14,2)->M3
+      J15      : C 189 -> 188  (finishes earlier - gains)
+      J14      : C 169 -> 171  (gives ground)
+      shared  : Cmax 210 -> 188   (clash resolved; the shared makespan drops)
+
+  [iter 1719]  J8  vs  J9   on M2   (swap)
+      change  : swap O(8,8) ahead of O(9,8) on M2
+      J8      : C 174 -> 167  (finishes earlier - gains)
+      J9      : C 183 -> 183  (unchanged)
+      shared  : Cmax 185 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 1720]  J8  vs  J4   on M2   (swap)
+      change  : swap O(8,8) ahead of O(4,5) on M2
+      J8      : C 167 -> 161  (finishes earlier - gains)
+      J4      : C 179 -> 179  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1738]  J8  vs  J10   on M3   (swap)
+      change  : swap O(8,2) ahead of O(10,7) on M3
+      J8      : C 181 -> 175  (finishes earlier - gains)
+      J10      : C 102 -> 102  (unchanged)
+      shared  : Cmax 205 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 1744]  J15  vs  J14   on M1   (mutual)
+      change  : mutual reroute O(15,2)->M4, O(14,2)->M3
+      J15      : C 188 -> 187  (finishes earlier - gains)
+      J14      : C 163 -> 170  (gives ground)
+      shared  : Cmax 203 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 1746]  J6  vs  J1   on M3   (swap)
+      change  : swap O(6,3) ahead of O(1,4) on M3
+      J6      : C 185 -> 186  (gives ground)
+      J1      : C 185 -> 185  (unchanged)
+      shared  : Cmax 189 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 1757]  J14  vs  J8   on M4   (swap)
+      change  : swap O(14,7) ahead of O(8,6) on M4
+      J14      : C 141 -> 133  (finishes earlier - gains)
+      J8      : C 178 -> 178  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1760]  J15  vs  J14   on M1   (mutual)
+      change  : mutual reroute O(15,2)->M4, O(14,2)->M3
+      J15      : C 188 -> 190  (gives ground)
+      J14      : C 163 -> 173  (gives ground)
+      shared  : Cmax 203 -> 190   (clash resolved; the shared makespan drops)
+
+  [iter 1763]  J15  vs  J14   on M1   (mutual)
+      change  : mutual reroute O(15,2)->M4, O(14,2)->M3
+      J15      : C 194 -> 196  (gives ground)
+      J14      : C 175 -> 182  (gives ground)
+      shared  : Cmax 216 -> 200   (clash resolved; the shared makespan drops)
+
+  [iter 1764]  J4  vs  J10   on M3   (swap)
+      change  : swap O(4,2) ahead of O(10,7) on M3
+      J4      : C 193 -> 189  (finishes earlier - gains)
+      J10      : C 103 -> 112  (gives ground)
+      shared  : Cmax 200 -> 195   (clash resolved; the shared makespan drops)
+
+  [iter 1766]  J13  vs  J10   on M1   (swap)
+      change  : swap O(13,3) ahead of O(10,3) on M1
+      J13      : C 107 -> 107  (unchanged)
+      J10      : C 110 -> 109  (finishes earlier - gains)
+      shared  : Cmax 188 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 1769]  J15  vs  J14   on M1   (mutual)
+      change  : mutual reroute O(15,2)->M4, O(14,2)->M3
+      J15      : C 188 -> 188  (unchanged)
+      J14      : C 169 -> 174  (gives ground)
+      shared  : Cmax 210 -> 192   (clash resolved; the shared makespan drops)
+
+  [iter 1775]  J6  vs  J5   on M3   (swap)
+      change  : swap O(6,3) ahead of O(5,5) on M3
+      J6      : C 195 -> 193  (finishes earlier - gains)
+      J5      : C 125 -> 133  (gives ground)
+      shared  : Cmax 195 -> 193   (clash resolved; the shared makespan drops)
+
+  [iter 1788]  J3  vs  J13   on M1   (swap)
+      change  : swap O(3,5) ahead of O(13,7) on M1
+      J3      : C 149 -> 138  (finishes earlier - gains)
+      J13      : C 111 -> 117  (gives ground)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1804]  J5  vs  J15   on M1   (mutual)
+      change  : mutual reroute O(5,1)->M3, O(15,2)->M4
+      J5      : C 74 -> 76  (gives ground)
+      J15      : C 154 -> 187  (gives ground)
+      shared  : Cmax 196 -> 192   (clash resolved; the shared makespan drops)
+
+  [iter 1808]  J15  vs  J14   on M1   (mutual)
+      change  : mutual reroute O(15,2)->M4, O(14,2)->M3
+      J15      : C 190 -> 186  (finishes earlier - gains)
+      J14      : C 163 -> 173  (gives ground)
+      shared  : Cmax 208 -> 196   (clash resolved; the shared makespan drops)
+
+  [iter 1810]  J15  vs  J14   on M1   (mutual)
+      change  : mutual reroute O(15,2)->M4, O(14,2)->M3
+      J15      : C 191 -> 190  (finishes earlier - gains)
+      J14      : C 171 -> 176  (gives ground)
+      shared  : Cmax 209 -> 194   (clash resolved; the shared makespan drops)
+
+  [iter 1813]  J6  vs  J1   on M3   (swap)
+      change  : swap O(6,3) ahead of O(1,4) on M3
+      J6      : C 185 -> 186  (gives ground)
+      J1      : C 185 -> 185  (unchanged)
+      shared  : Cmax 189 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 1815]  J2  vs  J4   on M3   (swap)
+      change  : swap O(2,1) ahead of O(4,2) on M3
+      J2      : C 105 -> 103  (finishes earlier - gains)
+      J4      : C 181 -> 181  (unchanged)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1817]  J5  vs  J15   on M1   (mutual)
+      change  : mutual reroute O(5,1)->M3, O(15,2)->M4
+      J5      : C 74 -> 76  (gives ground)
+      J15      : C 167 -> 190  (gives ground)
+      shared  : Cmax 203 -> 194   (clash resolved; the shared makespan drops)
+
+  [iter 1826]  J14  vs  J15   on M1   (mutual)
+      change  : mutual reroute O(14,2)->M3, O(15,2)->M4
+      J14      : C 169 -> 183  (gives ground)
+      J15      : C 173 -> 182  (gives ground)
+      shared  : Cmax 197 -> 194   (clash resolved; the shared makespan drops)
+
+  [iter 1829]  J10  vs  J5   on M4   (swap)
+      change  : swap O(10,2) ahead of O(5,3) on M4
+      J10      : C 111 -> 111  (unchanged)
+      J5      : C 91 -> 83  (finishes earlier - gains)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1843]  J14  vs  J15   on M1   (mutual)
+      change  : mutual reroute O(14,2)->M3, O(15,2)->M4
+      J14      : C 163 -> 170  (gives ground)
+      J15      : C 188 -> 187  (finishes earlier - gains)
+      shared  : Cmax 203 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 1845]  J6  vs  J1   on M3   (swap)
+      change  : swap O(6,3) ahead of O(1,4) on M3
+      J6      : C 185 -> 186  (gives ground)
+      J1      : C 185 -> 185  (unchanged)
+      shared  : Cmax 189 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 1853]  J8  vs  J11   on M1   (mutual)
+      change  : mutual reroute O(8,1)->M3, O(11,1)->M2
+      J8      : C 177 -> 180  (gives ground)
+      J11      : C 193 -> 189  (finishes earlier - gains)
+      shared  : Cmax 200 -> 196   (clash resolved; the shared makespan drops)
+
+  [iter 1865]  J1  vs  J4   on M4   (swap)
+      change  : swap O(1,6) ahead of O(4,6) on M4
+      J1      : C 178 -> 173  (finishes earlier - gains)
+      J4      : C 184 -> 184  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1867]  J15  vs  J13   on M4   (mutual)
+      change  : mutual reroute O(15,3)->M3, O(13,3)->M1
+      J15      : C 101 -> 92  (finishes earlier - gains)
+      J13      : C 211 -> 194  (finishes earlier - gains)
+      shared  : Cmax 286 -> 269   (clash resolved; the shared makespan drops)
+
+  [iter 1868]  J15  vs  J10   on M4   (mutual)
+      change  : mutual reroute O(15,5)->M2, O(10,3)->M1
+      J15      : C 92 -> 97  (gives ground)
+      J10      : C 234 -> 220  (finishes earlier - gains)
+      shared  : Cmax 269 -> 255   (clash resolved; the shared makespan drops)
+
+  [iter 1869]  J5  vs  J14   on M4   (mutual)
+      change  : mutual reroute O(5,3)->M3, O(14,3)->M1
+      J5      : C 170 -> 169  (finishes earlier - gains)
+      J14      : C 200 -> 186  (finishes earlier - gains)
+      shared  : Cmax 255 -> 241   (clash resolved; the shared makespan drops)
+
+  [iter 1871]  J10  vs  J4   on M4   (mutual)
+      change  : mutual reroute O(10,9)->M2, O(4,6)->M2
+      J10      : C 206 -> 186  (finishes earlier - gains)
+      J4      : C 217 -> 207  (finishes earlier - gains)
+      shared  : Cmax 230 -> 222   (clash resolved; the shared makespan drops)
+
+  [iter 1876]  J5  vs  J13   on M1   (mutual)
+      change  : mutual reroute O(5,6)->M2, O(13,6)->M2
+      J5      : C 161 -> 159  (finishes earlier - gains)
+      J13      : C 182 -> 152  (finishes earlier - gains)
+      shared  : Cmax 212 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1886]  J8  vs  J1   on M3   (swap)
+      change  : swap O(8,3) ahead of O(1,4) on M3
+      J8      : C 143 -> 143  (unchanged)
+      J1      : C 122 -> 121  (finishes earlier - gains)
+      shared  : Cmax 200 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1891]  J7  vs  J10   on M3   (swap)
+      change  : swap O(7,5) ahead of O(10,7) on M3
+      J7      : C 175 -> 168  (finishes earlier - gains)
+      J10      : C 180 -> 187  (gives ground)
+      shared  : Cmax 191 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1913]  J8  vs  J6   on M2   (swap)
+      change  : swap O(8,8) ahead of O(6,5) on M2
+      J8      : C 139 -> 132  (finishes earlier - gains)
+      J6      : C 185 -> 185  (unchanged)
+      shared  : Cmax 188 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1938]  J12  vs  J4   on M2   (swap)
+      change  : swap O(12,4) ahead of O(4,6) on M2
+      J12      : C 184 -> 183  (finishes earlier - gains)
+      J4      : C 175 -> 175  (unchanged)
+      shared  : Cmax 184 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 1942]  J12  vs  J5   on M3   (swap)
+      change  : swap O(12,2) ahead of O(5,4) on M3
+      J12      : C 183 -> 184  (gives ground)
+      J5      : C 183 -> 183  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1954]  J8  vs  J14   on M2   (swap)
+      change  : swap O(8,8) ahead of O(14,4) on M2
+      J8      : C 122 -> 116  (finishes earlier - gains)
+      J14      : C 151 -> 151  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1955]  J3  vs  J1   on M1   (swap)
+      change  : swap O(3,3) ahead of O(1,2) on M1
+      J3      : C 113 -> 113  (unchanged)
+      J1      : C 119 -> 119  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1960]  J9  vs  J1   on M2   (swap)
+      change  : swap O(9,1) ahead of O(1,3) on M2
+      J9      : C 191 -> 174  (finishes earlier - gains)
+      J1      : C 111 -> 111  (unchanged)
+      shared  : Cmax 192 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 1976]  J1  vs  J8   on M4   (swap)
+      change  : swap O(1,5) ahead of O(8,6) on M4
+      J1      : C 110 -> 110  (unchanged)
+      J8      : C 115 -> 116  (gives ground)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1979]  J1  vs  J8   on M4   (swap)
+      change  : swap O(1,5) ahead of O(8,6) on M4
+      J1      : C 110 -> 110  (unchanged)
+      J8      : C 121 -> 121  (unchanged)
+      shared  : Cmax 180 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1984]  J4  vs  J6   on M1   (swap)
+      change  : swap O(4,3) ahead of O(6,4) on M1
+      J4      : C 148 -> 146  (finishes earlier - gains)
+      J6      : C 178 -> 176  (finishes earlier - gains)
+      shared  : Cmax 183 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 1995]  J14  vs  J9   on M1   (swap)
+      change  : swap O(14,5) ahead of O(9,4) on M1
+      J14      : C 153 -> 153  (unchanged)
+      J9      : C 181 -> 180  (finishes earlier - gains)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 1999]  J9  vs  J8   on M4   (swap)
+      change  : swap O(9,2) ahead of O(8,6) on M4
+      J9      : C 176 -> 184  (gives ground)
+      J8      : C 127 -> 135  (gives ground)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2000]  J1  vs  J2   on M4   (swap)
+      change  : swap O(1,5) ahead of O(2,3) on M4
+      J1      : C 108 -> 108  (unchanged)
+      J2      : C 122 -> 121  (finishes earlier - gains)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2017]  J12  vs  J14   on M4   (swap)
+      change  : swap O(12,3) ahead of O(14,7) on M4
+      J12      : C 185 -> 184  (finishes earlier - gains)
+      J14      : C 157 -> 164  (gives ground)
+      shared  : Cmax 185 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 2024]  J11  vs  J10   on M1   (swap)
+      change  : swap O(11,3) ahead of O(10,2) on M1
+      J11      : C 123 -> 107  (finishes earlier - gains)
+      J10      : C 181 -> 181  (unchanged)
+      shared  : Cmax 186 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2042]  J8  vs  J1   on M1   (swap)
+      change  : swap O(8,4) ahead of O(1,2) on M1
+      J8      : C 122 -> 122  (unchanged)
+      J1      : C 86 -> 86  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2092]  J5  vs  J11   on M1   (mutual)
+      change  : mutual reroute O(5,1)->M3, O(11,2)->M4
+      J5      : C 187 -> 183  (finishes earlier - gains)
+      J11      : C 112 -> 112  (unchanged)
+      shared  : Cmax 190 -> 186   (clash resolved; the shared makespan drops)
+
+  [iter 2096]  J6  vs  J7   on M3   (swap)
+      change  : swap O(6,3) ahead of O(7,5) on M3
+      J6      : C 184 -> 180  (finishes earlier - gains)
+      J7      : C 123 -> 127  (gives ground)
+      shared  : Cmax 186 -> 182   (clash resolved; the shared makespan drops)
+
+  [iter 2115]  J12  vs  J9   on M4   (swap)
+      change  : swap O(12,1) ahead of O(9,5) on M4
+      J12      : C 185 -> 181  (finishes earlier - gains)
+      J9      : C 184 -> 178  (finishes earlier - gains)
+      shared  : Cmax 185 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 2116]  J12  vs  J4   on M4   (swap)
+      change  : swap O(12,1) ahead of O(4,4) on M4
+      J12      : C 181 -> 180  (finishes earlier - gains)
+      J4      : C 165 -> 164  (finishes earlier - gains)
+      shared  : Cmax 181 -> 180   (clash resolved; the shared makespan drops)
+
+  [iter 2127]  J8  vs  J3   on M1   (swap)
+      change  : swap O(8,4) ahead of O(3,5) on M1
+      J8      : C 129 -> 129  (unchanged)
+      J3      : C 125 -> 125  (unchanged)
+      shared  : Cmax 185 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2160]  J10  vs  J3   on M1   (swap)
+      change  : swap O(10,2) ahead of O(3,5) on M1
+      J10      : C 177 -> 178  (gives ground)
+      J3      : C 120 -> 119  (finishes earlier - gains)
+      shared  : Cmax 185 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 2169]  J14  vs  J9   on M1   (swap)
+      change  : swap O(14,5) ahead of O(9,4) on M1
+      J14      : C 140 -> 139  (finishes earlier - gains)
+      J9      : C 178 -> 178  (unchanged)
+      shared  : Cmax 184 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 2197]  J8  vs  J3   on M1   (swap)
+      change  : swap O(8,4) ahead of O(3,5) on M1
+      J8      : C 126 -> 125  (finishes earlier - gains)
+      J3      : C 122 -> 121  (finishes earlier - gains)
+      shared  : Cmax 186 -> 185   (clash resolved; the shared makespan drops)
+
+  [iter 2206]  J5  vs  J11   on M1   (swap)
+      change  : swap O(5,1) ahead of O(11,3) on M1
+      J5      : C 186 -> 186  (unchanged)
+      J11      : C 97 -> 97  (unchanged)
+      shared  : Cmax 189 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2210]  J15  vs  J6   on M1   (mutual)
+      change  : mutual reroute O(15,6)->M2, O(6,9)->M4
+      J15      : C 180 -> 173  (finishes earlier - gains)
+      J6      : C 180 -> 173  (finishes earlier - gains)
+      shared  : Cmax 212 -> 200   (clash resolved; the shared makespan drops)
+
+  [iter 2211]  J8  vs  J11   on M3   (swap)
+      change  : swap O(8,2) ahead of O(11,4) on M3
+      J8      : C 192 -> 183  (finishes earlier - gains)
+      J11      : C 140 -> 140  (unchanged)
+      shared  : Cmax 200 -> 191   (clash resolved; the shared makespan drops)
+
+  [iter 2261]  J4  vs  J5   on M3   (swap)
+      change  : swap O(4,2) ahead of O(5,4) on M3
+      J4      : C 182 -> 173  (finishes earlier - gains)
+      J5      : C 124 -> 124  (unchanged)
+      shared  : Cmax 190 -> 183   (clash resolved; the shared makespan drops)
+
+  [iter 2266]  J10  vs  J6   on M1   (swap)
+      change  : swap O(10,5) ahead of O(6,8) on M1
+      J10      : C 173 -> 173  (unchanged)
+      J6      : C 152 -> 152  (unchanged)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2267]  J11  vs  J2   on M3   (swap)
+      change  : swap O(11,4) ahead of O(2,1) on M3
+      J11      : C 106 -> 106  (unchanged)
+      J2      : C 172 -> 167  (finishes earlier - gains)
+      shared  : Cmax 187 -> 182   (clash resolved; the shared makespan drops)
+
+  [iter 2278]  J4  vs  J2   on M4   (swap)
+      change  : swap O(4,6) ahead of O(2,4) on M4
+      J4      : C 177 -> 177  (unchanged)
+      J2      : C 169 -> 169  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2327]  J13  vs  J9   on M1   (swap)
+      change  : swap O(13,7) ahead of O(9,8) on M1
+      J13      : C 173 -> 165  (finishes earlier - gains)
+      J9      : C 181 -> 181  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2328]  J13  vs  J9   on M1   (swap)
+      change  : swap O(13,7) ahead of O(9,7) on M1
+      J13      : C 165 -> 157  (finishes earlier - gains)
+      J9      : C 181 -> 181  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2329]  J13  vs  J9   on M1   (swap)
+      change  : swap O(13,7) ahead of O(9,6) on M1
+      J13      : C 157 -> 149  (finishes earlier - gains)
+      J9      : C 181 -> 181  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2353]  J15  vs  J12   on M3   (swap)
+      change  : swap O(15,3) ahead of O(12,2) on M3
+      J15      : C 155 -> 155  (unchanged)
+      J12      : C 180 -> 180  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2370]  J7  vs  J15   on M3   (swap)
+      change  : swap O(7,5) ahead of O(15,4) on M3
+      J7      : C 133 -> 126  (finishes earlier - gains)
+      J15      : C 156 -> 156  (unchanged)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2371]  J5  vs  J14   on M1   (swap)
+      change  : swap O(5,6) ahead of O(14,5) on M1
+      J5      : C 119 -> 114  (finishes earlier - gains)
+      J14      : C 132 -> 132  (unchanged)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2373]  J7  vs  J15   on M3   (swap)
+      change  : swap O(7,5) ahead of O(15,3) on M3
+      J7      : C 126 -> 120  (finishes earlier - gains)
+      J15      : C 156 -> 156  (unchanged)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2378]  J5  vs  J8   on M1   (swap)
+      change  : swap O(5,6) ahead of O(8,4) on M1
+      J5      : C 114 -> 109  (finishes earlier - gains)
+      J8      : C 180 -> 180  (unchanged)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2382]  J5  vs  J6   on M1   (swap)
+      change  : swap O(5,6) ahead of O(6,4) on M1
+      J5      : C 85 -> 80  (finishes earlier - gains)
+      J6      : C 151 -> 151  (unchanged)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2384]  J5  vs  J13   on M1   (swap)
+      change  : swap O(5,6) ahead of O(13,3) on M1
+      J5      : C 74 -> 66  (finishes earlier - gains)
+      J13      : C 180 -> 180  (unchanged)
+      shared  : Cmax 182 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2405]  J1  vs  J15   on M3   (swap)
+      change  : swap O(1,4) ahead of O(15,3) on M3
+      J1      : C 122 -> 116  (finishes earlier - gains)
+      J15      : C 162 -> 155  (finishes earlier - gains)
+      shared  : Cmax 194 -> 181   (clash resolved; the shared makespan drops)
+
+  [iter 2409]  J13  vs  J9   on M1   (swap)
+      change  : swap O(13,7) ahead of O(9,7) on M1
+      J13      : C 165 -> 157  (finishes earlier - gains)
+      J9      : C 181 -> 181  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2417]  J1  vs  J11   on M3   (swap)
+      change  : swap O(1,4) ahead of O(11,7) on M3
+      J1      : C 117 -> 116  (finishes earlier - gains)
+      J11      : C 99 -> 106  (gives ground)
+      shared  : Cmax 185 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 2418]  J13  vs  J3   on M2   (swap)
+      change  : swap O(13,5) ahead of O(3,5) on M2
+      J13      : C 149 -> 149  (unchanged)
+      J3      : C 153 -> 153  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2420]  J5  vs  J9   on M1   (swap)
+      change  : swap O(5,6) ahead of O(9,7) on M1
+      J5      : C 176 -> 152  (finishes earlier - gains)
+      J9      : C 182 -> 182  (unchanged)
+      shared  : Cmax 184 -> 182   (clash resolved; the shared makespan drops)
+
+  [iter 2430]  J15  vs  J11   on M3   (swap)
+      change  : swap O(15,1) ahead of O(11,4) on M3
+      J15      : C 155 -> 155  (unchanged)
+      J11      : C 99 -> 99  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2448]  J6  vs  J12   on M4   (swap)
+      change  : swap O(6,6) ahead of O(12,3) on M4
+      J6      : C 150 -> 149  (finishes earlier - gains)
+      J12      : C 189 -> 187  (finishes earlier - gains)
+      shared  : Cmax 189 -> 187   (clash resolved; the shared makespan drops)
+
+  [iter 2454]  J5  vs  J3   on M1   (swap)
+      change  : swap O(5,6) ahead of O(3,5) on M1
+      J5      : C 125 -> 119  (finishes earlier - gains)
+      J3      : C 145 -> 145  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2455]  J5  vs  J8   on M1   (swap)
+      change  : swap O(5,6) ahead of O(8,4) on M1
+      J5      : C 119 -> 109  (finishes earlier - gains)
+      J8      : C 179 -> 179  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2457]  J5  vs  J10   on M1   (swap)
+      change  : swap O(5,6) ahead of O(10,2) on M1
+      J5      : C 101 -> 93  (finishes earlier - gains)
+      J10      : C 179 -> 179  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2459]  J5  vs  J15   on M1   (swap)
+      change  : swap O(5,6) ahead of O(15,2) on M1
+      J5      : C 88 -> 80  (finishes earlier - gains)
+      J15      : C 155 -> 155  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2460]  J5  vs  J1   on M1   (swap)
+      change  : swap O(5,6) ahead of O(1,3) on M1
+      J5      : C 80 -> 74  (finishes earlier - gains)
+      J1      : C 143 -> 143  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2471]  J6  vs  J10   on M1   (swap)
+      change  : swap O(6,7) ahead of O(10,5) on M1
+      J6      : C 152 -> 149  (finishes earlier - gains)
+      J10      : C 179 -> 179  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2484]  J1  vs  J4   on M4   (mutual)
+      change  : mutual reroute O(1,5)->M2, O(4,6)->M2
+      J1      : C 146 -> 130  (finishes earlier - gains)
+      J4      : C 178 -> 168  (finishes earlier - gains)
+      shared  : Cmax 189 -> 184   (clash resolved; the shared makespan drops)
+
+  [iter 2486]  J2  vs  J9   on M4   (swap)
+      change  : swap O(2,4) ahead of O(9,5) on M4
+      J2      : C 170 -> 170  (unchanged)
+      J9      : C 183 -> 183  (unchanged)
+      shared  : Cmax 184 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+  [iter 2496]  J8  vs  J10   on M3   (swap)
+      change  : swap O(8,5) ahead of O(10,4) on M3
+      J8      : C 179 -> 179  (unchanged)
+      J10      : C 179 -> 179  (unchanged)
+      shared  : Cmax 181 (unchanged) - kept because the rivals' total completion falls (tie-break)
+
+Read: each block is one interaction - the two rival players, the change they
+made, how each one's completion C moved, and the shared makespan they lowered
+together. One player often 'gives ground' so the makespan-critical one gains;
+the move is kept because their joint cost (Cmax) drops.
+
 SEARCH SUMMARY
 --------------
 Runs (best kept)    : 10
 Per-run best Cmax   : best=177  worst=181  mean=179.6  (over 10 runs)
 First runs' best    : 181 181 179 181 178 180 180 178 181 177
 Accepted moves      : 3649
-Schedule evaluations: 1086388
+Schedule evaluations: 1088888
 Nash equilibrium    : reached (critical-path local optimum)
 
 FINAL EQUILIBRIUM SCHEDULE
@@ -2781,93 +4672,448 @@ MAV decoded (chosen machine per operation), by job:
   J14:  O(14,1) alt2->M2  O(14,2) alt2->M1  O(14,3) alt1->M1  O(14,4) alt2->M2  O(14,5) alt1->M4  O(14,6) alt1->M4  O(14,7) alt1->M4
   J15:  O(15,1) alt1->M3  O(15,2) alt1->M1  O(15,3) alt2->M3  O(15,4) alt1->M3  O(15,5) alt2->M2  O(15,6) alt2->M2  O(15,7) alt2->M2
 
-JOB-vs-JOB INTERACTIONS (final schedule)
-----------------------------------------
-Rivals = two operations consecutive on a machine that belong to different
-jobs. (*) marks a pair on the critical path - the rivalry that sets Cmax.
-  M1: J5 -> J8  (O(5,1) before O(8,1))
-  M1: J8 -> J1  (O(8,1) before O(1,2))
-  M1: J1 -> J3  (O(1,2) before O(3,3))
-  M1: J3 -> J14  (O(3,4) before O(14,2))  *
-  M1: J14 -> J11  (O(14,3) before O(11,2))  *
-  M1: J11 -> J4  (O(11,2) before O(4,1))  *
-  M1: J4 -> J6  (O(4,1) before O(6,4))  *
-  M1: J6 -> J8  (O(6,4) before O(8,4))  *
-  M1: J8 -> J13  (O(8,4) before O(13,3))  *
-  M1: J13 -> J15  (O(13,3) before O(15,2))  *
-  M1: J15 -> J6  (O(15,2) before O(6,7))  *
-  M1: J6 -> J10  (O(6,9) before O(10,2))  *
-  M1: J10 -> J5  (O(10,3) before O(5,6))  *
-  M1: J5 -> J13  (O(5,6) before O(13,7))  *
-  M1: J13 -> J4  (O(13,7) before O(4,3))  *
-  M1: J4 -> J12  (O(4,3) before O(12,4))  *
-  M1: J12 -> J9  (O(12,4) before O(9,6))  *
-  M1: J9 -> J12  (O(9,7) before O(12,6))
-  M2: J1 -> J2  (O(1,1) before O(2,2))  *
-  M2: J2 -> J3  (O(2,2) before O(3,2))  *
-  M2: J3 -> J14  (O(3,2) before O(14,1))  *
-  M2: J14 -> J11  (O(14,1) before O(11,1))  *
-  M2: J11 -> J7  (O(11,1) before O(7,3))  *
-  M2: J7 -> J10  (O(7,4) before O(10,1))  *
-  M2: J10 -> J1  (O(10,1) before O(1,3))  *
-  M2: J1 -> J11  (O(1,3) before O(11,3))  *
-  M2: J11 -> J3  (O(11,3) before O(3,5))  *
-  M2: J3 -> J2  (O(3,5) before O(2,4))  *
-  M2: J2 -> J3  (O(2,4) before O(3,7))  *
-  M2: J3 -> J1  (O(3,7) before O(1,5))  *
-  M2: J1 -> J2  (O(1,5) before O(2,5))  *
-  M2: J2 -> J9  (O(2,5) before O(9,3))  *
-  M2: J9 -> J5  (O(9,3) before O(5,2))  *
-  M2: J5 -> J14  (O(5,2) before O(14,4))
-  M2: J14 -> J13  (O(14,4) before O(13,5))
-  M2: J13 -> J9  (O(13,5) before O(9,4))
-  M2: J9 -> J13  (O(9,4) before O(13,6))
-  M2: J13 -> J10  (O(13,6) before O(10,5))
-  M2: J10 -> J15  (O(10,5) before O(15,5))
-  M2: J15 -> J4  (O(15,7) before O(4,5))
-  M2: J4 -> J9  (O(4,6) before O(9,8))  *
-  M2: J9 -> J8  (O(9,8) before O(8,8))
-  M3: J2 -> J7  (O(2,1) before O(7,1))
-  M3: J7 -> J9  (O(7,1) before O(9,1))
-  M3: J9 -> J8  (O(9,1) before O(8,2))
-  M3: J8 -> J15  (O(8,2) before O(15,1))
-  M3: J15 -> J13  (O(15,1) before O(13,2))
-  M3: J13 -> J7  (O(13,2) before O(7,5))
-  M3: J7 -> J6  (O(7,5) before O(6,3))
-  M3: J6 -> J11  (O(6,3) before O(11,4))
-  M3: J11 -> J1  (O(11,4) before O(1,4))
-  M3: J1 -> J3  (O(1,4) before O(3,8))
-  M3: J3 -> J12  (O(3,8) before O(12,2))  *
-  M3: J12 -> J15  (O(12,2) before O(15,3))  *
-  M3: J15 -> J11  (O(15,3) before O(11,6))  *
-  M3: J11 -> J5  (O(11,7) before O(5,4))  *
-  M3: J5 -> J10  (O(5,5) before O(10,4))  *
-  M3: J10 -> J15  (O(10,4) before O(15,4))  *
-  M3: J15 -> J8  (O(15,4) before O(8,5))  *
-  M3: J8 -> J10  (O(8,5) before O(10,6))  *
-  M3: J10 -> J12  (O(10,7) before O(12,5))  *
-  M3: J12 -> J8  (O(12,5) before O(8,7))  *
-  M3: J8 -> J9  (O(8,7) before O(9,9))  *
-  M4: J3 -> J12  (O(3,1) before O(12,1))
-  M4: J12 -> J6  (O(12,1) before O(6,1))
-  M4: J6 -> J7  (O(6,1) before O(7,2))
-  M4: J7 -> J13  (O(7,2) before O(13,1))
-  M4: J13 -> J6  (O(13,1) before O(6,2))
-  M4: J6 -> J8  (O(6,2) before O(8,3))
-  M4: J8 -> J9  (O(8,3) before O(9,2))
-  M4: J9 -> J2  (O(9,2) before O(2,3))
-  M4: J2 -> J3  (O(2,3) before O(3,6))
-  M4: J3 -> J6  (O(3,6) before O(6,5))  *
-  M4: J6 -> J1  (O(6,6) before O(1,6))  *
-  M4: J1 -> J11  (O(1,6) before O(11,5))  *
-  M4: J11 -> J13  (O(11,5) before O(13,4))  *
-  M4: J13 -> J5  (O(13,4) before O(5,3))  *
-  M4: J5 -> J14  (O(5,3) before O(14,5))  *
-  M4: J14 -> J4  (O(14,7) before O(4,2))  *
-  M4: J4 -> J12  (O(4,2) before O(12,3))  *
-  M4: J12 -> J9  (O(12,3) before O(9,5))  *
-  M4: J9 -> J4  (O(9,5) before O(4,4))  *
-  M4: J4 -> J8  (O(4,4) before O(8,6))  *
-  M4: J8 -> J10  (O(8,6) before O(10,8))  *
-  M4: J10 -> J4  (O(10,9) before O(4,7))  *
-Interaction degree per job:  J1:11  J2:9  J3:13  J4:11  J5:9  J6:12  J7:8  J8:15  J9:15  J10:12  J11:12  J12:11  J13:14  J14:8  J15:10
+TWO-PLAYER INTERACTIONS (who delays whom & how each strategy pays off)
+--------------------------------------------------------------------
+Two jobs INTERACT when their operations land on the same machine: the earlier
+one holds the resource and DELAYS the later one. 'Delay' = how long the later
+job was already ready but had to wait while the machine finished the rival's
+operation. (*) marks a pair on the critical path - that exact rivalry is what
+fixes the makespan Cmax, so resolving it is how the players reach the optimum.
+
+Per-machine adjacencies (earlier player delays the later player):
+  M1: J5 delays J8 by 5  (O(5,1)[0-5] before O(8,1)[5-10]; J8 ready at 0)
+  M1: J8 delays J1 by 3  (O(8,1)[5-10] before O(1,2)[10-18]; J1 ready at 7)
+  M1: J1 delays J3 by 0  (O(1,2)[10-18] before O(3,3)[19-24]; J3 ready at 19)
+  M1: J3 delays J14 by 8  (O(3,4)[24-32] before O(14,2)[32-37]; J14 ready at 24)  *
+  M1: J14 delays J11 by 15  (O(14,3)[37-45] before O(11,2)[45-53]; J11 ready at 30)  *
+  M1: J11 delays J4 by 53  (O(11,2)[45-53] before O(4,1)[53-58]; J4 ready at 0)  *
+  M1: J4 delays J6 by 1  (O(4,1)[53-58] before O(6,4)[58-63]; J6 ready at 57)  *
+  M1: J6 delays J8 by 15  (O(6,4)[58-63] before O(8,4)[63-68]; J8 ready at 48)  *
+  M1: J8 delays J13 by 26  (O(8,4)[63-68] before O(13,3)[68-76]; J13 ready at 42)  *
+  M1: J13 delays J15 by 40  (O(13,3)[68-76] before O(15,2)[76-84]; J15 ready at 36)  *
+  M1: J15 delays J6 by 1  (O(15,2)[76-84] before O(6,7)[84-92]; J6 ready at 83)  *
+  M1: J6 delays J10 by 57  (O(6,9)[100-105] before O(10,2)[105-113]; J10 ready at 48)  *
+  M1: J10 delays J5 by 0  (O(10,3)[113-121] before O(5,6)[121-129]; J5 ready at 121)  *
+  M1: J5 delays J13 by 5  (O(5,6)[121-129] before O(13,7)[129-134]; J13 ready at 124)  *
+  M1: J13 delays J4 by 3  (O(13,7)[129-134] before O(4,3)[134-142]; J4 ready at 131)  *
+  M1: J4 delays J12 by 4  (O(4,3)[134-142] before O(12,4)[142-148]; J12 ready at 138)  *
+  M1: J12 delays J9 by 4  (O(12,4)[142-148] before O(9,6)[148-156]; J9 ready at 144)  *
+  M1: J9 delays J12 by 0  (O(9,7)[156-164] before O(12,6)[164-172]; J12 ready at 164)
+  M2: J1 delays J2 by 0  (O(1,1)[0-7] before O(2,2)[7-12]; J2 ready at 7)  *
+  M2: J2 delays J3 by 5  (O(2,2)[7-12] before O(3,2)[12-19]; J3 ready at 7)  *
+  M2: J3 delays J14 by 19  (O(3,2)[12-19] before O(14,1)[19-24]; J14 ready at 0)  *
+  M2: J14 delays J11 by 24  (O(14,1)[19-24] before O(11,1)[24-30]; J11 ready at 0)  *
+  M2: J11 delays J7 by 2  (O(11,1)[24-30] before O(7,3)[30-35]; J7 ready at 28)  *
+  M2: J7 delays J10 by 42  (O(7,4)[35-42] before O(10,1)[42-48]; J10 ready at 0)  *
+  M2: J10 delays J1 by 30  (O(10,1)[42-48] before O(1,3)[48-53]; J1 ready at 18)  *
+  M2: J1 delays J11 by 0  (O(1,3)[48-53] before O(11,3)[53-58]; J11 ready at 53)  *
+  M2: J11 delays J3 by 26  (O(11,3)[53-58] before O(3,5)[58-63]; J3 ready at 32)  *
+  M2: J3 delays J2 by 1  (O(3,5)[58-63] before O(2,4)[63-69]; J2 ready at 62)  *
+  M2: J2 delays J3 by 0  (O(2,4)[63-69] before O(3,7)[69-75]; J3 ready at 69)  *
+  M2: J3 delays J1 by 3  (O(3,7)[69-75] before O(1,5)[75-81]; J1 ready at 72)  *
+  M2: J1 delays J2 by 12  (O(1,5)[75-81] before O(2,5)[81-87]; J2 ready at 69)  *
+  M2: J2 delays J9 by 31  (O(2,5)[81-87] before O(9,3)[87-93]; J9 ready at 56)  *
+  M2: J9 delays J5 by 88  (O(9,3)[87-93] before O(5,2)[93-100]; J5 ready at 5)  *
+  M2: J5 delays J14 by 55  (O(5,2)[93-100] before O(14,4)[100-106]; J14 ready at 45)
+  M2: J14 delays J13 by 6  (O(14,4)[100-106] before O(13,5)[106-113]; J13 ready at 100)
+  M2: J13 delays J9 by 20  (O(13,5)[106-113] before O(9,4)[113-118]; J9 ready at 93)
+  M2: J9 delays J13 by 5  (O(9,4)[113-118] before O(13,6)[118-124]; J13 ready at 113)
+  M2: J13 delays J10 by 0  (O(13,6)[118-124] before O(10,5)[127-132]; J10 ready at 127)
+  M2: J10 delays J15 by 0  (O(10,5)[127-132] before O(15,5)[134-140]; J15 ready at 134)
+  M2: J15 delays J4 by 0  (O(15,7)[146-151] before O(4,5)[152-158]; J4 ready at 152)
+  M2: J4 delays J9 by 0  (O(4,6)[158-164] before O(9,8)[164-170]; J9 ready at 164)  *
+  M2: J9 delays J8 by 0  (O(9,8)[164-170] before O(8,8)[170-175]; J8 ready at 170)
+  M3: J2 delays J7 by 7  (O(2,1)[0-7] before O(7,1)[7-15]; J7 ready at 0)
+  M3: J7 delays J9 by 15  (O(7,1)[7-15] before O(9,1)[15-20]; J9 ready at 0)
+  M3: J9 delays J8 by 10  (O(9,1)[15-20] before O(8,2)[20-28]; J8 ready at 10)
+  M3: J8 delays J15 by 28  (O(8,2)[20-28] before O(15,1)[28-36]; J15 ready at 0)
+  M3: J15 delays J13 by 0  (O(15,1)[28-36] before O(13,2)[36-42]; J13 ready at 36)
+  M3: J13 delays J7 by 0  (O(13,2)[36-42] before O(7,5)[42-49]; J7 ready at 42)
+  M3: J7 delays J6 by 8  (O(7,5)[42-49] before O(6,3)[49-57]; J6 ready at 41)
+  M3: J6 delays J11 by 0  (O(6,3)[49-57] before O(11,4)[58-65]; J11 ready at 58)
+  M3: J11 delays J1 by 12  (O(11,4)[58-65] before O(1,4)[65-72]; J1 ready at 53)
+  M3: J1 delays J3 by 0  (O(1,4)[65-72] before O(3,8)[75-81]; J3 ready at 75)
+  M3: J3 delays J12 by 66  (O(3,8)[75-81] before O(12,2)[81-88]; J12 ready at 15)  *
+  M3: J12 delays J15 by 4  (O(12,2)[81-88] before O(15,3)[88-94]; J15 ready at 84)  *
+  M3: J15 delays J11 by 0  (O(15,3)[88-94] before O(11,6)[94-102]; J11 ready at 94)  *
+  M3: J11 delays J5 by 1  (O(11,7)[102-108] before O(5,4)[108-116]; J5 ready at 107)  *
+  M3: J5 delays J10 by 0  (O(5,5)[116-121] before O(10,4)[121-127]; J10 ready at 121)  *
+  M3: J10 delays J15 by 33  (O(10,4)[121-127] before O(15,4)[127-134]; J15 ready at 94)  *
+  M3: J15 delays J8 by 66  (O(15,4)[127-134] before O(8,5)[134-141]; J8 ready at 68)  *
+  M3: J8 delays J10 by 9  (O(8,5)[134-141] before O(10,6)[141-149]; J10 ready at 132)  *
+  M3: J10 delays J12 by 8  (O(10,7)[149-156] before O(12,5)[156-164]; J12 ready at 148)  *
+  M3: J12 delays J8 by 4  (O(12,5)[156-164] before O(8,7)[164-170]; J8 ready at 160)  *
+  M3: J8 delays J9 by 0  (O(8,7)[164-170] before O(9,9)[170-177]; J9 ready at 170)  *
+  M4: J3 delays J12 by 7  (O(3,1)[0-7] before O(12,1)[7-15]; J12 ready at 0)
+  M4: J12 delays J6 by 15  (O(12,1)[7-15] before O(6,1)[15-21]; J6 ready at 0)
+  M4: J6 delays J7 by 6  (O(6,1)[15-21] before O(7,2)[21-28]; J7 ready at 15)
+  M4: J7 delays J13 by 28  (O(7,2)[21-28] before O(13,1)[28-36]; J13 ready at 0)
+  M4: J13 delays J6 by 15  (O(13,1)[28-36] before O(6,2)[36-41]; J6 ready at 21)
+  M4: J6 delays J8 by 13  (O(6,2)[36-41] before O(8,3)[41-48]; J8 ready at 28)
+  M4: J8 delays J9 by 28  (O(8,3)[41-48] before O(9,2)[48-56]; J9 ready at 20)
+  M4: J9 delays J2 by 44  (O(9,2)[48-56] before O(2,3)[56-62]; J2 ready at 12)
+  M4: J2 delays J3 by 0  (O(2,3)[56-62] before O(3,6)[63-69]; J3 ready at 63)
+  M4: J3 delays J6 by 6  (O(3,6)[63-69] before O(6,5)[69-75]; J6 ready at 63)  *
+  M4: J6 delays J1 by 2  (O(6,6)[75-83] before O(1,6)[83-88]; J1 ready at 81)  *
+  M4: J1 delays J11 by 23  (O(1,6)[83-88] before O(11,5)[88-94]; J11 ready at 65)  *
+  M4: J11 delays J13 by 18  (O(11,5)[88-94] before O(13,4)[94-100]; J13 ready at 76)  *
+  M4: J13 delays J5 by 0  (O(13,4)[94-100] before O(5,3)[100-107]; J5 ready at 100)  *
+  M4: J5 delays J14 by 1  (O(5,3)[100-107] before O(14,5)[107-112]; J14 ready at 106)  *
+  M4: J14 delays J4 by 66  (O(14,7)[118-124] before O(4,2)[124-131]; J4 ready at 58)  *
+  M4: J4 delays J12 by 43  (O(4,2)[124-131] before O(12,3)[131-138]; J12 ready at 88)  *
+  M4: J12 delays J9 by 20  (O(12,3)[131-138] before O(9,5)[138-144]; J9 ready at 118)  *
+  M4: J9 delays J4 by 2  (O(9,5)[138-144] before O(4,4)[144-152]; J4 ready at 142)  *
+  M4: J4 delays J8 by 11  (O(4,4)[144-152] before O(8,6)[152-160]; J8 ready at 141)  *
+  M4: J8 delays J10 by 4  (O(8,6)[152-160] before O(10,8)[160-166]; J10 ready at 156)  *
+  M4: J10 delays J4 by 7  (O(10,9)[166-171] before O(4,7)[171-177]; J4 ready at 164)  *
+
+Pairwise delay totals (Ja -> Jb : total time Ja forced Jb to wait):
+  J1 -> J2 : 12
+  J1 -> J11 : 23
+  J2 -> J3 : 5
+  J2 -> J7 : 7
+  J2 -> J9 : 31
+  J3 -> J1 : 3
+  J3 -> J2 : 1
+  J3 -> J6 : 6
+  J3 -> J12 : 73
+  J3 -> J14 : 27
+  J4 -> J6 : 1
+  J4 -> J8 : 11
+  J4 -> J12 : 47
+  J5 -> J8 : 5
+  J5 -> J13 : 5
+  J5 -> J14 : 56
+  J6 -> J1 : 2
+  J6 -> J7 : 6
+  J6 -> J8 : 28
+  J6 -> J10 : 57
+  J7 -> J6 : 8
+  J7 -> J9 : 15
+  J7 -> J10 : 42
+  J7 -> J13 : 28
+  J8 -> J1 : 3
+  J8 -> J9 : 28
+  J8 -> J10 : 13
+  J8 -> J13 : 26
+  J8 -> J15 : 28
+  J9 -> J2 : 44
+  J9 -> J4 : 2
+  J9 -> J5 : 88
+  J9 -> J8 : 10
+  J9 -> J13 : 5
+  J10 -> J1 : 30
+  J10 -> J4 : 7
+  J10 -> J12 : 8
+  J10 -> J15 : 33
+  J11 -> J1 : 12
+  J11 -> J3 : 26
+  J11 -> J4 : 53
+  J11 -> J5 : 1
+  J11 -> J7 : 2
+  J11 -> J13 : 18
+  J12 -> J6 : 15
+  J12 -> J8 : 4
+  J12 -> J9 : 24
+  J12 -> J15 : 4
+  J13 -> J4 : 3
+  J13 -> J6 : 15
+  J13 -> J9 : 20
+  J13 -> J15 : 40
+  J14 -> J4 : 66
+  J14 -> J11 : 39
+  J14 -> J13 : 6
+  J15 -> J6 : 1
+  J15 -> J8 : 66
+
+Per-player strategy -> own benefit (each job maximises its OWN payoff U_i):
+  J1: plays O(1,1)->M2 O(1,2)->M1 O(1,3)->M2 O(1,4)->M3 O(1,5)->M2 O(1,6)->M4 
+     benefit  : finishes C=88, own waiting W=50, congestion Conf=1027, payoff U=0.0041
+     interact : delays rivals by 35 in total, is delayed by rivals by 50
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J2: plays O(2,1)->M3 O(2,2)->M2 O(2,3)->M4 O(2,4)->M2 O(2,5)->M2 
+     benefit  : finishes C=87, own waiting W=57, congestion Conf=856, payoff U=0.0042
+     interact : delays rivals by 43 in total, is delayed by rivals by 57
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J3: plays O(3,1)->M4 O(3,2)->M2 O(3,3)->M1 O(3,4)->M1 O(3,5)->M2 O(3,6)->M4 O(3,7)->M2 O(3,8)->M3 
+     benefit  : finishes C=81, own waiting W=31, congestion Conf=1374, payoff U=0.0040
+     interact : delays rivals by 110 in total, is delayed by rivals by 31
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J4: plays O(4,1)->M1 O(4,2)->M4 O(4,3)->M1 O(4,4)->M4 O(4,5)->M2 O(4,6)->M2 O(4,7)->M4 
+     benefit  : finishes C=177, own waiting W=131, congestion Conf=1208, payoff U=0.0027
+     interact : delays rivals by 59 in total, is delayed by rivals by 131   <- this job's finish SETS the makespan
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J5: plays O(5,1)->M1 O(5,2)->M2 O(5,3)->M4 O(5,4)->M3 O(5,5)->M3 O(5,6)->M1 
+     benefit  : finishes C=129, own waiting W=89, congestion Conf=1033, payoff U=0.0034
+     interact : delays rivals by 66 in total, is delayed by rivals by 89
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J6: plays O(6,1)->M4 O(6,2)->M4 O(6,3)->M3 O(6,4)->M1 O(6,5)->M4 O(6,6)->M4 O(6,7)->M1 O(6,8)->M1 O(6,9)->M1 
+     benefit  : finishes C=105, own waiting W=46, congestion Conf=1561, payoff U=0.0035
+     interact : delays rivals by 93 in total, is delayed by rivals by 46
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J7: plays O(7,1)->M3 O(7,2)->M4 O(7,3)->M2 O(7,4)->M2 O(7,5)->M3 
+     benefit  : finishes C=49, own waiting W=15, congestion Conf=860, payoff U=0.0054
+     interact : delays rivals by 93 in total, is delayed by rivals by 15
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J8: plays O(8,1)->M1 O(8,2)->M3 O(8,3)->M4 O(8,4)->M1 O(8,5)->M3 O(8,6)->M4 O(8,7)->M3 O(8,8)->M2 
+     benefit  : finishes C=175, own waiting W=124, congestion Conf=1382, payoff U=0.0027
+     interact : delays rivals by 98 in total, is delayed by rivals by 124
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J9: plays O(9,1)->M3 O(9,2)->M4 O(9,3)->M2 O(9,4)->M2 O(9,5)->M4 O(9,6)->M1 O(9,7)->M1 O(9,8)->M2 O(9,9)->M3 
+     benefit  : finishes C=177, own waiting W=118, congestion Conf=1547, payoff U=0.0026
+     interact : delays rivals by 149 in total, is delayed by rivals by 118   <- this job's finish SETS the makespan
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J10: plays O(10,1)->M2 O(10,2)->M1 O(10,3)->M1 O(10,4)->M3 O(10,5)->M2 O(10,6)->M3 O(10,7)->M3 O(10,8)->M4 O(10,9)->M4 
+     benefit  : finishes C=171, own waiting W=112, congestion Conf=1551, payoff U=0.0027
+     interact : delays rivals by 78 in total, is delayed by rivals by 112
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J11: plays O(11,1)->M2 O(11,2)->M1 O(11,3)->M2 O(11,4)->M3 O(11,5)->M4 O(11,6)->M3 O(11,7)->M3 
+     benefit  : finishes C=108, own waiting W=62, congestion Conf=1204, payoff U=0.0036
+     interact : delays rivals by 112 in total, is delayed by rivals by 62
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J12: plays O(12,1)->M4 O(12,2)->M3 O(12,3)->M4 O(12,4)->M1 O(12,5)->M3 O(12,6)->M1 
+     benefit  : finishes C=172, own waiting W=128, congestion Conf=1040, payoff U=0.0028
+     interact : delays rivals by 47 in total, is delayed by rivals by 128
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J13: plays O(13,1)->M4 O(13,2)->M3 O(13,3)->M1 O(13,4)->M4 O(13,5)->M2 O(13,6)->M2 O(13,7)->M1 
+     benefit  : finishes C=134, own waiting W=88, congestion Conf=1205, payoff U=0.0032
+     interact : delays rivals by 78 in total, is delayed by rivals by 88
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J14: plays O(14,1)->M2 O(14,2)->M1 O(14,3)->M1 O(14,4)->M2 O(14,5)->M4 O(14,6)->M4 O(14,7)->M4 
+     benefit  : finishes C=124, own waiting W=83, congestion Conf=1208, payoff U=0.0033
+     interact : delays rivals by 111 in total, is delayed by rivals by 83
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+  J15: plays O(15,1)->M3 O(15,2)->M1 O(15,3)->M3 O(15,4)->M3 O(15,5)->M2 O(15,6)->M2 O(15,7)->M2 
+     benefit  : finishes C=151, own waiting W=105, congestion Conf=1197, payoff U=0.0030
+     interact : delays rivals by 67 in total, is delayed by rivals by 105
+     response : best response - no unilateral re-route helps it, so it stays put (Nash-stable)
+Interaction degree per job (number of rival adjacencies):  J1:11  J2:9  J3:13  J4:11  J5:9  J6:12  J7:8  J8:15  J9:15  J10:12  J11:12  J12:11  J13:14  J14:8  J15:10
+
+PER-MACHINE TWO-PLAYER NASH GAMES (payoff tables, by machine section)
+--------------------------------------------------------------------
+For every machine where two jobs are rivals at the equilibrium, here is the
+full normal-form game between those two players: rows/columns are the machines
+each rival could route its contested operation to, and each cell is the pair of
+payoffs (U_A, U_B) that results when all other players keep their strategies.
+The played cell is (*); a pure-strategy Nash equilibrium is [NE]. This is where
+you can read whether the two players are individually in equilibrium per machine.
+
+====================================================================
+Machine M1  -  TWO-PLAYER GAME
+  Player 1 = J3  (operation O(3,4))
+  Player 2 = J14  (operation O(14,2))
+  critical-path rivalry: this clash is what fixes the makespan Cmax
+====================================================================
+
+(1) PAYOFF BIMATRIX   (each cell = payoff of Player 1 , payoff of Player 2)
+  +-------------+------------------------+------------------------+
+  | Job1 \ Job2 | Job2: M3               | Job2: M1               |
+  +-------------+------------------------+------------------------+
+  | Job1: M1    | 0.0038, 0.0032         | 0.0040, 0.0033 * NASH  |
+  | Job1: M4    | 0.0036, 0.0031         | 0.0036, 0.0031         |
+  +-------------+------------------------+------------------------+
+  legend:  *  = cell the solver actually plays    NASH = pure-strategy Nash equilibrium
+
+(2) PAYOFF CALCULATION   (how each cell above is obtained)
+  U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)   with  a=1.0000  b=0.3000  g=0.0500  d=0.5000
+  strategy pair           C_J3    C_J14   Cmax    U_J3      U_J14     note
+  J3:M1 & J14:M3          88      129     191     0.0038    0.0032    
+  J3:M1 & J14:M1          81      124     177     0.0040    0.0033    played Nash
+  J3:M4 & J14:M3          92      135     198     0.0036    0.0031    
+  J3:M4 & J14:M1          92      136     201     0.0036    0.0031    
+
+(3) NASH CALCULATION   (iterated best response - how the equilibrium is selected)
+  Step 1 - Player 1 (J3)'s best reply to each move of Player 2:
+      if J14 plays M3  ->  J3's best = M1   (U_J3=0.0038)
+      if J14 plays M1  ->  J3's best = M1   (U_J3=0.0040)
+  Step 2 - Player 2 (J14)'s best reply to each move of Player 1:
+      if J3 plays M1  ->  J14's best = M1   (U_J14=0.0033)
+      if J3 plays M4  ->  J14's best = M3   (U_J14=0.0031)
+  Step 3 - Nash equilibrium = a cell that is a MUTUAL best reply:
+      (J3:M1 , J14:M1)   <- the solver plays this cell
+  Selected: the solver plays (J3:M1 , J14:M1), chosen for the lowest
+  shared makespan (Cmax=177). It IS also a Nash equilibrium - neither job can raise its own payoff alone.
+
+====================================================================
+Machine M1  -  TWO-PLAYER GAME
+  Player 1 = J14  (operation O(14,3))
+  Player 2 = J11  (operation O(11,2))
+  critical-path rivalry: this clash is what fixes the makespan Cmax
+====================================================================
+
+(1) PAYOFF BIMATRIX   (each cell = payoff of Player 1 , payoff of Player 2)
+  +-------------+------------------------+------------------------+
+  | Job1 \ Job2 | Job2: M1               | Job2: M4               |
+  +-------------+------------------------+------------------------+
+  | Job1: M1    | 0.0033, 0.0036 * NASH  | 0.0031, 0.0034         |
+  | Job1: M4    | 0.0031, 0.0034         | 0.0030, 0.0032         |
+  +-------------+------------------------+------------------------+
+  legend:  *  = cell the solver actually plays    NASH = pure-strategy Nash equilibrium
+
+(2) PAYOFF CALCULATION   (how each cell above is obtained)
+  U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)   with  a=1.0000  b=0.3000  g=0.0500  d=0.5000
+  strategy pair           C_J14   C_J11   Cmax    U_J14     U_J11     note
+  J14:M1 & J11:M1         124     108     177     0.0033    0.0036    played Nash
+  J14:M1 & J11:M4         133     116     198     0.0031    0.0034    
+  J14:M4 & J11:M1         133     116     198     0.0031    0.0034    
+  J14:M4 & J11:M4         140     124     199     0.0030    0.0032    
+
+(3) NASH CALCULATION   (iterated best response - how the equilibrium is selected)
+  Step 1 - Player 1 (J14)'s best reply to each move of Player 2:
+      if J11 plays M1  ->  J14's best = M1   (U_J14=0.0033)
+      if J11 plays M4  ->  J14's best = M1   (U_J14=0.0031)
+  Step 2 - Player 2 (J11)'s best reply to each move of Player 1:
+      if J14 plays M1  ->  J11's best = M1   (U_J11=0.0036)
+      if J14 plays M4  ->  J11's best = M1   (U_J11=0.0034)
+  Step 3 - Nash equilibrium = a cell that is a MUTUAL best reply:
+      (J14:M1 , J11:M1)   <- the solver plays this cell
+  Selected: the solver plays (J14:M1 , J11:M1), chosen for the lowest
+  shared makespan (Cmax=177). It IS also a Nash equilibrium - neither job can raise its own payoff alone.
+
+====================================================================
+Machine M1  -  TWO-PLAYER GAME
+  Player 1 = J11  (operation O(11,2))
+  Player 2 = J4  (operation O(4,1))
+  critical-path rivalry: this clash is what fixes the makespan Cmax
+====================================================================
+
+(1) PAYOFF BIMATRIX   (each cell = payoff of Player 1 , payoff of Player 2)
+  +-------------+------------------------+------------------------+
+  | Job1 \ Job2 | Job2: M4               | Job2: M1               |
+  +-------------+------------------------+------------------------+
+  | Job1: M1    | 0.0034, 0.0026         | 0.0036, 0.0027 * NASH  |
+  | Job1: M4    | 0.0033, 0.0025         | 0.0034, 0.0025         |
+  +-------------+------------------------+------------------------+
+  legend:  *  = cell the solver actually plays    NASH = pure-strategy Nash equilibrium
+
+(2) PAYOFF CALCULATION   (how each cell above is obtained)
+  U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)   with  a=1.0000  b=0.3000  g=0.0500  d=0.5000
+  strategy pair           C_J11   C_J4    Cmax    U_J11     U_J4      note
+  J11:M1 & J4:M4          114     188     190     0.0034    0.0026    
+  J11:M1 & J4:M1          108     177     177     0.0036    0.0027    played Nash
+  J11:M4 & J4:M4          122     195     197     0.0033    0.0025    
+  J11:M4 & J4:M1          116     189     198     0.0034    0.0025    
+
+(3) NASH CALCULATION   (iterated best response - how the equilibrium is selected)
+  Step 1 - Player 1 (J11)'s best reply to each move of Player 2:
+      if J4 plays M4  ->  J11's best = M1   (U_J11=0.0034)
+      if J4 plays M1  ->  J11's best = M1   (U_J11=0.0036)
+  Step 2 - Player 2 (J4)'s best reply to each move of Player 1:
+      if J11 plays M1  ->  J4's best = M1   (U_J4=0.0027)
+      if J11 plays M4  ->  J4's best = M1   (U_J4=0.0025)
+  Step 3 - Nash equilibrium = a cell that is a MUTUAL best reply:
+      (J11:M1 , J4:M1)   <- the solver plays this cell
+  Selected: the solver plays (J11:M1 , J4:M1), chosen for the lowest
+  shared makespan (Cmax=177). It IS also a Nash equilibrium - neither job can raise its own payoff alone.
+
+====================================================================
+Machine M1  -  TWO-PLAYER GAME
+  Player 1 = J4  (operation O(4,1))
+  Player 2 = J6  (operation O(6,4))
+  critical-path rivalry: this clash is what fixes the makespan Cmax
+====================================================================
+
+(1) PAYOFF BIMATRIX   (each cell = payoff of Player 1 , payoff of Player 2)
+  +-------------+------------------------+------------------------+
+  | Job1 \ Job2 | Job2: M3               | Job2: M1               |
+  +-------------+------------------------+------------------------+
+  | Job1: M4    | 0.0026, 0.0034 NASH    | 0.0026, 0.0034         |
+  | Job1: M1    | 0.0025, 0.0034         | 0.0027, 0.0035 * NASH  |
+  +-------------+------------------------+------------------------+
+  legend:  *  = cell the solver actually plays    NASH = pure-strategy Nash equilibrium
+
+(2) PAYOFF CALCULATION   (how each cell above is obtained)
+  U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)   with  a=1.0000  b=0.3000  g=0.0500  d=0.5000
+  strategy pair           C_J4    C_J6    Cmax    U_J4      U_J6      note
+  J4:M4 & J6:M3           188     104     190     0.0026    0.0034    Nash
+  J4:M4 & J6:M1           188     104     190     0.0026    0.0034    
+  J4:M1 & J6:M3           193     104     195     0.0025    0.0034    
+  J4:M1 & J6:M1           177     105     177     0.0027    0.0035    played Nash
+
+(3) NASH CALCULATION   (iterated best response - how the equilibrium is selected)
+  Step 1 - Player 1 (J4)'s best reply to each move of Player 2:
+      if J6 plays M3  ->  J4's best = M4   (U_J4=0.0026)
+      if J6 plays M1  ->  J4's best = M1   (U_J4=0.0027)
+  Step 2 - Player 2 (J6)'s best reply to each move of Player 1:
+      if J4 plays M4  ->  J6's best = M3   (U_J6=0.0034)
+      if J4 plays M1  ->  J6's best = M1   (U_J6=0.0035)
+  Step 3 - Nash equilibrium = a cell that is a MUTUAL best reply:
+      (J4:M4 , J6:M3)
+      (J4:M1 , J6:M1)   <- the solver plays this cell
+  Selected: the solver plays (J4:M1 , J6:M1), chosen for the lowest
+  shared makespan (Cmax=177). It IS also a Nash equilibrium - neither job can raise its own payoff alone.
+
+====================================================================
+Machine M1  -  TWO-PLAYER GAME
+  Player 1 = J6  (operation O(6,4))
+  Player 2 = J8  (operation O(8,4))
+  critical-path rivalry: this clash is what fixes the makespan Cmax
+====================================================================
+
+(1) PAYOFF BIMATRIX   (each cell = payoff of Player 1 , payoff of Player 2)
+  +-------------+------------------------+------------------------+
+  | Job1 \ Job2 | Job2: M4               | Job2: M1               |
+  +-------------+------------------------+------------------------+
+  | Job1: M3    | 0.0034, 0.0025 NASH    | 0.0034, 0.0025         |
+  | Job1: M1    | 0.0034, 0.0025         | 0.0035, 0.0027 * NASH  |
+  +-------------+------------------------+------------------------+
+  legend:  *  = cell the solver actually plays    NASH = pure-strategy Nash equilibrium
+
+(2) PAYOFF CALCULATION   (how each cell above is obtained)
+  U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)   with  a=1.0000  b=0.3000  g=0.0500  d=0.5000
+  strategy pair           C_J6    C_J8    Cmax    U_J6      U_J8      note
+  J6:M3 & J8:M4           104     188     190     0.0034    0.0025    Nash
+  J6:M3 & J8:M1           104     193     195     0.0034    0.0025    
+  J6:M1 & J8:M4           104     188     190     0.0034    0.0025    
+  J6:M1 & J8:M1           105     175     177     0.0035    0.0027    played Nash
+
+(3) NASH CALCULATION   (iterated best response - how the equilibrium is selected)
+  Step 1 - Player 1 (J6)'s best reply to each move of Player 2:
+      if J8 plays M4  ->  J6's best = M3   (U_J6=0.0034)
+      if J8 plays M1  ->  J6's best = M1   (U_J6=0.0035)
+  Step 2 - Player 2 (J8)'s best reply to each move of Player 1:
+      if J6 plays M3  ->  J8's best = M4   (U_J8=0.0025)
+      if J6 plays M1  ->  J8's best = M1   (U_J8=0.0027)
+  Step 3 - Nash equilibrium = a cell that is a MUTUAL best reply:
+      (J6:M3 , J8:M4)
+      (J6:M1 , J8:M1)   <- the solver plays this cell
+  Selected: the solver plays (J6:M1 , J8:M1), chosen for the lowest
+  shared makespan (Cmax=177). It IS also a Nash equilibrium - neither job can raise its own payoff alone.
+
+====================================================================
+Machine M1  -  TWO-PLAYER GAME
+  Player 1 = J8  (operation O(8,4))
+  Player 2 = J13  (operation O(13,3))
+  critical-path rivalry: this clash is what fixes the makespan Cmax
+====================================================================
+
+(1) PAYOFF BIMATRIX   (each cell = payoff of Player 1 , payoff of Player 2)
+  +-------------+------------------------+------------------------+
+  | Job1 \ Job2 | Job2: M1               | Job2: M4               |
+  +-------------+------------------------+------------------------+
+  | Job1: M4    | 0.0025, 0.0032         | 0.0024, 0.0029         |
+  | Job1: M1    | 0.0027, 0.0032 * NASH  | 0.0024, 0.0029         |
+  +-------------+------------------------+------------------------+
+  legend:  *  = cell the solver actually plays    NASH = pure-strategy Nash equilibrium
+
+(2) PAYOFF CALCULATION   (how each cell above is obtained)
+  U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)   with  a=1.0000  b=0.3000  g=0.0500  d=0.5000
+  strategy pair           C_J8    C_J13   Cmax    U_J8      U_J13     note
+  J8:M4 & J13:M1          188     129     190     0.0025    0.0032    
+  J8:M4 & J13:M4          195     154     197     0.0024    0.0029    
+  J8:M1 & J13:M1          175     134     177     0.0027    0.0032    played Nash
+  J8:M1 & J13:M4          196     155     198     0.0024    0.0029    
+
+(3) NASH CALCULATION   (iterated best response - how the equilibrium is selected)
+  Step 1 - Player 1 (J8)'s best reply to each move of Player 2:
+      if J13 plays M1  ->  J8's best = M1   (U_J8=0.0027)
+      if J13 plays M4  ->  J8's best = M4   (U_J8=0.0024)
+  Step 2 - Player 2 (J13)'s best reply to each move of Player 1:
+      if J8 plays M4  ->  J13's best = M1   (U_J13=0.0032)
+      if J8 plays M1  ->  J13's best = M1   (U_J13=0.0032)
+  Step 3 - Nash equilibrium = a cell that is a MUTUAL best reply:
+      (J8:M1 , J13:M1)   <- the solver plays this cell
+  Selected: the solver plays (J8:M1 , J13:M1), chosen for the lowest
+  shared makespan (Cmax=177). It IS also a Nash equilibrium - neither job can raise its own payoff alone.
+
+(6 two-player games shown, critical-path rivalries first; further machines omitted for readability.)

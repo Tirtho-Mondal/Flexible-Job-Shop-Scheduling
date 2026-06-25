@@ -9,6 +9,18 @@ Operations          : 277
 Avg. flexibility    : 1.56 machines/operation
 Best-known makespan : 694
 
+GAME-THEORY MODEL (a microeconomics view of FJSP)
+-------------------------------------------------
+  Player      : a job - the decision-maker
+  Strategy    : its machine choice per operation + its dispatch positions
+  Payoff      : U_i = 1/(1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)  (higher = better)
+  Game        : all jobs competing for the shared machines
+  Solution    : the decoded schedule once every job fixes its strategy
+  Equilibrium : a stable schedule where no job can raise its payoff alone
+Two jobs interact whenever their operations meet on the same machine: the
+earlier one delays the other, so each job re-routes / re-sequences to raise
+its OWN payoff, and the schedule settles at an equilibrium.
+
 MODEL
 -----
 ONE payoff function. Each job is a self-interested player; machines are

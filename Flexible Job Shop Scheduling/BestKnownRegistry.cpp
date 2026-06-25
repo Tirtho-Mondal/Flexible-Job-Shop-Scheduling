@@ -23,12 +23,12 @@ string BestKnownRegistry::canonicalName(const string& name) {
 }
 
 void BestKnownRegistry::add(const string& group, const string& name, int value) {
-    table_[group + "/" + canonicalName(name)] = value;
+    table[group + "/" + canonicalName(name)] = value;
 }
 
 int BestKnownRegistry::lookup(const string& group, const string& instanceName) const {
-    auto it = table_.find(group + "/" + canonicalName(instanceName));
-    return it == table_.end() ? -1 : it->second;
+    auto it = table.find(group + "/" + canonicalName(instanceName));
+    return it == table.end() ? -1 : it->second;
 }
 
 BestKnownRegistry::BestKnownRegistry() {

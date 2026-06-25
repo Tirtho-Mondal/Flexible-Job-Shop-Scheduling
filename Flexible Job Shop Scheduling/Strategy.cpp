@@ -12,14 +12,13 @@ using namespace std;
 namespace fjs {
 
 Strategy::Strategy(int jobIndex, const string& label)
-    : jobIndex_(jobIndex), label_(label) {}
+    : jobIndex(jobIndex), name(label) {}
 
-void Strategy::setInteraction(double completion, double waiting,
-                              double conflict, double payoff) {
-    completion_ = completion;
-    waiting_    = waiting;
-    conflict_   = conflict;
-    payoff_     = payoff;
+void Strategy::setInteraction(double c, double w, double cf, double u) {
+    completion = c;
+    waiting    = w;
+    conflict   = cf;
+    payoff     = u;
 }
 
 Strategy Strategy::fromProfile(const Instance& inst, const StrategyProfile& profile,
@@ -29,12 +28,12 @@ Strategy Strategy::fromProfile(const Instance& inst, const StrategyProfile& prof
     Strategy s(job, j.label());
 
     // Where does each operation sit in the dispatch order (OSV)?
-    const vector<int>& seq = profile.sequence();
+    const vector<int>& seq = profile.sequence;
     vector<int> position(inst.totalOperations(), -1);
     for (int i = 0; i < (int)seq.size(); ++i) position[seq[i]] = i;
 
     for (const Operation& op : j.operations()) {
-        const int gid = op.globalId();
+        const int gid = op.globalId;
         const int alt = profile.alternativeOf(gid);
         OperationChoice c;
         c.globalId         = gid;

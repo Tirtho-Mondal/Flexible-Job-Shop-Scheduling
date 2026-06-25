@@ -8,10 +8,10 @@ using namespace std;
 namespace fjs {
 
 Machine::Machine(int index)
-    : index_(index) {}
+    : index(index) {}
 
 string Machine::label() const {
-    return "M" + to_string(index_ + 1);
+    return "M" + to_string(index + 1);
 }
 
 } // namespace fjs
