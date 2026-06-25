@@ -5,7 +5,7 @@
 //  The whole FJSSP problem instance: the players (jobs), the shared resources
 //  (machines) and a flat index of every operation.  This object is built once
 //  by the reader and then treated as IMMUTABLE problem data - the mutable
-//  decision (routing + dispatch order) lives in a separate GameState, so a
+//  decision (routing + dispatch order) lives in a separate StrategyProfile, so a
 //  single Instance can be evaluated against any number of strategy profiles.
 //
 //  OOP pillars: ABSTRACTION (the rest of the program touches the problem only

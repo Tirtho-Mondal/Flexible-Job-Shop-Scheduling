@@ -1,19 +1,11 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
-// ============================================================================
-//  main.cpp - driver of the game-theoretic FJSSP solver.
-//  ---------------------------------------------------------------------------
-//  Takes NO console input.  On start-up it:
-//    1. locates the data/ folder (override with the FJS_DATA env var),
-//    2. (re)creates output/allresult.txt,
-//    3. recursively finds every *.fjs instance,
-//    4. for each one: parse -> random init -> selfish best-response game ->
-//       write output/<group>_<name>_log.txt and append to output/allresult.txt,
-//    5. writes output/README.md and output/code_explanation.md.
+#define _CRT_SECURE_NO_WARNINGS   // we use getenv() below
+
+// Entry point for the JC-NCGS scheduler.
 //
-//  Build (from this folder) without Visual Studio, if desired:
-//      g++  -std=c++17 -O2 *.cpp -o fjs_game
-//      cl   /EHsc /std:c++17 /O2 *.cpp /Fe:fjs_game.exe
-// ============================================================================
+// There's nothing to type in: point it at a folder of FJSSP instances (the
+// data/ folder by default, or wherever FJS_DATA says) and it solves every
+// instance it finds, writing the reports into output/. Each instance gets its
+// own log; allresult.txt collects the makespan-vs-best-known comparison.
 
 #include "FjsInstanceReader.h"
 #include "GameSolver.h"
@@ -22,6 +14,8 @@
 #include "InstanceReport.h"
 #include "GlobalReport.h"
 #include "CodeExplanation.h"
+#include "ScheduleBuilder.h"
+#include "GanttChart.h"
 
 #include <iostream>
 #include <string>
@@ -33,123 +27,128 @@
 #include <functional>
 
 using namespace std;
-
 namespace fs = filesystem;
 using namespace fjs;
 
-// Lower-case copy of a string (for case-insensitive path matching).
-static string lower(string s) {
+static string toLower(string s) {
     for (char& c : s) c = (char)tolower((unsigned char)c);
     return s;
 }
 
-// An instance file is any .fjs or .txt (the benchmarks ship under both names).
-static bool isInstanceFile(const fs::path& p) {
-    string ext = lower(p.extension().string());
+// We accept the original .fjs benchmarks as well as the same data saved as .txt.
+static bool looksLikeInstance(const fs::path& p) {
+    const string ext = toLower(p.extension().string());
     return ext == ".fjs" || ext == ".txt";
 }
 
-// Find the data folder: honour FJS_DATA, otherwise probe a few likely places.
-static fs::path findDataFolder() {
-    if (const char* e = getenv("FJS_DATA")) {
-        fs::path p(e);
+// Where do the instances live? Use FJS_DATA if it's set; otherwise walk up a few
+// directories looking for a data/ (or input/) folder that actually contains some.
+static fs::path locateDataFolder() {
+    if (const char* env = getenv("FJS_DATA")) {
+        fs::path p(env);
         if (fs::exists(p)) return p;
     }
-    const char* candidates[] = {
-        "data", "../data", "../../data", "../../../data", "../../../../data",
-        "input", "../input", "../../input", "../../../input", "../../../../input"
-    };
-    for (const char* c : candidates) {
-        fs::path p(c);
-        if (fs::exists(p) && fs::is_directory(p)) {
-            for (auto& e : fs::recursive_directory_iterator(p))
-                if (e.is_regular_file() && isInstanceFile(e.path()))
-                    return p;
-        }
+    for (const char* guess : { "data", "../data", "../../data", "../../../data", "../../../../data",
+                               "input", "../input", "../../input", "../../../input", "../../../../input" }) {
+        fs::path p(guess);
+        if (!fs::is_directory(p)) continue;
+        for (auto& entry : fs::recursive_directory_iterator(p))
+            if (entry.is_regular_file() && looksLikeInstance(entry.path()))
+                return p;
     }
-    return fs::path();
+    return {};
 }
 
-// Decide which benchmark family a file belongs to (drives the best-known lookup
-// and the report file name).
-static string groupOf(const fs::path& file) {
+// The benchmark family is essentially the folder the file sits in. We use it to
+// look up the best-known value and to prefix the per-instance report name.
+static string familyOf(const fs::path& file) {
     for (const auto& part : file) {
-        string p = lower(part.string());
-        if (p == "edata" || p == "rdata" || p == "sdata" || p == "vdata") return p;
-        if (p == "brandimarte") return "brandimarte";
-        if (p.find("rcfjssp") != string::npos) return "rcfjssp";
+        const string name = toLower(part.string());
+        if (name == "edata" || name == "rdata" || name == "sdata" || name == "vdata") return name;
+        if (name == "brandimarte") return "brandimarte";
+        if (name.find("rcfjssp") != string::npos) return "rcfjssp";
     }
     return file.parent_path().filename().string();
 }
 
-// Trailing integer of an instance name, for natural sorting within a group.
-static int trailingNumber(const string& s) {
-    int v = 0; bool any = false;
-    for (char c : s) {
-        if (isdigit((unsigned char)c)) { v = v * 10 + (c - '0'); any = true; }
-        else if (any) break;
+// Pull the trailing number out of a name so that, e.g., mk2 sorts before mk10.
+static int instanceNumber(const string& name) {
+    int value = 0;
+    bool seenDigit = false;
+    for (char c : name) {
+        if (isdigit((unsigned char)c)) { value = value * 10 + (c - '0'); seenDigit = true; }
+        else if (seenDigit) break;        // first non-digit after the number ends it
     }
-    return any ? v : 0;
+    return seenDigit ? value : 0;
 }
 
 int main() {
-    fs::path dataDir = findDataFolder();
+    const fs::path dataDir = locateDataFolder();
     if (dataDir.empty()) {
-        cerr << "ERROR: could not find a 'data' folder containing .fjs files.\n"
-                     "Set the FJS_DATA environment variable to its path.\n";
+        cerr << "Couldn't find a data/ folder with .fjs or .txt instances.\n"
+                "Point FJS_DATA at one and try again.\n";
         return 1;
     }
     fs::create_directories("output");
+    fs::create_directories("output/ganchart");
 
-    // gather instances
-    vector<fs::path> files;
-    for (auto& e : fs::recursive_directory_iterator(dataDir))
-        if (e.is_regular_file() && isInstanceFile(e.path()))
-            files.push_back(e.path());
-    sort(files.begin(), files.end(), [](const fs::path& a, const fs::path& b) {
-        string ga = groupOf(a), gb = groupOf(b);
-        if (ga != gb) return ga < gb;
-        return trailingNumber(a.stem().string()) < trailingNumber(b.stem().string());
+    // Grab every instance file, then order them family-by-family and in natural
+    // numeric order so the console output and tables read sensibly.
+    vector<fs::path> instances;
+    for (auto& entry : fs::recursive_directory_iterator(dataDir))
+        if (entry.is_regular_file() && looksLikeInstance(entry.path()))
+            instances.push_back(entry.path());
+
+    sort(instances.begin(), instances.end(), [](const fs::path& a, const fs::path& b) {
+        const string fa = familyOf(a), fb = familyOf(b);
+        if (fa != fb) return fa < fb;
+        return instanceNumber(a.stem().string()) < instanceNumber(b.stem().string());
     });
 
-    cout << "Data folder : " << dataDir.string() << "\n";
-    cout << "Instances   : " << files.size() << "\n\n";
+    cout << "Data folder : " << dataDir.string() << "\n"
+         << "Instances   : " << instances.size() << "\n\n";
 
     FjsInstanceReader reader;
     PayoffFunction    payoff;
-    BestKnownRegistry bestKnown;
-    GlobalReport      global("output/allresult.txt");
+    BestKnownRegistry literature;
+    GlobalReport      summary("output/allresult.txt");
 
-    int done = 0;
-    for (const fs::path& file : files) {
-        const string group = groupOf(file);
-        const string stem  = file.stem().string();
-        cout << "[" << ++done << "/" << files.size() << "] "
-                  << group << "/" << stem << " ... " << flush;
+    int index = 0;
+    for (const fs::path& file : instances) {
+        const string family = familyOf(file);
+        const string name   = file.stem().string();
+        cout << "[" << ++index << "/" << instances.size() << "] "
+             << family << "/" << name << " ... " << flush;
+
         try {
-            Instance inst = reader.read(file.string(), group);
+            Instance inst = reader.read(file.string(), family);
 
-            // Reproducible per-instance seed (deterministic across runs).
-            unsigned seed = (unsigned)(hash<string>{}(group + "/" + stem) ^ 0x9E3779B9u);
+            // Same instance name -> same seed, so re-running reproduces the numbers.
+            const unsigned seed = (unsigned)(hash<string>{}(family + "/" + name) ^ 0x9E3779B9u);
             GameSolver solver(inst, payoff, seed);
-            SolveResult result = solver.solve();
+            const SolveResult result = solver.solve();
 
-            int bk = bestKnown.lookup(group, stem);
-            InstanceReport::write("output/" + group + "_" + stem + "_log.txt",
-                                  inst, result, payoff, bk);
-            global.append(inst, result, bk);
+            const int bks = literature.lookup(family, name);
+            InstanceReport::write("output/" + family + "_" + name + "_log.txt",
+                                  inst, result, payoff, bks);
+            summary.append(inst, result, bks);
+
+            // Gantt chart of the best schedule (one colour per job).
+            Schedule best = ScheduleBuilder::build(inst, result.bestState);
+            GanttChart::write("output/ganchart/" + family + "_" + name + ".svg", inst, best);
 
             cout << "Cmax=" << result.bestMakespan;
-            if (bk >= 0) cout << " (BKS " << bk << ")";
+            if (bks >= 0) cout << " (BKS " << bks << ")";
             cout << "\n";
         } catch (const exception& ex) {
+            // One bad file shouldn't sink the whole batch - report it and move on.
             cout << "ERROR: " << ex.what() << "\n";
         }
     }
 
-    global.writeReadme("output/README.md");
+    summary.writeReadme("output/README.md");
     CodeExplanation::write("output/code_explanation.md", payoff);
 
-    cout << "\nDone. See output/allresult.txt, output/README.md and the per-instance logs.\n";
+    cout << "\nAll done - see output/ (allresult.txt, README.md, per-instance logs).\n";
     return 0;
 }

@@ -9,7 +9,7 @@ using namespace std;
 
 namespace fjs {
 
-Schedule ScheduleBuilder::build(const Instance& inst, const GameState& state) {
+Schedule ScheduleBuilder::build(const Instance& inst, const StrategyProfile& state) {
     const int numOps = inst.totalOperations();
     const int numJobs = inst.numJobs();
     const int numMachines = inst.numMachines();

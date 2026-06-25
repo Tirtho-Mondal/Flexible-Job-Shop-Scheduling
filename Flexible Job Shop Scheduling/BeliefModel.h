@@ -23,7 +23,7 @@
 // ============================================================================
 
 #include "Instance.h"
-#include "GameState.h"
+#include "StrategyProfile.h"
 #include <vector>
 #include <random>
 
@@ -36,7 +36,7 @@ public:
     BeliefModel(const Instance& inst, int capacity);
 
     // Offer an equilibrium to the elite pool (kept if good and not a duplicate).
-    void consider(const GameState& state, int makespan);
+    void consider(const StrategyProfile& state, int makespan);
 
     bool ready()       const { return !pool_.empty(); }
     int  eliteCount()  const { return (int)pool_.size(); }
@@ -54,7 +54,7 @@ private:
 
     const Instance&                  inst_;
     int                              capacity_;
-    vector<GameState>           pool_;       // elite equilibria
+    vector<StrategyProfile>           pool_;       // elite equilibria
     vector<int>                 makespans_;  // their makespans
     vector<vector<double>> freq_;       // gid -> alt -> probability
 };

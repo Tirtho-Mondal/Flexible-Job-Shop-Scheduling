@@ -142,8 +142,12 @@
     <ClCompile Include="Machine.cpp" />
     <ClCompile Include="Operation.cpp" />
     <ClCompile Include="Job.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="ScheduleBuilder.cpp" />
+    <ClCompile Include="Strategy.cpp" />
+    <ClCompile Include="Solution.cpp" />
+    <ClCompile Include="StableSolution.cpp" />
     <ClCompile Include="PayoffFunction.cpp" />
     <ClCompile Include="GameSolver.cpp" />
     <ClCompile Include="FjsInstanceReader.cpp" />
@@ -152,14 +156,19 @@
     <ClCompile Include="InstanceReport.cpp" />
     <ClCompile Include="GlobalReport.cpp" />
     <ClCompile Include="CodeExplanation.cpp" />
+    <ClCompile Include="GanttChart.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Machine.h" />
     <ClInclude Include="Operation.h" />
     <ClInclude Include="Job.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Instance.h" />
-    <ClInclude Include="GameState.h" />
+    <ClInclude Include="Strategy.h" />
+    <ClInclude Include="StrategyProfile.h" />
+    <ClInclude Include="Solution.h" />
+    <ClInclude Include="StableSolution.h" />
     <ClInclude Include="Schedule.h" />
     <ClInclude Include="ScheduleBuilder.h" />
     <ClInclude Include="PayoffFunction.h" />
@@ -170,6 +179,7 @@
     <ClInclude Include="InstanceReport.h" />
     <ClInclude Include="GlobalReport.h" />
     <ClInclude Include="CodeExplanation.h" />
+    <ClInclude Include="GanttChart.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

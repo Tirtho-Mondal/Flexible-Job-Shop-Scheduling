@@ -2,7 +2,7 @@
 // ============================================================================
 //  ScheduleBuilder.h
 //  ---------------------------------------------------------------------------
-//  Turns a strategy profile (GameState) into a concrete timed Schedule.
+//  Turns a strategy profile (StrategyProfile) into a concrete timed Schedule.
 //
 //  It is a deterministic list-scheduler ("as-early-as-possible" decoder): it
 //  walks the global dispatch sequence and places each operation at the earliest
@@ -16,7 +16,7 @@
 // ============================================================================
 
 #include "Instance.h"
-#include "GameState.h"
+#include "StrategyProfile.h"
 #include "Schedule.h"
 
 using namespace std;
@@ -26,7 +26,7 @@ namespace fjs {
 class ScheduleBuilder {
 public:
     // Decode `state` against `inst` into a fully timed Schedule.
-    static Schedule build(const Instance& inst, const GameState& state);
+    static Schedule build(const Instance& inst, const StrategyProfile& state);
 };
 
 } // namespace fjs

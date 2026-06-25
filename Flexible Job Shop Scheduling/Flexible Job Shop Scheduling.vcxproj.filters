@@ -14,8 +14,12 @@
     <ClCompile Include="Machine.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Operation.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Job.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Player.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Instance.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="ScheduleBuilder.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Strategy.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Solution.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="StableSolution.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="PayoffFunction.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="GameSolver.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="FjsInstanceReader.cpp"><Filter>Source Files</Filter></ClCompile>
@@ -24,14 +28,19 @@
     <ClCompile Include="InstanceReport.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="GlobalReport.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="CodeExplanation.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="GanttChart.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="main.cpp"><Filter>Source Files</Filter></ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Machine.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="Operation.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="Job.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Player.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="Instance.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="GameState.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Strategy.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="StrategyProfile.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Solution.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="StableSolution.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="Schedule.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="ScheduleBuilder.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="PayoffFunction.h"><Filter>Header Files</Filter></ClInclude>
@@ -42,5 +51,6 @@
     <ClInclude Include="InstanceReport.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="GlobalReport.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="CodeExplanation.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="GanttChart.h"><Filter>Header Files</Filter></ClInclude>
   </ItemGroup>
 </Project>

@@ -23,7 +23,7 @@
 // ============================================================================
 
 #include "Instance.h"
-#include "GameState.h"
+#include "StrategyProfile.h"
 #include "PayoffFunction.h"
 #include "BeliefModel.h"
 #include <vector>
@@ -54,11 +54,11 @@ public:
     int numJobs = 0, numMachines = 0, numOperations = 0;
 
     int       initialMakespan = 0;   // makespan of the very first random profile
-    GameState initialState;          // that first random profile (for reporting)
+    StrategyProfile initialState;          // that first random profile (for reporting)
 
     int       bestMakespan = 0;
     long long bestTotalCompletion = 0;
-    GameState bestState;             // the best profile found over all runs
+    StrategyProfile bestState;             // the best profile found over all runs
 
     bool equilibriumReached = false; // at least one critical-path local optimum
     int  runsRun       = 0;          // number of independent runs performed
@@ -76,39 +76,36 @@ public:
     SolveResult solve();
 
 private:
-    GameState randomProfile();
-    void      fillRandomSequence(GameState& state);        // precedence-feasible order
-    GameState greedyGlobalProfile();   // load-balancing machine selection (Reijnen "Global")
-    GameState greedyLocalProfile();    // shortest-processing-time machine selection ("Local")
-    GameState taskPoolProfile();       // task-pool constructor: ready ops compete (earliest completion)
-    GameState beliefProfile(const BeliefModel& belief);    // fictitious-play seeded start
-    Schedule  evaluate(const GameState& state);            // decode + count
+    StrategyProfile randomProfile();
+    void      fillRandomSequence(StrategyProfile& state);        // precedence-feasible order
+    StrategyProfile greedyGlobalProfile();   // load-balancing machine selection (Reijnen "Global")
+    StrategyProfile greedyLocalProfile();    // shortest-processing-time machine selection ("Local")
+    StrategyProfile taskPoolProfile();       // task-pool constructor: ready ops compete (earliest completion)
+    StrategyProfile beliefProfile(const BeliefModel& belief);    // fictitious-play seeded start
+    Schedule  evaluate(const StrategyProfile& state);            // decode + count
 
     // Operations lying on a critical path of `sched` (those that can change Cmax).
     vector<int> criticalOperations(const Schedule& sched) const;
 
     // Critical-path best-response descent: keep applying the best makespan-reducing
     // critical deviation until none remains (a Nash equilibrium / local optimum).
-    // Updates the global incumbent.  (A tabu-search variant was trialled but did
-    // not beat this under the same budget, so the strict descent is kept.)
-    void descend(GameState& state, int run, long budgetEnd,
+    // Runs to full convergence - there is no budget cut-off.
+    void descend(StrategyProfile& state, int run,
                  SolveResult& result, long long& bestFit, int& iteration);
 
     // Diversification kick for iterated local search; if `belief` is non-null the
     // re-routing part is drawn from the players' beliefs (intensification).
-    void perturb(GameState& state, int strength, const BeliefModel* belief);
+    void perturb(StrategyProfile& state, int strength, const BeliefModel* belief);
 
     // Consider `cand` as the new global incumbent.
     void considerIncumbent(SolveResult& result, long long& bestFit,
-                           const GameState& state, const Schedule& sched);
+                           const StrategyProfile& state, const Schedule& sched);
 
     const Instance&       inst_;
     const PayoffFunction& payoff_;
     mt19937          rng_;
 
-    long evalBudget_  = 0;
-    long evals_       = 0;
-    long perRunBudget_ = 0;
+    long evals_        = 0;   // schedule decodes performed (reported, not a cap)
     int  maxTraceRows_ = 2500;
 };
 

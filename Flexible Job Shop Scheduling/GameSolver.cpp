@@ -16,41 +16,19 @@ namespace fjs {
 
 GameSolver::GameSolver(const Instance& inst, const PayoffFunction& payoff, unsigned seed)
     : inst_(inst), payoff_(payoff), rng_(seed) {
-    const long ops = inst_.totalOperations();
-
-    // Each run must be long enough for one critical-path descent to actually
-    // CONVERGE to a local optimum (otherwise large instances are cut off mid
-    // descent and never reach a good schedule). So the run length scales with
-    // the instance size; on top of that we do a fixed number of belief-learning
-    // runs, which the FJS_EFFORT env var multiplies for higher quality.
-    perRunBudget_ = 500L * ops;
-    if (perRunBudget_ < 25000L)  perRunBudget_ = 25000L;
-    if (perRunBudget_ > 300000L) perRunBudget_ = 300000L;
-
-    // Number of independent belief-learning runs per instance. Default 1000;
-    // override with the FJS_RUNS env var (e.g. 100 for a quick pass). FJS_EFFORT
-    // is an extra multiplier kept for convenience.
-    long runs = 100;
-    if (const char* e = getenv("FJS_RUNS")) {
-        runs = atol(e);
-        if (runs < 1)      runs = 1;
-        if (runs > 100000) runs = 100000;
-    }
-    long effort = 1;
-    if (const char* e = getenv("FJS_EFFORT")) {
-        effort = atol(e);
-        if (effort < 1)  effort = 1;
-        if (effort > 50) effort = 50;
-    }
-    evalBudget_ = perRunBudget_ * runs * effort;
+    // No evaluation budget and no "effort" knob. The search runs until it
+    // CONVERGES: every descent runs all the way to a true local optimum (no
+    // cut-off), and the solver keeps restarting until neither the per-run
+    // iterated local search nor the global incumbent improves for a sustained
+    // streak (the stagnation criterion in solve()).
 }
 
-Schedule GameSolver::evaluate(const GameState& state) {
+Schedule GameSolver::evaluate(const StrategyProfile& state) {
     ++evals_;
     return ScheduleBuilder::build(inst_, state);
 }
 
-void GameSolver::fillRandomSequence(GameState& state) {
+void GameSolver::fillRandomSequence(StrategyProfile& state) {
     vector<int> placed(inst_.numJobs(), 0);
     vector<int> active;
     for (int j = 0; j < inst_.numJobs(); ++j)
@@ -67,8 +45,8 @@ void GameSolver::fillRandomSequence(GameState& state) {
     }
 }
 
-GameState GameSolver::randomProfile() {
-    GameState state(inst_.totalOperations());
+StrategyProfile GameSolver::randomProfile() {
+    StrategyProfile state(inst_.totalOperations());
     for (int gid = 0; gid < inst_.totalOperations(); ++gid) {
         const Operation& op = inst_.operationByGlobalId(gid);
         uniform_int_distribution<int> pick(0, op.alternativeCount() - 1);
@@ -80,8 +58,8 @@ GameState GameSolver::randomProfile() {
 
 // Reijnen et al. "Global" machine selection: greedily balance the machine
 // workloads (a strong load-balanced starting point for the makespan).
-GameState GameSolver::greedyGlobalProfile() {
-    GameState state(inst_.totalOperations());
+StrategyProfile GameSolver::greedyGlobalProfile() {
+    StrategyProfile state(inst_.totalOperations());
     vector<long long> load(inst_.numMachines(), 0);
     for (int gid = 0; gid < inst_.totalOperations(); ++gid) {
         const Operation& op = inst_.operationByGlobalId(gid);
@@ -98,8 +76,8 @@ GameState GameSolver::greedyGlobalProfile() {
 }
 
 // Reijnen et al. "Local" machine selection: shortest processing time per op.
-GameState GameSolver::greedyLocalProfile() {
-    GameState state(inst_.totalOperations());
+StrategyProfile GameSolver::greedyLocalProfile() {
+    StrategyProfile state(inst_.totalOperations());
     for (int gid = 0; gid < inst_.totalOperations(); ++gid) {
         const Operation& op = inst_.operationByGlobalId(gid);
         int bestAlt = 0, bestTime = INT_MAX;
@@ -116,8 +94,8 @@ GameState GameSolver::greedyLocalProfile() {
 // ready operations compete and the one that can COMPLETE earliest (over its
 // eligible machines) is dispatched next. This jointly builds OSV (the dispatch
 // order) and MAV (the chosen machine) and yields a strong active schedule.
-GameState GameSolver::taskPoolProfile() {
-    GameState state(inst_.totalOperations());
+StrategyProfile GameSolver::taskPoolProfile() {
+    StrategyProfile state(inst_.totalOperations());
     const int J = inst_.numJobs();
     vector<int> nextOp(J, 0), jobReady(J, 0);
     vector<int> machineFree(inst_.numMachines(), 0);
@@ -152,8 +130,8 @@ GameState GameSolver::taskPoolProfile() {
 }
 
 // Fictitious-play seed: routing drawn from the players' learned beliefs.
-GameState GameSolver::beliefProfile(const BeliefModel& belief) {
-    GameState state(inst_.totalOperations());
+StrategyProfile GameSolver::beliefProfile(const BeliefModel& belief) {
+    StrategyProfile state(inst_.totalOperations());
     state.routing() = belief.sampleRouting(rng_);
     fillRandomSequence(state);
     return state;
@@ -200,16 +178,6 @@ vector<int> GameSolver::criticalOperations(const Schedule& sched) const {
     return crit;
 }
 
-// Copy of `seq` with the element at `pos` moved to index `target`.
-static vector<int> moveTo(const vector<int>& seq, int pos, int target) {
-    vector<int> r = seq;
-    int g = r[pos];
-    r.erase(r.begin() + pos);
-    int t = (target > pos) ? target - 1 : target;
-    r.insert(r.begin() + t, g);
-    return r;
-}
-
 // True iff `seq` lists each job's operations in their route order (feasible).
 static bool precedenceOK(const Instance& inst, const vector<int>& seq) {
     vector<int> need(inst.numJobs(), 0);
@@ -222,7 +190,7 @@ static bool precedenceOK(const Instance& inst, const vector<int>& seq) {
 }
 
 void GameSolver::considerIncumbent(SolveResult& result, long long& bestFit,
-                                   const GameState& state, const Schedule& sched) {
+                                   const StrategyProfile& state, const Schedule& sched) {
     long long f = payoff_.fitness(sched);
     if (f < bestFit) {
         bestFit = f;
@@ -232,9 +200,12 @@ void GameSolver::considerIncumbent(SolveResult& result, long long& bestFit,
     }
 }
 
-void GameSolver::descend(GameState& state, int run, long budgetEnd,
+void GameSolver::descend(StrategyProfile& state, int run,
                          SolveResult& result, long long& bestFit, int& iteration) {
-    while (evals_ < budgetEnd) {
+    // Keep applying the single best improving deviation until none remains - a
+    // true Nash equilibrium / critical-path local optimum. There is no budget:
+    // the loop ends only when the schedule has converged (kind == 0).
+    while (true) {
         Schedule cur = evaluate(state);
         const long long curFit = payoff_.fitness(cur);
         const int curMk = cur.makespan();
@@ -263,10 +234,10 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
             const int curAlt = state.alternativeOf(gid);
             for (int alt = 0; alt < op.alternativeCount(); ++alt) {
                 if (alt == curAlt) continue;
-                state.routing()[gid] = alt;
+                state.reroute(gid, alt);
                 Schedule s = evaluate(state);
                 long long f = payoff_.fitness(s);
-                state.routing()[gid] = curAlt;
+                state.reroute(gid, curAlt);                 // revert
                 if (f < bestFitMove) {
                     bestFitMove = f; kind = 1; moveGid = gid; moveAlt = alt;
                     moveMk = s.makespan(); moveSum = s.totalCompletion();
@@ -274,9 +245,7 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
                              to_string(op.machineOfAlternative(curAlt) + 1) +
                              " -> M" + to_string(op.machineOfAlternative(alt) + 1);
                 }
-                if (evals_ >= budgetEnd) break;
             }
-            if (evals_ >= budgetEnd) break;
 
             // (2) re-sequence the critical operation within its legal window.
             const int pos = posOf[gid];
@@ -292,7 +261,7 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
                 if (t <= predPos || t >= succPos || t == pos || t < 0) continue;
                 if (t == lastT) continue;
                 lastT = t;
-                vector<int> cand = moveTo(state.sequence(), pos, t);
+                vector<int> cand = state.resequenced(pos, t);
                 state.sequence().swap(cand);
                 Schedule s = evaluate(state);
                 long long f = payoff_.fitness(s);
@@ -303,9 +272,7 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
                     action = "move " + op.label() + " to dispatch slot " +
                              to_string(t + 1) + " (was " + to_string(pos + 1) + ")";
                 }
-                if (evals_ >= budgetEnd) break;
             }
-            if (evals_ >= budgetEnd) break;
         }
 
         // ---- (3) JOB-vs-JOB pairwise moves on a shared machine -------------
@@ -319,10 +286,10 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
             for (int gid = 0; gid < inst_.totalOperations(); ++gid)
                 perMachine[cur.machineOf(gid)].push_back(gid);
             int mutualPairs = 0;                 // cap on the costly mutual reroutes
-            for (int mm = 0; mm < inst_.numMachines() && evals_ < budgetEnd; ++mm) {
+            for (int mm = 0; mm < inst_.numMachines(); ++mm) {
                 auto& v = perMachine[mm];
                 sort(v.begin(), v.end(), [&](int a, int b){ return cur.startOf(a) < cur.startOf(b); });
-                for (size_t q = 0; q + 1 < v.size() && evals_ < budgetEnd; ++q) {
+                for (size_t q = 0; q + 1 < v.size(); ++q) {
                     const int u = v[q], w = v[q + 1];
                     if (!isCrit[u] || !isCrit[w]) continue;
                     const Operation& opU = inst_.operationByGlobalId(u);
@@ -330,7 +297,7 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
                     if (opU.jobIndex() == opW.jobIndex()) continue;     // same job: not rivals
 
                     // Action 1 - swap the rivals' order (move w just ahead of u).
-                    vector<int> cand = moveTo(state.sequence(), posOf[w], posOf[u]);
+                    vector<int> cand = state.resequenced(posOf[w], posOf[u]);
                     if (precedenceOK(inst_, cand)) {
                         state.sequence().swap(cand);
                         Schedule s = evaluate(state);
@@ -343,7 +310,6 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
                                      " on M" + to_string(mm + 1);
                         }
                     }
-                    if (evals_ >= budgetEnd) break;
 
                     // Action 5 - mutual rerouting: both rivals leave the contested
                     // machine together (bounded; this is the costly move).
@@ -351,13 +317,13 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
                         && opU.alternativeCount() * opW.alternativeCount() <= 12) {
                         ++mutualPairs;
                         const int curU = state.alternativeOf(u), curW = state.alternativeOf(w);
-                        for (int au = 0; au < opU.alternativeCount() && evals_ < budgetEnd; ++au)
-                            for (int aw = 0; aw < opW.alternativeCount() && evals_ < budgetEnd; ++aw) {
+                        for (int au = 0; au < opU.alternativeCount(); ++au)
+                            for (int aw = 0; aw < opW.alternativeCount(); ++aw) {
                                 if (au == curU && aw == curW) continue;
-                                state.routing()[u] = au; state.routing()[w] = aw;
+                                state.reroute(u, au); state.reroute(w, aw);
                                 Schedule s = evaluate(state);
                                 long long f = payoff_.fitness(s);
-                                state.routing()[u] = curU; state.routing()[w] = curW;
+                                state.reroute(u, curU); state.reroute(w, curW);   // revert
                                 if (f < bestFitMove) {
                                     bestFitMove = f; kind = 3;
                                     moveGid = u; moveAlt = au; moveGid2 = w; moveAlt2 = aw;
@@ -376,9 +342,9 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
         if (kind == 0) { result.equilibriumReached = true; return; } // local optimum
 
         // Apply the best deviation (single reroute, re-sequence/swap, or mutual reroute).
-        if (kind == 1)      state.routing()[moveGid] = moveAlt;
+        if (kind == 1)      state.reroute(moveGid, moveAlt);
         else if (kind == 2) state.sequence() = moveSeq;
-        else /* kind 3 */ { state.routing()[moveGid] = moveAlt; state.routing()[moveGid2] = moveAlt2; }
+        else /* kind 3 */ { state.reroute(moveGid, moveAlt); state.reroute(moveGid2, moveAlt2); }
 
         ++result.acceptedMoves;
         if ((int)result.trace.size() < maxTraceRows_) {
@@ -400,7 +366,7 @@ void GameSolver::descend(GameState& state, int run, long budgetEnd,
     }
 }
 
-void GameSolver::perturb(GameState& state, int strength, const BeliefModel* belief) {
+void GameSolver::perturb(StrategyProfile& state, int strength, const BeliefModel* belief) {
     const int n = inst_.totalOperations();
     uniform_int_distribution<int> coin(0, 1);
     for (int s = 0; s < strength; ++s) {
@@ -411,10 +377,10 @@ void GameSolver::perturb(GameState& state, int strength, const BeliefModel* beli
             // Re-route: draw from beliefs when available (aim the kick at the
             // machine assignments good solutions agree on), else uniformly.
             if (belief && belief->ready())
-                state.routing()[gid] = belief->sampleAlternative(gid, rng_);
+                state.reroute(gid, belief->sampleAlternative(gid, rng_));
             else {
                 uniform_int_distribution<int> pa(0, op.alternativeCount() - 1);
-                state.routing()[gid] = pa(rng_);
+                state.reroute(gid, pa(rng_));
             }
         } else {
             // reposition within its legal window
@@ -430,7 +396,7 @@ void GameSolver::perturb(GameState& state, int strength, const BeliefModel* beli
             uniform_int_distribution<int> pt(predPos + 1, succPos - 1);
             int t = pt(rng_);
             if (t == pos) continue;
-            vector<int> cand = moveTo(state.sequence(), pos, t);
+            vector<int> cand = state.resequenced(pos, t);
             state.sequence().swap(cand);
         }
     }
@@ -451,13 +417,21 @@ SolveResult GameSolver::solve() {
     // Fictitious-play memory of the best equilibria found so far.
     BeliefModel belief(inst_, 30);
 
-    while (evals_ < evalBudget_) {
-        const long budgetEnd = min(evalBudget_, evals_ + perRunBudget_);
+    // totalRun controls the whole search: every instance performs this many
+    // independent runs (default 500). There is no evaluation budget - each run
+    // still descends to a true local optimum and its iterated local search runs
+    // to convergence (ILS_PATIENCE consecutive non-improving kicks).
+    // Number of independent runs (default 500). For a quick pass, override with
+    // the FJS_RUNS env var (e.g. FJS_RUNS=25) - no rebuild needed.
+    int totalRun = 1000;
+    if (const char* e = getenv("FJS_RUNS")) { int v = atoi(e); if (v >= 1 && v <= 100000) totalRun = v; }
+    const int ILS_PATIENCE = 25 + inst_.totalOperations() / 10;
 
+    for (run = 0; run < totalRun; ++run) {
         // Choose how this run is seeded. Run 0 is ALWAYS fully random (the
         // required random initialisation); later runs are seeded by the learned
         // beliefs and the Global/Local greedy heuristics, then refined by play.
-        GameState state;
+        StrategyProfile state;
         if (run == 0) {
             state = randomProfile();
         } else if (run == 1) {
@@ -475,27 +449,29 @@ SolveResult GameSolver::solve() {
         if (run == 0) { result.initialMakespan = s0.makespan(); result.initialState = state; }
         considerIncumbent(result, bestFit, state, s0);
 
-        GameState runBest = state;
+        StrategyProfile runBest = state;
         long long runBestFit = payoff_.fitness(s0);
 
-        descend(state, run, budgetEnd, result, bestFit, iteration);
+        descend(state, run, result, bestFit, iteration);
         { Schedule sd = evaluate(state); long long f = payoff_.fitness(sd);
           if (f < runBestFit) { runBestFit = f; runBest = state; } }
 
-        // Iterated local search: kick the run's best (aimed by beliefs), descend.
-        while (evals_ < budgetEnd) {
-            GameState work = runBest;
+        // Iterated local search until convergence: kick the run's best (aimed by
+        // beliefs) and descend, until no improvement for ILS_PATIENCE kicks.
+        int stagnantKicks = 0;
+        while (stagnantKicks < ILS_PATIENCE) {
+            StrategyProfile work = runBest;
             perturb(work, kickStrength, &belief);
-            descend(work, run, budgetEnd, result, bestFit, iteration);
+            descend(work, run, result, bestFit, iteration);
             Schedule sw = evaluate(work);
             long long f = payoff_.fitness(sw);
-            if (f < runBestFit) { runBestFit = f; runBest = work; }
+            if (f < runBestFit) { runBestFit = f; runBest = work; stagnantKicks = 0; }
+            else                ++stagnantKicks;
         }
 
         const int runBestMk = (int)(runBestFit / 1000000LL);
         result.runBests.push_back(runBestMk);
         belief.consider(runBest, runBestMk);   // learn from this run's best
-        ++run;
     }
 
     result.runsRun     = run;

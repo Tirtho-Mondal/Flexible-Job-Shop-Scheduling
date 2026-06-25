@@ -3,6 +3,9 @@
 // ============================================================================
 #include "InstanceReport.h"
 #include "ScheduleBuilder.h"
+#include "Player.h"
+#include "Solution.h"
+#include "StableSolution.h"
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -57,7 +60,7 @@ static vector<char> criticalSet(const Instance& inst, const Schedule& sched) {
 // Print one individual as the two aligned vectors OSV (job ids, dispatch order)
 // and MAV (chosen eligible-machine index, aligned to OSV).
 static void writeEncoding(ofstream& f, const Instance& inst,
-                          const GameState& st, const string& label) {
+                          const StrategyProfile& st, const string& label) {
     f << label << "\n";
     f << "  OSV :";
     for (int gid : st.sequence()) f << " " << (inst.operationByGlobalId(gid).jobIndex() + 1);
@@ -210,13 +213,46 @@ void InstanceReport::write(const string& path, const Instance& inst,
     f << left << setw(6) << "Job" << right << setw(8) << "C_i"
       << setw(8) << "W_i" << setw(10) << "Conf_i" << setw(10) << "U_i" << "\n";
     f << fixed << setprecision(4);
-    for (int j = 0; j < inst.numJobs(); ++j)
+    for (int j = 0; j < inst.numJobs(); ++j) {
+        const Payoff p = payoff.forPlayer(best, inst, j);
         f << left << setw(6) << inst.job(j).label() << right
-          << setw(8) << setprecision(0) << best.jobCompletion(j)
-          << setw(8) << payoff.jobWaiting(best, inst, j)
-          << setw(10) << payoff.jobConflict(best, inst, j)
-          << setw(10) << setprecision(4) << payoff.playerPayoff(best, inst, j) << "\n";
+          << setw(8) << setprecision(0) << p.completion
+          << setw(8) << p.waiting
+          << setw(10) << p.conflict
+          << setw(10) << setprecision(4) << p.utility << "\n";
+    }
     f << setprecision(0) << "\n";
+
+    // ---- the three game-theoretic objects: Strategy / Solution / StableSolution ----
+    Solution solution = Solution::decode(inst, result.bestState, payoff);
+    StableSolution stable(inst, result.bestState, payoff);
+    f << "GAME-THEORETIC SOLUTION (Strategy / Solution / Stable Solution)\n";
+    f << "--------------------------------------------------------------\n";
+    f << "Solution  : makespan=" << solution.makespan()
+      << "  fitness=" << solution.fitness()
+      << "  total payoff (sum U_i)=" << setprecision(4) << solution.totalPayoff()
+      << setprecision(0) << "\n";
+    f << "Stable?   : " << (stable.isStable()
+            ? string("YES - no job can lower the makespan by changing its own strategy alone (Nash-stable)")
+            : ("NO - " + stable.profitableDeviation())) << "\n\n";
+    f << "Players (jobs) and the strategy each one plays\n";
+    f << "(operation->machine@seq-position | interaction | best-response status):\n";
+    for (int j = 0; j < inst.numJobs(); ++j) {
+        Player player(inst, j);                       // the job AS a player/agent
+        const Strategy& s = solution.jobStrategy(j);
+        f << "  " << player.label() << ": ";
+        for (const OperationChoice& c : s.choices())
+            f << c.operationLabel << "->M" << (c.machine + 1) << "@" << c.sequencePosition << "  ";
+        f << "| C=" << s.completion() << " W=" << s.waiting() << " Conf=" << s.conflict()
+          << " U=" << setprecision(4) << s.payoff() << setprecision(0);
+        string how;
+        if (player.canImprove(result.bestState, payoff, &how))
+            f << "  [could improve alone: " << how << "]";
+        else
+            f << "  [best response - cannot improve alone]";
+        f << "\n";
+    }
+    f << "\n";
 
     f << "Full operation timetable:\n";
     f << left << setw(10) << "Op" << setw(6) << "Job"
@@ -236,7 +272,7 @@ void InstanceReport::write(const string& path, const Instance& inst,
     // ---- individual encoding: the two-vector representation X = (OSV, MAV) ----
     f << "INDIVIDUAL SOLUTION ENCODING  X = (OSV, MAV)\n";
     f << "--------------------------------------------\n";
-    f << "One individual = one GameState. OSV = operation sequence vector (job ids in\n";
+    f << "One individual = one StrategyProfile. OSV = operation sequence vector (job ids in\n";
     f << "dispatch order); MAV = machine assignment vector (chosen eligible-machine #,\n";
     f << "aligned to OSV; 1 = the operation's first eligible machine). Rule: the k-th\n";
     f << "occurrence of job j in OSV is operation O(j,k).\n\n";

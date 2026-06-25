@@ -2,7 +2,7 @@
 // ============================================================================
 //  Schedule.h
 //  ---------------------------------------------------------------------------
-//  The concrete, timed result of decoding a GameState against an Instance.
+//  The concrete, timed result of decoding a StrategyProfile against an Instance.
 //  For every operation it stores the machine it ran on plus its start and end
 //  times; for every job it stores the completion time C_i; and it aggregates
 //  the makespan (the global objective we report against the best-known values).

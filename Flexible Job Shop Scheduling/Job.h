@@ -9,7 +9,7 @@
 //      1. routing   - which eligible machine each of its operations uses
 //                     (stored inside the Operation objects), and
 //      2. priority  - where its operations sit in the global dispatch order
-//                     (managed by the solver through the shared GameState).
+//                     (managed by the solver through the shared StrategyProfile).
 //
 //  A player is "selfish": it only cares about its OWN completion time C_i, the
 //  moment its last operation finishes.  The payoff it tries to maximise is

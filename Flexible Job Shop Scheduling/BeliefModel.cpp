@@ -18,9 +18,9 @@ int BeliefModel::bestMakespan() const {
     return b;
 }
 
-void BeliefModel::consider(const GameState& state, int makespan) {
+void BeliefModel::consider(const StrategyProfile& state, int makespan) {
     // Reject exact duplicates (same routing) to keep the pool diverse.
-    for (const GameState& e : pool_)
+    for (const StrategyProfile& e : pool_)
         if (e.routing() == state.routing()) return;
 
     if ((int)pool_.size() < capacity_) {
@@ -48,7 +48,7 @@ void BeliefModel::rebuild() {
     for (int gid = 0; gid < n; ++gid) {
         const int altCount = inst_.operationByGlobalId(gid).alternativeCount();
         vector<double> count(altCount, 0.0);
-        for (const GameState& e : pool_) count[e.alternativeOf(gid)] += 1.0;
+        for (const StrategyProfile& e : pool_) count[e.alternativeOf(gid)] += 1.0;
         vector<double> p(altCount, 0.0);
         const double denom = pool_.size() + alpha * altCount;
         for (int a = 0; a < altCount; ++a) p[a] = (count[a] + alpha) / denom;

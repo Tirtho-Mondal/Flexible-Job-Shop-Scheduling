@@ -1,8 +1,12 @@
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Machine.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\Machine.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Operation.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\Operation.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Job.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\Job.obj
+d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Player.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\Player.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Instance.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\Instance.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\ScheduleBuilder.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\ScheduleBuilder.obj
+d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Strategy.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\Strategy.obj
+d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Solution.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\Solution.obj
+d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\StableSolution.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\StableSolution.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\PayoffFunction.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\PayoffFunction.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\GameSolver.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\GameSolver.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\FjsInstanceReader.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\FjsInstanceReader.obj
@@ -11,4 +15,5 @@ d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\BestKnownReg
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\InstanceReport.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\InstanceReport.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\GlobalReport.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\GlobalReport.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\CodeExplanation.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\CodeExplanation.obj
+d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\GanttChart.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\GanttChart.obj
 d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\main.cpp;d:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Flexible.a71c3886\x64\Release\main.obj
