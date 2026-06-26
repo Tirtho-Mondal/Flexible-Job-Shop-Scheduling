@@ -317,15 +317,15 @@ void InstanceReport::write(const string& path, const Instance& inst,
     f << "its OWN payoff, and the schedule settles at an equilibrium.\n\n";
 
     f << "MODEL\n-----\n" << payoff.description() << "\n\n";
-    f << "Search: critical-path best-response with SINGLE-JOB and JOB-vs-JOB moves +\n"
-      << "fictitious-play belief learning + Global/Local greedy seeding +\n"
-      << "iterated local search + multiple runs.\n"
+    f << "Search (TWO-PLAYER INTERACTION FIRST):\n"
       << "Run 0 starts from a fully RANDOM profile; later runs are seeded by the\n"
-      << "players' learned beliefs and greedy heuristics. Each step makes the best\n"
-      << "deviation - a single job re-routing/re-sequencing, or two rival jobs that\n"
-      << "share a machine swapping order or rerouting together - until neither any\n"
-      << "job nor any rival pair can improve (a pairwise Nash-stable schedule). The\n"
-      << "single best run is reported below. A single payoff drives everything.\n\n";
+      << "players' learned beliefs and greedy heuristics. Each step the two rival jobs\n"
+      << "that share a critical machine PLAY THEIR 2-PLAYER GAME first - swapping order\n"
+      << "or jointly re-routing to the joint best response that most lowers Cmax. A\n"
+      << "single job acting ALONE is only a fallback, used when no rival pair can\n"
+      << "improve. When neither helps, the profile is a Nash equilibrium; a RANDOM KICK\n"
+      << "then perturbs it and the game is played again (iterated local search over\n"
+      << "many runs). The single best run is reported below; one payoff drives all.\n\n";
 
     // ---- initial random profile ----------------------------------------
     f << "INITIAL RANDOM PROFILE (restart 0)\n----------------------------------\n";

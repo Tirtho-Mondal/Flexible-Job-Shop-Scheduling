@@ -1,21 +1,33 @@
 <svg xmlns='http://www.w3.org/2000/svg' width='1300' height='444' font-family='Segoe UI, Arial, sans-serif'>
 <rect width='100%' height='100%' fill='white'/>
-<text x='70' y='28' font-size='18' font-weight='bold'>mk04  -  Gantt chart  (Cmax = 65)</text>
+<text x='70' y='28' font-size='18' font-weight='bold'>mk04  -  Gantt chart  (Cmax = 62)</text>
 <text x='70' y='46' font-size='12' fill='#555'>group: brandimarte   jobs: 15   machines: 8   (each job = one colour)</text>
 <line x1='70' y1='56' x2='70' y2='344' stroke='#e6e6e6'/>
 <text x='70' y='360' font-size='11' fill='#666' text-anchor='middle'>0</text>
-<line x1='254' y1='56' x2='254' y2='344' stroke='#e6e6e6'/>
-<text x='254' y='360' font-size='11' fill='#666' text-anchor='middle'>10</text>
-<line x1='439' y1='56' x2='439' y2='344' stroke='#e6e6e6'/>
-<text x='439' y='360' font-size='11' fill='#666' text-anchor='middle'>20</text>
-<line x1='623' y1='56' x2='623' y2='344' stroke='#e6e6e6'/>
-<text x='623' y='360' font-size='11' fill='#666' text-anchor='middle'>30</text>
-<line x1='808' y1='56' x2='808' y2='344' stroke='#e6e6e6'/>
-<text x='808' y='360' font-size='11' fill='#666' text-anchor='middle'>40</text>
-<line x1='993' y1='56' x2='993' y2='344' stroke='#e6e6e6'/>
-<text x='993' y='360' font-size='11' fill='#666' text-anchor='middle'>50</text>
-<line x1='1177' y1='56' x2='1177' y2='344' stroke='#e6e6e6'/>
-<text x='1177' y='360' font-size='11' fill='#666' text-anchor='middle'>60</text>
+<line x1='166' y1='56' x2='166' y2='344' stroke='#e6e6e6'/>
+<text x='166' y='360' font-size='11' fill='#666' text-anchor='middle'>5</text>
+<line x1='263' y1='56' x2='263' y2='344' stroke='#e6e6e6'/>
+<text x='263' y='360' font-size='11' fill='#666' text-anchor='middle'>10</text>
+<line x1='360' y1='56' x2='360' y2='344' stroke='#e6e6e6'/>
+<text x='360' y='360' font-size='11' fill='#666' text-anchor='middle'>15</text>
+<line x1='457' y1='56' x2='457' y2='344' stroke='#e6e6e6'/>
+<text x='457' y='360' font-size='11' fill='#666' text-anchor='middle'>20</text>
+<line x1='553' y1='56' x2='553' y2='344' stroke='#e6e6e6'/>
+<text x='553' y='360' font-size='11' fill='#666' text-anchor='middle'>25</text>
+<line x1='650' y1='56' x2='650' y2='344' stroke='#e6e6e6'/>
+<text x='650' y='360' font-size='11' fill='#666' text-anchor='middle'>30</text>
+<line x1='747' y1='56' x2='747' y2='344' stroke='#e6e6e6'/>
+<text x='747' y='360' font-size='11' fill='#666' text-anchor='middle'>35</text>
+<line x1='844' y1='56' x2='844' y2='344' stroke='#e6e6e6'/>
+<text x='844' y='360' font-size='11' fill='#666' text-anchor='middle'>40</text>
+<line x1='940' y1='56' x2='940' y2='344' stroke='#e6e6e6'/>
+<text x='940' y='360' font-size='11' fill='#666' text-anchor='middle'>45</text>
+<line x1='1037' y1='56' x2='1037' y2='344' stroke='#e6e6e6'/>
+<text x='1037' y='360' font-size='11' fill='#666' text-anchor='middle'>50</text>
+<line x1='1134' y1='56' x2='1134' y2='344' stroke='#e6e6e6'/>
+<text x='1134' y='360' font-size='11' fill='#666' text-anchor='middle'>55</text>
+<line x1='1231' y1='56' x2='1231' y2='344' stroke='#e6e6e6'/>
+<text x='1231' y='360' font-size='11' fill='#666' text-anchor='middle'>60</text>
 <text x='60' y='74.48' font-size='12' text-anchor='end'>M1</text>
 <line x1='70' y1='84' x2='1270' y2='84' stroke='#f0f0f0'/>
 <text x='60' y='110.48' font-size='12' text-anchor='end'>M2</text>
@@ -32,171 +44,171 @@
 <line x1='70' y1='300' x2='1270' y2='300' stroke='#f0f0f0'/>
 <text x='60' y='326.48' font-size='12' text-anchor='end'>M8</text>
 <line x1='70' y1='336' x2='1270' y2='336' stroke='#f0f0f0'/>
-<rect x='180' y='56' width='110' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,1)  M1  [6,12]</title></rect>
-<text x='235' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J1.1</text>
-<rect x='531' y='272' width='166' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,2)  M7  [25,34]</title></rect>
-<text x='614' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J1.2</text>
-<rect x='697' y='236' width='129' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,3)  M6  [34,41]</title></rect>
-<text x='761' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J1.3</text>
-<rect x='826' y='164' width='36' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,4)  M4  [41,43]</title></rect>
-<text x='844' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J1.4</text>
-<rect x='863' y='308' width='166' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,5)  M8  [43,52]</title></rect>
-<text x='946' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J1.5</text>
-<rect x='1029' y='92' width='55' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,6)  M2  [52,55]</title></rect>
-<text x='1056' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J1.6</text>
-<rect x='1085' y='200' width='92' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,7)  M5  [55,60]</title></rect>
-<text x='1131' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J1.7</text>
-<rect x='1177' y='236' width='18' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,8)  M6  [60,61]</title></rect>
-<rect x='88' y='236' width='18' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,1)  M6  [1,2]</title></rect>
-<rect x='309' y='164' width='129' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,2)  M4  [13,20]</title></rect>
-<text x='373' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J2.2</text>
-<rect x='845' y='56' width='110' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,3)  M1  [42,48]</title></rect>
-<text x='900' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J2.3</text>
-<rect x='974' y='236' width='129' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,4)  M6  [49,56]</title></rect>
-<text x='1038' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J2.4</text>
-<rect x='1103' y='92' width='55' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,5)  M2  [56,59]</title></rect>
-<text x='1130' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J2.5</text>
-<rect x='1196' y='236' width='36' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,6)  M6  [61,63]</title></rect>
-<text x='1214' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J2.6</text>
-<rect x='1233' y='272' width='36' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,7)  M7  [63,65]</title></rect>
-<text x='1251' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J2.7</text>
-<rect x='70' y='236' width='18' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,1)  M6  [0,1]</title></rect>
-<rect x='88' y='128' width='36' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,2)  M3  [1,3]</title></rect>
-<text x='106' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J3.2</text>
-<rect x='125' y='128' width='36' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,3)  M3  [3,5]</title></rect>
-<text x='143' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J3.3</text>
-<rect x='199' y='164' width='36' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,4)  M4  [7,9]</title></rect>
-<text x='217' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J3.4</text>
-<rect x='383' y='128' width='129' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,5)  M3  [17,24]</title></rect>
-<text x='447' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J3.5</text>
-<rect x='513' y='128' width='18' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,6)  M3  [24,25]</title></rect>
-<rect x='106' y='272' width='36' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,1)  M7  [2,4]</title></rect>
-<text x='124' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J4.1</text>
-<rect x='623' y='56' width='110' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,2)  M1  [30,36]</title></rect>
-<text x='678' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J4.2</text>
-<rect x='734' y='56' width='110' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,3)  M1  [36,42]</title></rect>
-<text x='789' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J4.3</text>
-<rect x='845' y='236' width='129' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,4)  M6  [42,49]</title></rect>
-<text x='909' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J4.4</text>
-<rect x='974' y='164' width='92' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,5)  M4  [49,54]</title></rect>
-<text x='1020' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J4.5</text>
-<rect x='70' y='272' width='36' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,1)  M7  [0,2]</title></rect>
-<text x='88' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J5.1</text>
-<rect x='199' y='272' width='166' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,2)  M7  [7,16]</title></rect>
-<text x='282' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J5.2</text>
-<rect x='365' y='128' width='18' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,3)  M3  [16,17]</title></rect>
-<rect x='402' y='308' width='166' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,4)  M8  [18,27]</title></rect>
-<text x='485' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J5.4</text>
-<rect x='679' y='128' width='129' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,5)  M3  [33,40]</title></rect>
-<text x='743' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J5.5</text>
-<rect x='808' y='92' width='55' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,6)  M2  [40,43]</title></rect>
-<text x='835' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J5.6</text>
-<rect x='863' y='164' width='92' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,7)  M4  [43,48]</title></rect>
-<text x='909' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J5.7</text>
-<rect x='143' y='236' width='36' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,1)  M6  [4,6]</title></rect>
-<text x='161' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J6.1</text>
-<rect x='180' y='128' width='18' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,2)  M3  [6,7]</title></rect>
-<rect x='328' y='128' width='36' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,3)  M3  [14,16]</title></rect>
-<text x='346' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J6.3</text>
-<rect x='494' y='164' width='129' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,4)  M4  [23,30]</title></rect>
-<text x='558' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J6.4</text>
-<rect x='623' y='200' width='129' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,5)  M5  [30,37]</title></rect>
-<text x='687' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J6.5</text>
-<rect x='808' y='128' width='166' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,6)  M3  [40,49]</title></rect>
-<text x='891' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J6.6</text>
-<rect x='974' y='128' width='129' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,7)  M3  [49,56]</title></rect>
-<text x='1038' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J6.7</text>
-<rect x='1103' y='236' width='18' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,8)  M6  [56,57]</title></rect>
-<rect x='1122' y='56' width='110' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,9)  M1  [57,63]</title></rect>
-<text x='1177' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J6.9</text>
-<rect x='70' y='200' width='92' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,1)  M5  [0,5]</title></rect>
-<text x='116' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J7.1</text>
-<rect x='199' y='128' width='129' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,2)  M3  [7,14]</title></rect>
-<text x='263' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J7.2</text>
-<rect x='402' y='236' width='18' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,3)  M6  [18,19]</title></rect>
-<rect x='420' y='236' width='36' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,4)  M6  [19,21]</title></rect>
-<text x='438' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J7.4</text>
-<rect x='457' y='236' width='129' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,5)  M6  [21,28]</title></rect>
-<text x='521' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J7.5</text>
-<rect x='254' y='200' width='129' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,1)  M5  [10,17]</title></rect>
-<text x='318' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J8.1</text>
-<rect x='476' y='200' width='92' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,2)  M5  [22,27]</title></rect>
-<text x='522' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J8.2</text>
-<rect x='568' y='92' width='55' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,3)  M2  [27,30]</title></rect>
-<text x='595' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J8.3</text>
-<rect x='623' y='236' width='36' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,4)  M6  [30,32]</title></rect>
-<text x='641' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J8.4</text>
-<rect x='660' y='236' width='18' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,5)  M6  [32,33]</title></rect>
-<rect x='734' y='272' width='166' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,6)  M7  [36,45]</title></rect>
-<text x='817' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J8.6</text>
-<rect x='70' y='56' width='110' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,1)  M1  [0,6]</title></rect>
-<text x='125' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J9.1</text>
-<rect x='365' y='272' width='166' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,2)  M7  [16,25]</title></rect>
-<text x='448' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J9.2</text>
-<rect x='531' y='128' width='18' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,3)  M3  [25,26]</title></rect>
-<rect x='568' y='308' width='166' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,4)  M8  [27,36]</title></rect>
-<text x='651' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J9.4</text>
-<rect x='734' y='164' width='36' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,5)  M4  [36,38]</title></rect>
-<text x='752' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J9.5</text>
-<rect x='826' y='236' width='18' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,6)  M6  [41,42]</title></rect>
-<rect x='900' y='272' width='36' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,7)  M7  [45,47]</title></rect>
-<text x='918' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J9.7</text>
-<rect x='1103' y='128' width='129' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,8)  M3  [56,63]</title></rect>
-<text x='1167' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J9.8</text>
-<rect x='1233' y='128' width='36' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,9)  M3  [63,65]</title></rect>
-<text x='1251' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J9.9</text>
-<rect x='383' y='200' width='92' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,1)  M5  [17,22]</title></rect>
-<text x='429' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J10.1</text>
-<rect x='513' y='56' width='110' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,2)  M1  [24,30]</title></rect>
-<text x='568' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J10.2</text>
-<rect x='697' y='272' width='36' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,3)  M7  [34,36]</title></rect>
-<text x='715' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J10.3</text>
-<rect x='753' y='200' width='129' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,4)  M5  [37,44]</title></rect>
-<text x='817' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J10.4</text>
-<rect x='937' y='272' width='166' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,5)  M7  [47,56]</title></rect>
-<text x='1020' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J10.5</text>
-<rect x='70' y='308' width='166' height='28' rx='3' fill='#5252D8' stroke='#333' stroke-width='0.6'><title>J11  O(11,1)  M8  [0,9]</title></rect>
-<text x='153' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J11.1</text>
-<rect x='291' y='56' width='110' height='28' rx='3' fill='#5252D8' stroke='#333' stroke-width='0.6'><title>J11  O(11,2)  M1  [12,18]</title></rect>
-<text x='346' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J11.2</text>
-<rect x='402' y='92' width='55' height='28' rx='3' fill='#5252D8' stroke='#333' stroke-width='0.6'><title>J11  O(11,3)  M2  [18,21]</title></rect>
-<text x='429' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J11.3</text>
-<rect x='457' y='164' width='36' height='28' rx='3' fill='#5252D8' stroke='#333' stroke-width='0.6'><title>J11  O(11,4)  M4  [21,23]</title></rect>
-<text x='475' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J11.4</text>
-<rect x='162' y='164' width='36' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,1)  M4  [5,7]</title></rect>
-<text x='180' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J12.1</text>
-<rect x='199' y='236' width='18' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,2)  M6  [7,8]</title></rect>
-<rect x='402' y='56' width='110' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,3)  M1  [18,24]</title></rect>
-<text x='457' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J12.3</text>
-<rect x='549' y='128' width='129' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,4)  M3  [26,33]</title></rect>
-<text x='613' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J12.4</text>
-<rect x='1029' y='308' width='166' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,5)  M8  [52,61]</title></rect>
-<text x='1112' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J12.5</text>
-<rect x='1196' y='272' width='36' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,6)  M7  [61,63]</title></rect>
-<text x='1214' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J12.6</text>
-<rect x='106' y='236' width='36' height='28' rx='3' fill='#BD52D8' stroke='#333' stroke-width='0.6'><title>J13  O(13,1)  M6  [2,4]</title></rect>
-<text x='124' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J13.1</text>
-<rect x='162' y='128' width='18' height='28' rx='3' fill='#BD52D8' stroke='#333' stroke-width='0.6'><title>J13  O(13,2)  M3  [5,6]</title></rect>
-<rect x='180' y='236' width='18' height='28' rx='3' fill='#BD52D8' stroke='#333' stroke-width='0.6'><title>J13  O(13,3)  M6  [6,7]</title></rect>
-<rect x='273' y='236' width='129' height='28' rx='3' fill='#BD52D8' stroke='#333' stroke-width='0.6'><title>J13  O(13,4)  M6  [11,18]</title></rect>
-<text x='337' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J13.4</text>
-<rect x='162' y='200' width='92' height='28' rx='3' fill='#D852BD' stroke='#333' stroke-width='0.6'><title>J14  O(14,1)  M5  [5,10]</title></rect>
-<text x='208' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J14.1</text>
-<rect x='254' y='236' width='18' height='28' rx='3' fill='#D852BD' stroke='#333' stroke-width='0.6'><title>J14  O(14,2)  M6  [10,11]</title></rect>
-<rect x='273' y='164' width='36' height='28' rx='3' fill='#D852BD' stroke='#333' stroke-width='0.6'><title>J14  O(14,3)  M4  [11,13]</title></rect>
-<text x='291' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J14.3</text>
-<rect x='70' y='164' width='92' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,1)  M4  [0,5]</title></rect>
-<text x='116' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J15.1</text>
-<rect x='162' y='272' width='36' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,2)  M7  [5,7]</title></rect>
-<text x='180' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J15.2</text>
-<rect x='236' y='308' width='166' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,3)  M8  [9,18]</title></rect>
-<text x='319' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J15.3</text>
-<rect x='457' y='92' width='55' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,4)  M2  [21,24]</title></rect>
-<text x='484' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J15.4</text>
-<rect x='623' y='164' width='73' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,5)  M4  [30,34]</title></rect>
-<text x='659' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J15.5</text>
-<rect x='956' y='56' width='110' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,6)  M1  [48,54]</title></rect>
-<text x='1011' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J15.6</text>
+<rect x='70' y='56' width='116' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,1)  M1  [0,6]</title></rect>
+<text x='128' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J1.1</text>
+<rect x='534' y='272' width='174' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,2)  M7  [24,33]</title></rect>
+<text x='621' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J1.2</text>
+<rect x='708' y='236' width='135' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,3)  M6  [33,40]</title></rect>
+<text x='775' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J1.3</text>
+<rect x='844' y='164' width='38' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,4)  M4  [40,42]</title></rect>
+<text x='863' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J1.4</text>
+<rect x='882' y='308' width='174' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,5)  M8  [42,51]</title></rect>
+<text x='969' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J1.5</text>
+<rect x='1057' y='92' width='58' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,6)  M2  [51,54]</title></rect>
+<text x='1086' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J1.6</text>
+<rect x='1115' y='200' width='96' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,7)  M5  [54,59]</title></rect>
+<text x='1163' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J1.7</text>
+<rect x='1211' y='236' width='19' height='28' rx='3' fill='#D85252' stroke='#333' stroke-width='0.6'><title>J1  O(1,8)  M6  [59,60]</title></rect>
+<rect x='128' y='236' width='19' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,1)  M6  [3,4]</title></rect>
+<rect x='147' y='236' width='19' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,2)  M6  [4,5]</title></rect>
+<rect x='418' y='56' width='116' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,3)  M1  [18,24]</title></rect>
+<text x='476' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J2.3</text>
+<rect x='534' y='236' width='135' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,4)  M6  [24,31]</title></rect>
+<text x='601' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J2.4</text>
+<rect x='670' y='92' width='58' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,5)  M2  [31,34]</title></rect>
+<text x='699' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J2.5</text>
+<rect x='844' y='236' width='38' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,6)  M6  [40,42]</title></rect>
+<text x='863' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J2.6</text>
+<rect x='882' y='272' width='38' height='28' rx='3' fill='#D88852' stroke='#333' stroke-width='0.6'><title>J2  O(2,7)  M7  [42,44]</title></rect>
+<text x='901' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J2.7</text>
+<rect x='108' y='236' width='19' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,1)  M6  [2,3]</title></rect>
+<rect x='128' y='92' width='58' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,2)  M2  [3,6]</title></rect>
+<text x='157' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J3.2</text>
+<rect x='205' y='164' width='77' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,3)  M4  [7,11]</title></rect>
+<text x='243' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J3.3</text>
+<rect x='282' y='164' width='38' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,4)  M4  [11,13]</title></rect>
+<text x='301' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J3.4</text>
+<rect x='515' y='128' width='135' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,5)  M3  [23,30]</title></rect>
+<text x='582' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J3.5</text>
+<rect x='708' y='164' width='77' height='28' rx='3' fill='#D8BD52' stroke='#333' stroke-width='0.6'><title>J3  O(3,6)  M4  [33,37]</title></rect>
+<text x='746' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J3.6</text>
+<rect x='321' y='272' width='38' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,1)  M7  [13,15]</title></rect>
+<text x='340' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J4.1</text>
+<rect x='534' y='56' width='116' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,2)  M1  [24,30]</title></rect>
+<text x='592' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J4.2</text>
+<rect x='708' y='272' width='174' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,3)  M7  [33,42]</title></rect>
+<text x='795' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J4.3</text>
+<rect x='960' y='236' width='135' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,4)  M6  [46,53]</title></rect>
+<text x='1027' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J4.4</text>
+<rect x='1134' y='164' width='96' height='28' rx='3' fill='#BDD852' stroke='#333' stroke-width='0.6'><title>J4  O(4,5)  M4  [55,60]</title></rect>
+<text x='1182' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J4.5</text>
+<rect x='70' y='272' width='38' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,1)  M7  [0,2]</title></rect>
+<text x='89' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J5.1</text>
+<rect x='108' y='272' width='174' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,2)  M7  [2,11]</title></rect>
+<text x='195' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J5.2</text>
+<rect x='302' y='128' width='19' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,3)  M3  [12,13]</title></rect>
+<rect x='321' y='308' width='174' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,4)  M8  [13,22]</title></rect>
+<text x='408' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J5.4</text>
+<rect x='650' y='128' width='135' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,5)  M3  [30,37]</title></rect>
+<text x='717' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J5.5</text>
+<rect x='786' y='92' width='58' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,6)  M2  [37,40]</title></rect>
+<text x='815' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J5.6</text>
+<rect x='844' y='200' width='135' height='28' rx='3' fill='#88D852' stroke='#333' stroke-width='0.6'><title>J5  O(5,7)  M5  [40,47]</title></rect>
+<text x='911' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J5.7</text>
+<rect x='70' y='236' width='38' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,1)  M6  [0,2]</title></rect>
+<text x='89' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J6.1</text>
+<rect x='108' y='128' width='19' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,2)  M3  [2,3]</title></rect>
+<rect x='128' y='128' width='38' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,3)  M3  [3,5]</title></rect>
+<text x='147' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J6.3</text>
+<rect x='224' y='236' width='19' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,4)  M6  [8,9]</title></rect>
+<rect x='360' y='164' width='96' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,5)  M4  [15,20]</title></rect>
+<text x='408' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J6.5</text>
+<rect x='495' y='308' width='174' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,6)  M8  [22,31]</title></rect>
+<text x='582' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J6.6</text>
+<rect x='786' y='128' width='135' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,7)  M3  [37,44]</title></rect>
+<text x='853' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J6.7</text>
+<rect x='940' y='236' width='19' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,8)  M6  [45,46]</title></rect>
+<rect x='1037' y='272' width='174' height='28' rx='3' fill='#52D852' stroke='#333' stroke-width='0.6'><title>J6  O(6,9)  M7  [50,59]</title></rect>
+<text x='1124' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J6.9</text>
+<rect x='70' y='200' width='96' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,1)  M5  [0,5]</title></rect>
+<text x='118' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J7.1</text>
+<rect x='166' y='128' width='135' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,2)  M3  [5,12]</title></rect>
+<text x='233' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J7.2</text>
+<rect x='302' y='236' width='19' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,3)  M6  [12,13]</title></rect>
+<rect x='321' y='236' width='38' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,4)  M6  [13,15]</title></rect>
+<text x='340' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J7.4</text>
+<rect x='360' y='236' width='135' height='28' rx='3' fill='#52D888' stroke='#333' stroke-width='0.6'><title>J7  O(7,5)  M6  [15,22]</title></rect>
+<text x='427' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J7.5</text>
+<rect x='360' y='200' width='135' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,1)  M5  [15,22]</title></rect>
+<text x='427' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J8.1</text>
+<rect x='495' y='200' width='96' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,2)  M5  [22,27]</title></rect>
+<text x='543' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J8.2</text>
+<rect x='592' y='92' width='58' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,3)  M2  [27,30]</title></rect>
+<text x='621' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J8.3</text>
+<rect x='670' y='236' width='38' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,4)  M6  [31,33]</title></rect>
+<text x='689' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J8.4</text>
+<rect x='882' y='236' width='19' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,5)  M6  [42,43]</title></rect>
+<rect x='999' y='56' width='116' height='28' rx='3' fill='#52D8BD' stroke='#333' stroke-width='0.6'><title>J8  O(8,6)  M1  [48,54]</title></rect>
+<text x='1057' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J8.6</text>
+<rect x='186' y='56' width='116' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,1)  M1  [6,12]</title></rect>
+<text x='244' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J9.1</text>
+<rect x='360' y='272' width='174' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,2)  M7  [15,24]</title></rect>
+<text x='447' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J9.2</text>
+<rect x='631' y='164' width='77' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,3)  M4  [29,33]</title></rect>
+<text x='669' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J9.3</text>
+<rect x='708' y='308' width='174' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,4)  M8  [33,42]</title></rect>
+<text x='795' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J9.4</text>
+<rect x='882' y='164' width='38' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,5)  M4  [42,44]</title></rect>
+<text x='901' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J9.5</text>
+<rect x='921' y='236' width='19' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,6)  M6  [44,45]</title></rect>
+<rect x='940' y='272' width='38' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,7)  M7  [45,47]</title></rect>
+<text x='959' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J9.7</text>
+<rect x='1057' y='128' width='135' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,8)  M3  [51,58]</title></rect>
+<text x='1124' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J9.8</text>
+<rect x='1192' y='128' width='38' height='28' rx='3' fill='#52BDD8' stroke='#333' stroke-width='0.6'><title>J9  O(9,9)  M3  [58,60]</title></rect>
+<text x='1211' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J9.9</text>
+<rect x='263' y='200' width='96' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,1)  M5  [10,15]</title></rect>
+<text x='311' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J10.1</text>
+<rect x='882' y='56' width='116' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,2)  M1  [42,48]</title></rect>
+<text x='940' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J10.2</text>
+<rect x='999' y='272' width='38' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,3)  M7  [48,50]</title></rect>
+<text x='1018' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J10.3</text>
+<rect x='1037' y='164' width='96' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,4)  M4  [50,55]</title></rect>
+<text x='1085' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J10.4</text>
+<rect x='1134' y='56' width='116' height='28' rx='3' fill='#5288D8' stroke='#333' stroke-width='0.6'><title>J10  O(10,5)  M1  [55,61]</title></rect>
+<text x='1192' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J10.5</text>
+<rect x='70' y='308' width='174' height='28' rx='3' fill='#5252D8' stroke='#333' stroke-width='0.6'><title>J11  O(11,1)  M8  [0,9]</title></rect>
+<text x='157' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J11.1</text>
+<rect x='302' y='56' width='116' height='28' rx='3' fill='#5252D8' stroke='#333' stroke-width='0.6'><title>J11  O(11,2)  M1  [12,18]</title></rect>
+<text x='360' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J11.2</text>
+<rect x='418' y='92' width='58' height='28' rx='3' fill='#5252D8' stroke='#333' stroke-width='0.6'><title>J11  O(11,3)  M2  [18,21]</title></rect>
+<text x='447' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J11.3</text>
+<rect x='476' y='164' width='38' height='28' rx='3' fill='#5252D8' stroke='#333' stroke-width='0.6'><title>J11  O(11,4)  M4  [21,23]</title></rect>
+<text x='495' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J11.4</text>
+<rect x='166' y='164' width='38' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,1)  M4  [5,7]</title></rect>
+<text x='185' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J12.1</text>
+<rect x='205' y='236' width='19' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,2)  M6  [7,8]</title></rect>
+<rect x='766' y='56' width='116' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,3)  M1  [36,42]</title></rect>
+<text x='824' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J12.3</text>
+<rect x='921' y='128' width='135' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,4)  M3  [44,51]</title></rect>
+<text x='988' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J12.4</text>
+<rect x='1057' y='308' width='174' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,5)  M8  [51,60]</title></rect>
+<text x='1144' y='326.48' font-size='10' fill='#111' text-anchor='middle'>J12.5</text>
+<rect x='1231' y='272' width='38' height='28' rx='3' fill='#8852D8' stroke='#333' stroke-width='0.6'><title>J12  O(12,6)  M7  [60,62]</title></rect>
+<text x='1250' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J12.6</text>
+<rect x='166' y='236' width='38' height='28' rx='3' fill='#BD52D8' stroke='#333' stroke-width='0.6'><title>J13  O(13,1)  M6  [5,7]</title></rect>
+<text x='185' y='254.48' font-size='10' fill='#111' text-anchor='middle'>J13.1</text>
+<rect x='495' y='128' width='19' height='28' rx='3' fill='#BD52D8' stroke='#333' stroke-width='0.6'><title>J13  O(13,2)  M3  [22,23]</title></rect>
+<rect x='515' y='236' width='19' height='28' rx='3' fill='#BD52D8' stroke='#333' stroke-width='0.6'><title>J13  O(13,3)  M6  [23,24]</title></rect>
+<rect x='592' y='200' width='96' height='28' rx='3' fill='#BD52D8' stroke='#333' stroke-width='0.6'><title>J13  O(13,4)  M5  [27,32]</title></rect>
+<text x='640' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J13.4</text>
+<rect x='166' y='200' width='96' height='28' rx='3' fill='#D852BD' stroke='#333' stroke-width='0.6'><title>J14  O(14,1)  M5  [5,10]</title></rect>
+<text x='214' y='218.48' font-size='10' fill='#111' text-anchor='middle'>J14.1</text>
+<rect x='263' y='236' width='19' height='28' rx='3' fill='#D852BD' stroke='#333' stroke-width='0.6'><title>J14  O(14,2)  M6  [10,11]</title></rect>
+<rect x='321' y='164' width='38' height='28' rx='3' fill='#D852BD' stroke='#333' stroke-width='0.6'><title>J14  O(14,3)  M4  [13,15]</title></rect>
+<text x='340' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J14.3</text>
+<rect x='70' y='164' width='96' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,1)  M4  [0,5]</title></rect>
+<text x='118' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J15.1</text>
+<rect x='282' y='272' width='38' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,2)  M7  [11,13]</title></rect>
+<text x='301' y='290.48' font-size='10' fill='#111' text-anchor='middle'>J15.2</text>
+<rect x='321' y='128' width='174' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,3)  M3  [13,22]</title></rect>
+<text x='408' y='146.48' font-size='10' fill='#111' text-anchor='middle'>J15.3</text>
+<rect x='495' y='92' width='58' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,4)  M2  [22,25]</title></rect>
+<text x='524' y='110.48' font-size='10' fill='#111' text-anchor='middle'>J15.4</text>
+<rect x='553' y='164' width='77' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,5)  M4  [25,29]</title></rect>
+<text x='591' y='182.48' font-size='10' fill='#111' text-anchor='middle'>J15.5</text>
+<rect x='650' y='56' width='116' height='28' rx='3' fill='#D85288' stroke='#333' stroke-width='0.6'><title>J15  O(15,6)  M1  [30,36]</title></rect>
+<text x='708' y='74.48' font-size='10' fill='#111' text-anchor='middle'>J15.6</text>
 <text x='70' y='378' font-size='12' font-weight='bold'>Jobs</text>
 <rect x='70' y='390' width='14' height='14' rx='2' fill='#D85252' stroke='#333' stroke-width='0.5'/>
 <text x='89' y='402' font-size='11'>J1</text>

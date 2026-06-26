@@ -46,22 +46,25 @@ single-job deviations.
 ## 3. How equilibria are found (`GameSolver`)
 
 A SINGLE payoff (Section 2) governs everything; the search just helps the
-players reach good equilibria of that one game. For each run:
+players reach good equilibria of that one game. The core idea is **two-player
+interaction**: rival jobs play against each other first, and only the inability
+of ANY pair to improve triggers a random kick. For each run:
 1. **seed** a strategy profile. Run 0 is ALWAYS fully random (random machine per
    operation + random precedence-feasible dispatch order). Later runs are seeded
    by (a) the players' learned BELIEFS, (b) a Global load-balancing machine
    selection, (c) a Local shortest-processing-time selection, or (d) random;
-2. **critical-path descent (single-job + job-pair moves)**: find a critical path
-   (only those operations can change the makespan) and make the single best
-   deviation that most lowers the makespan - either a UNILATERAL move (re-route a
-   critical operation, or re-sequence it) or a JOB-vs-JOB move on a shared machine
-   (swap two rival operations, or reroute both off the contested machine); repeat
-   until neither any job nor any rival pair can improve (a **pairwise
-   Nash-stable** schedule);
-3. **iterated local search**: kick the run's best profile (the re-routing part
-   aimed by the beliefs) and descend again, keeping the better;
-4. **multiple runs**: repeat from many seeds and simply keep the **best run**
-   (the one with the lowest makespan).
+2. **two-player interaction descent (primary)**: on a critical path, the two
+   rival jobs that share a critical machine PLAY THEIR 2-PLAYER GAME - they swap
+   their order on the machine, or jointly re-route to the joint best response -
+   taking the interaction that most lowers Cmax. A single job acting ALONE
+   (re-route / re-sequence) is only a FALLBACK, used when no rival pair can
+   improve. This repeats until neither any rival pair nor any lone job can
+   improve - a **Nash-equilibrium** schedule;
+3. **random kick + replay the game**: when Cmax can no longer be improved, a
+   RANDOM KICK perturbs the profile and the two-player game is played again,
+   keeping the better (iterated local search);
+4. **multiple runs**: repeat from many seeds and keep the **best run** (lowest
+   makespan).
 
 ### Belief learning (fictitious play) - how we approach optimal
 Borrowing the long-term-memory idea of Kasapidis et al. (2025) and the
