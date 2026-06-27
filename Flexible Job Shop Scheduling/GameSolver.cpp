@@ -178,62 +178,85 @@ void GameSolver::descend(StrategyProfile& state, int run,
         vector<int> crit = criticalOperations(cur);
 
         // ============================================================
-        //  ONE PLAY OF THE GAME  -  TWO-PLAYER INTERACTION FIRST
+        //  ONE PLAY OF THE GAME  -  EVERY OPERATION IS A TWO-PLAYER MOVE
         //  -----------------------------------------------------------
-        //  Methodology: the makespan is driven down PRIMARILY by two
-        //  rival players (jobs whose operations meet on a critical
-        //  machine) interacting - swapping their order or jointly
-        //  re-routing - until that 2-player game reaches a Nash point
-        //  that lowers Cmax. A single job acting ALONE is only a
-        //  FALLBACK, used when no rival pair can improve. When neither
-        //  helps, the profile is a Nash equilibrium and the caller
-        //  applies a random kick and the game is played again.
+        //  Methodology: EVERY makespan-critical operation is a "mover";
+        //  the job owning it FIRST plays a two-player game against each
+        //  rival job it meets on its machine (its machine neighbours).
+        //  The two players may
+        //    (2) SWAP their order on the machine,
+        //    (3) JOINTLY RE-ROUTE (both re-pick machines), or
+        //    (4) COMBINE the two - the mover re-routes WHILE the pair
+        //        swaps order (a reroute + resequence between two players).
+        //  A single job acting ALONE (bucket B) is only a FALLBACK, used
+        //  when no rival interaction can improve. When neither helps the
+        //  profile is a Nash equilibrium and the caller kicks it.
         // ============================================================
 
         // ---- bucket A: the TWO-PLAYER interaction move (primary) ----
         long long pairFit = curFit;
-        int  pairKind = 0;                 // 2 = order swap, 3 = joint (mutual) reroute
+        int  pairKind = 0;                 // 2 = swap, 3 = mutual reroute, 4 = reroute+resequence
         int  pairGid = -1, pairAlt = -1, pairGid2 = -1, pairAlt2 = -1, pairMk = curMk;
         long long pairSum = cur.totalCompletion();
         vector<int> pairSeq;
         string pairAction, pairType;
         int  pairPartner = -1, pairMachine = -1;
         {
-            vector<char> isCrit(inst.totalOperations(), 0);
-            for (int g : crit) isCrit[g] = 1;
+            // Operations on each machine in time order, so we can read off the
+            // machine NEIGHBOURS - the rival jobs an operation actually meets.
             vector<vector<int>> perMachine(inst.numMachines());
             for (int gid = 0; gid < inst.totalOperations(); ++gid)
                 perMachine[cur.machineOf(gid)].push_back(gid);
-            int mutualPairs = 0;
-            for (int mm = 0; mm < inst.numMachines(); ++mm) {
-                auto& v = perMachine[mm];
+            for (auto& v : perMachine)
                 sort(v.begin(), v.end(), [&](int a, int b){ return cur.startOf(a) < cur.startOf(b); });
-                for (size_t q = 0; q + 1 < v.size(); ++q) {
-                    const int u = v[q], w = v[q + 1];
-                    if (!isCrit[u] || !isCrit[w]) continue;
-                    const Operation& opU = inst.operationByGlobalId(u);
-                    const Operation& opW = inst.operationByGlobalId(w);
-                    if (opU.jobIndex == opW.jobIndex) continue;     // same job: not rivals
+            vector<int> slotOf(inst.totalOperations(), -1);
+            for (int mm = 0; mm < inst.numMachines(); ++mm)
+                for (int i = 0; i < (int)perMachine[mm].size(); ++i)
+                    slotOf[perMachine[mm][i]] = i;
 
-                    // interaction 1 - the two rivals swap their order on the machine.
-                    vector<int> cand = state.resequenced(posOf[w], posOf[u]);
-                    if (precedenceOK(inst, cand)) {
-                        state.sequence.swap(cand);
+            int mutualPairs = 0;
+            // EVERY critical operation is the mover; it plays against each of its
+            // machine neighbours (the rivals it directly contends with for slots).
+            for (int u : crit) {
+                const int mm = cur.machineOf(u);
+                auto& v = perMachine[mm];
+                const int su = slotOf[u];
+                const Operation& opU = inst.operationByGlobalId(u);
+
+                for (int dir = -1; dir <= 1; dir += 2) {      // previous and next neighbour
+                    const int sv = su + dir;
+                    if (sv < 0 || sv >= (int)v.size()) continue;
+                    const int w = v[sv];
+                    const Operation& opW = inst.operationByGlobalId(w);
+                    if (opU.jobIndex == opW.jobIndex) continue;   // same job: not rivals
+
+                    // The two operations in dispatch order (earlier first); a "swap"
+                    // pulls the later one ahead of the earlier one.
+                    const int earlier = (cur.startOf(u) <= cur.startOf(w)) ? u : w;
+                    const int later   = (earlier == u) ? w : u;
+                    vector<int> swapSeq = state.resequenced(posOf[later], posOf[earlier]);
+                    const bool swapOK = precedenceOK(inst, swapSeq);
+                    const string swapText = "swap " + inst.operationByGlobalId(later).label() +
+                        " ahead of " + inst.operationByGlobalId(earlier).label() +
+                        " on M" + to_string(mm + 1);
+
+                    // interaction 1 - the two rivals SWAP their order on the machine.
+                    if (swapOK) {
+                        state.sequence.swap(swapSeq);
                         Schedule s = evaluate(state);
                         long long f = payoff.fitness(s);
-                        state.sequence.swap(cand);
+                        state.sequence.swap(swapSeq);
                         if (f < pairFit) {
-                            pairFit = f; pairKind = 2; pairGid = w; pairSeq = move(cand);
+                            pairFit = f; pairKind = 2; pairGid = u; pairSeq = swapSeq;
                             pairMk = s.makespan(); pairSum = s.totalCompletion();
-                            pairPartner = u; pairMachine = mm; pairType = "swap";
-                            pairAction = "swap " + opW.label() + " ahead of " + opU.label() +
-                                         " on M" + to_string(mm + 1);
+                            pairPartner = w; pairMachine = mm; pairType = "swap";
+                            pairAction = swapText;
                         }
                     }
 
-                    // interaction 2 - the two rivals play their routing game and move
-                    // to the joint best response (both re-pick machines together).
-                    if (mutualPairs < 16 && (opU.alternativeCount() > 1 || opW.alternativeCount() > 1)
+                    // interaction 2 - the two rivals JOINTLY RE-ROUTE (both re-pick
+                    // machines together - the joint best response of the routing game).
+                    if (mutualPairs < 24 && (opU.alternativeCount() > 1 || opW.alternativeCount() > 1)
                         && opU.alternativeCount() * opW.alternativeCount() <= 36) {
                         ++mutualPairs;
                         const int curU = state.alternativeOf(u), curW = state.alternativeOf(w);
@@ -255,6 +278,30 @@ void GameSolver::descend(StrategyProfile& state, int run,
                                         to_string(opW.machineOfAlternative(aw) + 1);
                                 }
                             }
+                    }
+
+                    // interaction 3 - COMBINED: the mover RE-ROUTES while the two
+                    // players SWAP order (a reroute + resequence between two players).
+                    if (swapOK && opU.alternativeCount() > 1) {
+                        const int curU = state.alternativeOf(u);
+                        for (int au = 0; au < opU.alternativeCount(); ++au) {
+                            if (au == curU) continue;
+                            state.reroute(u, au);
+                            state.sequence.swap(swapSeq);
+                            Schedule s = evaluate(state);
+                            long long f = payoff.fitness(s);
+                            state.sequence.swap(swapSeq);
+                            state.reroute(u, curU);
+                            if (f < pairFit) {
+                                pairFit = f; pairKind = 4;
+                                pairGid = u; pairAlt = au; pairSeq = swapSeq;
+                                pairMk = s.makespan(); pairSum = s.totalCompletion();
+                                pairPartner = w; pairMachine = mm; pairType = "reroute+swap";
+                                pairAction = "reroute " + opU.label() + "->M" +
+                                    to_string(opU.machineOfAlternative(au) + 1) +
+                                    " & " + swapText;
+                            }
+                        }
                     }
                 }
             }
@@ -352,10 +399,12 @@ void GameSolver::descend(StrategyProfile& state, int run,
             if (movePartnerGid >= 0) rAltBefore = state.alternativeOf(movePartnerGid);
         }
 
-        // Apply the best deviation (single reroute, re-sequence/swap, or mutual reroute).
+        // Apply the best deviation (single reroute, re-sequence/swap, mutual reroute,
+        // or the combined reroute+resequence between the two players).
         if (kind == 1)      state.reroute(moveGid, moveAlt);
         else if (kind == 2) state.sequence = moveSeq;
-        else /* kind 3 */ { state.reroute(moveGid, moveAlt); state.reroute(moveGid2, moveAlt2); }
+        else if (kind == 3) { state.reroute(moveGid, moveAlt); state.reroute(moveGid2, moveAlt2); }
+        else /* kind 4 */   { state.reroute(moveGid, moveAlt); state.sequence = moveSeq; }
 
         ++result.acceptedMoves;
         if ((int)result.trace.size() < maxTraceRows) {
@@ -426,7 +475,7 @@ SolveResult GameSolver::solve() {
     // (ILS_PATIENCE consecutive non-improving kicks). Default 20 (the two-player-
     // first descent settles on interaction-stable optima, so a few more restarts
     // recover the optimum); override with the FJS_RUNS env var if needed.
-    int totalRun = 50;
+    int totalRun = 500;
     if (const char* e = getenv("FJS_RUNS")) { int v = atoi(e); if (v >= 1 && v <= 100000) totalRun = v; }
     const int ILS_PATIENCE = 60 + inst.totalOperations() / 4;
 

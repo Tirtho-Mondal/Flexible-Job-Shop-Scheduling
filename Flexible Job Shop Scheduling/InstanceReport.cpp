@@ -411,6 +411,13 @@ void InstanceReport::write(const string& path, const Instance& inst,
             else if (m.moveType == "mutual")
                 writeMoveBimatrix(f, inst, payoff, m.stateBefore, m.moverOp, m.rivalOp,
                                   m.moverAltBefore, m.rivalAltBefore, m.moverAltAfter, m.rivalAltAfter);
+            else if (m.moveType == "reroute+swap") {
+                f << "  (combined move: the mover RE-ROUTES while the two players SWAP their\n"
+                     "   dispatch order. The mover's routing game is shown below; the swap is the\n"
+                     "   sequencing half of the same two-player interaction.)\n";
+                writeMoveBimatrix(f, inst, payoff, m.stateBefore, m.moverOp, -1,
+                                  m.moverAltBefore, -1, m.moverAltAfter, -1);
+            }
             else
                 f << "  (sequencing move: the operations' dispatch order changed, routing is\n"
                      "   unchanged - so there is no routing bimatrix; the completion change above\n"
