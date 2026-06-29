@@ -1,0 +1,28 @@
+# Algorithm parameters - "key value" per line. '#' = comment.
+# Delete a line (or this whole file) to use the built-in default shown in ().
+
+# ---- payoff weights:  U_i = 1 / (1 + alpha*C_i + beta*W_i + gamma*Conf_i + delta*Cmax)
+alpha  1.0      # (1.0)   completion-time weight
+beta   0.3      # (0.3)   waiting-time weight
+gamma  0.05     # (0.05)  machine-conflict weight
+delta  0.5      # (0.5)   shared-makespan coupling (set 0 = pure-selfish)
+tau    0.02     # (0.0)   NOVELTY: congestion-toll weight (delay externality on
+                #          machine rivals). Pigouvian coordination device: keeps the
+                #          selfish game pure (own payoff) while pulling equilibria to
+                #          LOW makespan (lowers price of anarchy). 0 = off.
+
+# ---- game mode
+acceptance  potential   # "potential" = COORDINATED engine = BEST makespan (default; use
+                        #               this to beat results / reach optima).
+                        # "selfish"   = pure non-cooperative game (own payoff U_i); has a
+                        #               price of anarchy (worse makespan) - use only to
+                        #               MEASURE the PoA / the toll's effect.
+
+# ---- search control
+runs              20    # (50)   independent multi-start runs per instance (raise for quality)
+belief_pool       30    # (30)   elite-pool size for fictitious-play learning
+ils_patience      60    # (60)   ILS stops after (this + ops/ils_patience_div) idle kicks
+ils_patience_div  4     # (4)
+kick_min          4     # (4)    ILS kick strength = max(kick_min, ops/kick_div)
+kick_div          8     # (8)
+trace_rows        300   # (2500) accepted moves logged per instance report (lower = faster)

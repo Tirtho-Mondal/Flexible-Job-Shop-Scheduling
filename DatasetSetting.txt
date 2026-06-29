@@ -1,0 +1,15 @@
+# Datasets to run - one name per line, grouped under a "# Folder" header.
+# Empty file = run all.
+
+
+# brandimarte
+mk01
+mk02
+mk03
+mk04
+mk05
+mk06
+mk07
+mk08
+mk09
+mk10
