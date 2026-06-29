@@ -1,27 +1,10 @@
-﻿  Machine.cpp
-  Operation.cpp
-  Job.cpp
-  Player.cpp
-  Instance.cpp
-  ScheduleBuilder.cpp
-  TaskPool.cpp
-  RandomKick.cpp
-  Strategy.cpp
-  Solution.cpp
-  StableSolution.cpp
-  PayoffFunction.cpp
-  GameSolver.cpp
-  FjsInstanceReader.cpp
-  BeliefModel.cpp
-  BestKnownRegistry.cpp
-  InstanceReport.cpp
+﻿  GameSolver.cpp
   GlobalReport.cpp
-  CodeExplanation.cpp
-  GanttChart.cpp
-  Compiling...
+  InstanceReport.cpp
   main.cpp
   Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 2694 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  137 of 2956 functions ( 4.6%) were compiled, the rest were copied from previous compilation.
+    33 functions were new in current compilation
+    245 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Flexible Job Shop Scheduling.vcxproj -> D:\Thesis\Flexible Job Shop Scheduling\x64\Release\Flexible Job Shop Scheduling.exe

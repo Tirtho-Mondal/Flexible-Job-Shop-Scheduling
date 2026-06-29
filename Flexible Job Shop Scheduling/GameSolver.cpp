@@ -5,6 +5,7 @@
 #define _CRT_SECURE_NO_WARNINGS   // allow getenv under MSVC /sdl
 #include "GameSolver.h"
 #include "ScheduleBuilder.h"
+#include "NashChecker.h"
 #include <algorithm>
 #include <climits>
 #include <numeric>
@@ -14,13 +15,15 @@ using namespace std;
 
 namespace fjs {
 
-GameSolver::GameSolver(const Instance& inst, const PayoffFunction& payoff, unsigned seed)
-    : inst(inst), payoff(payoff), rng(seed) {
-    // No evaluation budget and no "effort" knob. The search runs until it
-    // CONVERGES: every descent runs all the way to a true local optimum (no
-    // cut-off), and the solver keeps restarting until neither the per-run
-    // iterated local search nor the global incumbent improves for a sustained
-    // streak (the stagnation criterion in solve()).
+GameSolver::GameSolver(const Instance& inst, const PayoffFunction& payoff, unsigned seed,
+                       const AlgorithmConfig& cfg)
+    : inst(inst), payoff(payoff), rng(seed), cfg(cfg) {
+    // All tunables come from cfg (AlgorithmSetting.txt); the defaults reproduce the
+    // built-in behaviour. The search still runs to CONVERGENCE: every descent
+    // reaches a true local optimum, and each run's iterated local search runs until
+    // it stagnates for ILS_PATIENCE kicks (see solve()).
+    maxTraceRows = max(0, cfg.traceRows);
+    detailRows   = maxTraceRows;
 }
 
 Schedule GameSolver::evaluate(const StrategyProfile& state) {
@@ -450,6 +453,241 @@ void GameSolver::descend(StrategyProfile& state, int run,
     }
 }
 
+// ----------------------------------------------------------------------------
+//  NON-COOPERATIVE NASH GAME  -  UNILATERAL then PAIRWISE (job-vs-job) BEST RESPONSE
+//  ---------------------------------------------------------------------------
+//  THE engine that carries the novelty. Two phases, alternated to convergence:
+//
+//   PHASE 1 (unilateral): each job, acting ALONE, makes the single move - reroute
+//     one operation or shift one within its window - that most raises its OWN payoff
+//        U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i),
+//     accepted ONLY IF U_i strictly improves (makespan is NOT the rule, so equilibria
+//     may be inefficient = the PRICE OF ANARCHY; the toll t*Toll_i pulls them down).
+//
+//   PHASE 2 (pairwise, job-vs-job): when no single job can improve, two RIVAL jobs on
+//     a shared machine deviate TOGETHER (swap order / joint reroute), accepted ONLY IF
+//     BOTH gain (a Pareto-improving coalition) AND Cmax does not rise. This escapes the
+//     coordination traps unilateral play cannot, refining the result to a PAIRWISE-
+//     STABLE (strong) Nash equilibrium with a lower makespan.
+//
+//  When NEITHER a single job NOR a rival pair can improve, the profile is returned as a
+//  certified equilibrium (true). The outer solve() then applies a RANDOM KICK and
+//  replays the game (iterated local search), keeping the best equilibrium by Cmax -
+//  exactly: Nash game -> if stuck, kick -> Nash game again -> repeat until stable.
+// ----------------------------------------------------------------------------
+bool GameSolver::descendSelfish(StrategyProfile& state, int run,
+                                SolveResult& result, int& iteration) {
+    const double EPS = 1e-9;
+    const int MAX_SWEEPS = 500;
+    for (int sweep = 0; sweep < MAX_SWEEPS; ++sweep) {
+        bool improvedAny = false;
+
+        // bottleneck-first: the latest-finishing players take their turn first
+        Schedule snap = evaluate(state);
+        vector<int> order(inst.numJobs());
+        iota(order.begin(), order.end(), 0);
+        sort(order.begin(), order.end(),
+             [&](int a, int b){ return snap.jobCompletion(a) > snap.jobCompletion(b); });
+
+        for (int j : order) {
+            Schedule cur = evaluate(state);
+            const double uCur  = payoff.forPlayer(cur, inst, j).utility;
+            const int    curMk = cur.makespan();
+
+            vector<int> posOf(inst.totalOperations(), -1);
+            for (int i = 0; i < (int)state.sequence.size(); ++i) posOf[state.sequence[i]] = i;
+
+            double bestU = uCur;
+            int  bKind = 0, bGid = -1, bAlt = -1, bMk = curMk;
+            long long bSum = cur.totalCompletion();
+            vector<int> bSeq;
+            string bAction;
+
+            // a self-interested job optimises its OWN payoff over ALL of its operations
+            for (const Operation& op : inst.job(j).operations()) {
+                const int gid = op.globalId;
+
+                // (1) unilateral REROUTE (machine-assignment strategy)
+                const int curAlt = state.alternativeOf(gid);
+                for (int alt = 0; alt < op.alternativeCount(); ++alt) {
+                    if (alt == curAlt) continue;
+                    state.reroute(gid, alt);
+                    const Schedule s = evaluate(state);
+                    const double u = payoff.forPlayer(s, inst, j).utility;
+                    state.reroute(gid, curAlt);
+                    if (u > bestU + EPS) {
+                        bestU = u; bKind = 1; bGid = gid; bAlt = alt;
+                        bMk = s.makespan(); bSum = s.totalCompletion();
+                        bAction = "reroute " + op.label() + ": M" +
+                                  to_string(op.machineOfAlternative(curAlt) + 1) + " -> M" +
+                                  to_string(op.machineOfAlternative(alt) + 1);
+                    }
+                }
+
+                // (2) unilateral RESEQUENCE within the precedence window (priority)
+                const int pos = posOf[gid];
+                const int p   = op.positionInJob;
+                const int predPos = (p == 0) ? -1
+                                  : posOf[inst.job(j).operation(p - 1).globalId];
+                const int succPos = (p + 1 >= inst.job(j).operationCount())
+                                  ? (int)state.sequence.size()
+                                  : posOf[inst.job(j).operation(p + 1).globalId];
+                const int slots[4] = { predPos + 1, succPos - 1, pos - 1, pos + 1 };
+                int lastT = -999;
+                for (int t : slots) {
+                    if (t <= predPos || t >= succPos || t == pos || t < 0 || t == lastT) continue;
+                    lastT = t;
+                    vector<int> cand = state.resequenced(pos, t);
+                    state.sequence.swap(cand);
+                    const Schedule s = evaluate(state);
+                    const double u = payoff.forPlayer(s, inst, j).utility;
+                    state.sequence.swap(cand);
+                    if (u > bestU + EPS) {
+                        bestU = u; bKind = 2; bGid = gid; bSeq = cand;
+                        bMk = s.makespan(); bSum = s.totalCompletion();
+                        bAction = "move " + op.label() + " to dispatch slot " +
+                                  to_string(t + 1) + " (was " + to_string(pos + 1) + ")";
+                    }
+                }
+            }
+
+            if (bKind == 0) continue;          // job j already plays its best response
+
+            const int cBefore = cur.jobCompletion(j);
+            if (bKind == 1) state.reroute(bGid, bAlt);
+            else            state.sequence = bSeq;
+            improvedAny = true;
+            ++result.acceptedMoves;
+
+            if ((int)result.trace.size() < maxTraceRows) {
+                const Schedule after = evaluate(state);
+                MoveRecord rec;
+                rec.iteration = ++iteration; rec.run = run; rec.job = j;
+                rec.action = bAction; rec.oldCost = curMk; rec.newCost = bMk;
+                rec.makespan = bMk; rec.sumCompletion = bSum;
+                rec.rival = -1;
+                rec.moveType = (bKind == 1) ? "selfish-reroute" : "selfish-resequence";
+                rec.moverCBefore = cBefore; rec.moverCAfter = after.jobCompletion(j);
+                result.trace.push_back(rec);
+            } else { ++iteration; }
+        }
+
+        if (improvedAny) continue;   // keep doing unilateral best responses first
+
+        // ============ PAIRWISE (JOB vs JOB) PARETO BEST RESPONSE ============
+        // No single job can improve alone. Now let two RIVAL jobs that meet on a
+        // machine deviate TOGETHER - swap their order, or jointly re-route - and
+        // accept the move ONLY IF BOTH jobs' payoffs strictly rise (a Pareto-
+        // improving coalition) AND it does not raise Cmax. This escapes the
+        // coordination traps that block unilateral play and refines the result to a
+        // PAIRWISE-STABLE (strong) Nash equilibrium with a lower makespan. Among all
+        // mutually-beneficial pair moves we take the one that most lowers Cmax.
+        bool pairImproved = false;
+        {
+            Schedule cur = evaluate(state);
+            const int curMk = cur.makespan();
+            const long long curSum = cur.totalCompletion();
+            vector<int> posOf(inst.totalOperations(), -1);
+            for (int i = 0; i < (int)state.sequence.size(); ++i) posOf[state.sequence[i]] = i;
+            vector<double> uNow(inst.numJobs());
+            for (int jx = 0; jx < inst.numJobs(); ++jx) uNow[jx] = payoff.forPlayer(cur, inst, jx).utility;
+
+            vector<int> crit = criticalOperations(cur);
+            vector<char> isCrit(inst.totalOperations(), 0);
+            for (int g : crit) isCrit[g] = 1;
+            vector<vector<int>> perMachine(inst.numMachines());
+            for (int gid = 0; gid < inst.totalOperations(); ++gid) perMachine[cur.machineOf(gid)].push_back(gid);
+            for (auto& v : perMachine)
+                sort(v.begin(), v.end(), [&](int a, int b){ return cur.startOf(a) < cur.startOf(b); });
+
+            int bMk = curMk; long long bSum = curSum;
+            int pKind = 0, pGid = -1, pAlt = -1, pGid2 = -1, pAlt2 = -1, pI = -1, pJ = -1, pMach = -1;
+            vector<int> pSeq; string pAction;
+            int mutualBudget = 24;
+
+            for (int m = 0; m < inst.numMachines(); ++m) {
+                auto& v = perMachine[m];
+                for (size_t q = 0; q + 1 < v.size(); ++q) {
+                    const int u = v[q], w = v[q + 1];
+                    if (!isCrit[u] && !isCrit[w]) continue;          // at least one rival is critical
+                    const Operation& ou = inst.operationByGlobalId(u);
+                    const Operation& ow = inst.operationByGlobalId(w);
+                    const int ji = ou.jobIndex, jj = ow.jobIndex;
+                    if (ji == jj) continue;                          // same job: not rivals
+
+                    // (A) the two rivals SWAP their order on the machine
+                    {
+                        vector<int> cand = state.resequenced(posOf[w], posOf[u]);
+                        if (precedenceOK(inst, cand)) {
+                            state.sequence.swap(cand);
+                            const Schedule s = evaluate(state);
+                            const double ui = payoff.forPlayer(s, inst, ji).utility;
+                            const double uj = payoff.forPlayer(s, inst, jj).utility;
+                            const int mk = s.makespan(); const long long sm = s.totalCompletion();
+                            state.sequence.swap(cand);
+                            if (ui > uNow[ji] + EPS && uj > uNow[jj] + EPS &&
+                                (mk < bMk || (mk == bMk && sm < bSum))) {
+                                bMk = mk; bSum = sm; pKind = 2; pSeq = cand; pI = ji; pJ = jj; pMach = m;
+                                pAction = "pairwise swap " + ow.label() + " ahead of " + ou.label() +
+                                          " on M" + to_string(m + 1);
+                            }
+                        }
+                    }
+
+                    // (B) the two rivals JOINTLY RE-ROUTE (both re-pick machines)
+                    if (mutualBudget > 0 && (ou.alternativeCount() > 1 || ow.alternativeCount() > 1)
+                        && ou.alternativeCount() * ow.alternativeCount() <= 36) {
+                        --mutualBudget;
+                        const int cu = state.alternativeOf(u), cw = state.alternativeOf(w);
+                        for (int au = 0; au < ou.alternativeCount(); ++au)
+                            for (int aw = 0; aw < ow.alternativeCount(); ++aw) {
+                                if (au == cu && aw == cw) continue;
+                                state.reroute(u, au); state.reroute(w, aw);
+                                const Schedule s = evaluate(state);
+                                const double ui = payoff.forPlayer(s, inst, ji).utility;
+                                const double uj = payoff.forPlayer(s, inst, jj).utility;
+                                const int mk = s.makespan(); const long long sm = s.totalCompletion();
+                                state.reroute(u, cu); state.reroute(w, cw);
+                                if (ui > uNow[ji] + EPS && uj > uNow[jj] + EPS &&
+                                    (mk < bMk || (mk == bMk && sm < bSum))) {
+                                    bMk = mk; bSum = sm; pKind = 3;
+                                    pGid = u; pAlt = au; pGid2 = w; pAlt2 = aw; pI = ji; pJ = jj; pMach = m;
+                                    pAction = "pairwise mutual reroute " + ou.label() + "->M" +
+                                              to_string(ou.machineOfAlternative(au) + 1) + ", " +
+                                              ow.label() + "->M" + to_string(ow.machineOfAlternative(aw) + 1);
+                                }
+                            }
+                    }
+                }
+            }
+
+            if (pKind != 0) {
+                const int cBeforeI = cur.jobCompletion(pI), cBeforeJ = cur.jobCompletion(pJ);
+                if (pKind == 2) state.sequence = pSeq;
+                else { state.reroute(pGid, pAlt); state.reroute(pGid2, pAlt2); }
+                pairImproved = true;
+                ++result.acceptedMoves;
+                if ((int)result.trace.size() < maxTraceRows) {
+                    const Schedule after = evaluate(state);
+                    MoveRecord rec;
+                    rec.iteration = ++iteration; rec.run = run; rec.job = pI; rec.rival = pJ;
+                    rec.contestMachine = pMach;
+                    rec.action = pAction; rec.oldCost = curMk; rec.newCost = after.makespan();
+                    rec.makespan = after.makespan(); rec.sumCompletion = after.totalCompletion();
+                    rec.moveType = (pKind == 2) ? "pairwise-swap" : "pairwise-mutual";
+                    rec.moverCBefore = cBeforeI; rec.moverCAfter = after.jobCompletion(pI);
+                    rec.rivalCBefore = cBeforeJ; rec.rivalCAfter = after.jobCompletion(pJ);
+                    result.trace.push_back(rec);
+                } else { ++iteration; }
+            }
+        }
+        if (pairImproved) continue;   // a mutually-beneficial pair move was applied: replay the game
+
+        result.equilibriumReached = true; return true;   // PAIRWISE-STABLE Nash equilibrium
+    }
+    return false;   // hit the round cap (rare)
+}
+
 SolveResult GameSolver::solve() {
     SolveResult result;
     result.name          = inst.name;
@@ -460,31 +698,51 @@ SolveResult GameSolver::solve() {
     long long bestFit = LLONG_MAX;
     int iteration = 0;
     int run = 0;
+
+    // Fallback incumbent for selfish mode (used only if no run reaches a certified
+    // Nash equilibrium): the best feasible profile seen, picked by makespan.
+    long long fallbackFit = LLONG_MAX;
+    StrategyProfile fallbackState;
+    auto updateFallback = [&](long long& ff, StrategyProfile& fs,
+                              const StrategyProfile& st, const Schedule& sc) {
+        const long long f = payoff.fitness(sc);
+        if (f < ff) { ff = f; fs = st; }
+    };
     // A stronger kick than a plain ILS: because the descent now plays TWO-PLAYER
     // moves first, its local optima are "interaction-stable", so escaping them
     // needs a slightly larger perturbation to re-open new rival pairings.
-    const int kickStrength = max(4, inst.totalOperations() / 8);
+    const int kickStrength = max(cfg.kickMin, inst.totalOperations() / max(1, cfg.kickDiv));
 
     // Fictitious-play memory of the best equilibria found so far, plus the ILS kick.
-    BeliefModel belief(inst, 30);
+    BeliefModel belief(inst, cfg.beliefPool);
     RandomKick  kick(inst, rng);
 
     // totalRun controls the whole search: every instance performs this many
     // independent runs. There is no evaluation budget - each run descends to a
     // true local optimum and its iterated local search runs to convergence
-    // (ILS_PATIENCE consecutive non-improving kicks). Default 20 (the two-player-
-    // first descent settles on interaction-stable optima, so a few more restarts
-    // recover the optimum); override with the FJS_RUNS env var if needed.
-    int totalRun = 500;
+    // (ILS_PATIENCE consecutive non-improving kicks). Set via AlgorithmSetting.txt
+    // (cfg.runs); the FJS_RUNS env var still overrides it if present.
+    int totalRun = cfg.runs;
     if (const char* e = getenv("FJS_RUNS")) { int v = atoi(e); if (v >= 1 && v <= 100000) totalRun = v; }
-    const int ILS_PATIENCE = 60 + inst.totalOperations() / 4;
+    // Each pure-selfish game is already a full Nash solve, so it needs only a few
+    // restarts; the coordinated engine uses the configured (larger) patience.
+    const int ILS_PATIENCE = cfg.selfish
+        ? max(6, inst.totalOperations() / 20)
+        : cfg.ilsPatienceBase + inst.totalOperations() / max(1, cfg.ilsPatienceDiv);
 
     for (run = 0; run < totalRun; ++run) {
         // Choose how this run is seeded. Run 0 is ALWAYS fully random (the
         // required random initialisation); later runs are seeded by the learned
         // beliefs and the Global/Local greedy heuristics, then refined by play.
         StrategyProfile state;
-        if (run == 0) {
+        if (cfg.selfish) {
+            // PURE GAME: seed ONLY from random profiles and the players' LEARNED
+            // BELIEFS (fictitious play). No greedy construction - the result is
+            // produced entirely by the non-cooperative Nash dynamics, and the
+            // beliefs (memory of good equilibria) speed convergence across restarts.
+            if (run > 0 && belief.ready() && (run % 2 == 0)) state = beliefProfile(belief);
+            else                                            state = randomProfile();
+        } else if (run == 0) {
             state = randomProfile();
         } else if (run == 1) {
             state = TaskPool::build(inst);   // strong task-pool (earliest-completion) seed
@@ -499,23 +757,37 @@ SolveResult GameSolver::solve() {
 
         Schedule s0 = evaluate(state);
         if (run == 0) { result.initialMakespan = s0.makespan(); result.initialState = state; }
-        considerIncumbent(result, bestFit, state, s0);
+        // In the pure-selfish game only CONVERGED Nash endpoints are eligible to be
+        // reported, so the pre-game random profile is not offered as an incumbent.
+        if (!cfg.selfish) considerIncumbent(result, bestFit, state, s0);
+
+        // Play the game to convergence (a Nash equilibrium). Selfish mode uses
+        // unilateral own-payoff best response; the default uses the makespan engine.
+        // In selfish mode ONLY a converged (true Nash) endpoint is eligible to be
+        // reported - so the chosen schedule is always a certified equilibrium.
+        bool conv;
+        if (cfg.selfish) conv = descendSelfish(state, run, result, iteration);
+        else           { descend(state, run, result, bestFit, iteration); conv = true; }
 
         StrategyProfile runBest = state;
-        long long runBestFit = payoff.fitness(s0);
+        Schedule sd = evaluate(state);
+        if (conv) considerIncumbent(result, bestFit, state, sd);     // NE only
+        if (cfg.selfish) updateFallback(fallbackFit, fallbackState, state, sd);
+        long long runBestFit = payoff.fitness(sd);
 
-        descend(state, run, result, bestFit, iteration);
-        { Schedule sd = evaluate(state); long long f = payoff.fitness(sd);
-          if (f < runBestFit) { runBestFit = f; runBest = state; } }
-
-        // Iterated local search until convergence: kick the run's best (aimed by
-        // beliefs) and descend, until no improvement for ILS_PATIENCE kicks.
+        // Iterated local search: kick the run's best and replay the game, keeping the
+        // best NASH endpoint by Cmax (selection is done AFTER play; the inner
+        // dynamics stay purely selfish, and a non-converged game is never reported).
         int stagnantKicks = 0;
         while (stagnantKicks < ILS_PATIENCE) {
             StrategyProfile work = runBest;
             kick.apply(work, kickStrength, &belief);
-            descend(work, run, result, bestFit, iteration);
+            bool c2;
+            if (cfg.selfish) c2 = descendSelfish(work, run, result, iteration);
+            else           { descend(work, run, result, bestFit, iteration); c2 = true; }
             Schedule sw = evaluate(work);
+            if (c2) considerIncumbent(result, bestFit, work, sw);    // NE only
+            if (cfg.selfish) updateFallback(fallbackFit, fallbackState, work, sw);
             long long f = payoff.fitness(sw);
             if (f < runBestFit) { runBestFit = f; runBest = work; stagnantKicks = 0; }
             else                ++stagnantKicks;
@@ -526,8 +798,24 @@ SolveResult GameSolver::solve() {
         belief.consider(runBest, runBestMk);   // learn from this run's best
     }
 
+    // Safety net: if no run ever reached a certified Nash equilibrium, report the
+    // best feasible profile seen (NashChecker below will flag it honestly).
+    if (cfg.selfish && bestFit == LLONG_MAX && fallbackFit != LLONG_MAX) {
+        Schedule fs = evaluate(fallbackState);
+        result.bestState           = fallbackState;
+        result.bestMakespan        = fs.makespan();
+        result.bestTotalCompletion = fs.totalCompletion();
+    }
+
     result.runsRun     = run;
     result.evaluations = evals;
+
+    // Certify the reported schedule as a game equilibrium. In the selfish game a
+    // profitable deviation raises a job's OWN payoff U_i; in the coordinated engine
+    // it lowers the makespan. 0 = pure Nash-stable.
+    NashChecker checker(inst, payoff);
+    result.profitableDeviations = checker.countProfitableDeviations(result.bestState, cfg.selfish != 0);
+    result.nashStable           = (result.profitableDeviations == 0);
     return result;
 }
 

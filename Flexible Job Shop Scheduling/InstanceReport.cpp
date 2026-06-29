@@ -285,7 +285,7 @@ static void writeMoveBimatrix(ofstream& f, const Instance& inst, const PayoffFun
 
 void InstanceReport::write(const string& path, const Instance& inst,
                            const SolveResult& result, const PayoffFunction& payoff,
-                           int bestKnown) {
+                           int bestKnown, bool selfish) {
     ofstream f(path);
     if (!f) return;
     f << fixed << setprecision(0);
@@ -308,24 +308,36 @@ void InstanceReport::write(const string& path, const Instance& inst,
     f << "-------------------------------------------------\n";
     f << "  Player      : a job - the decision-maker\n";
     f << "  Strategy    : its machine choice per operation + its dispatch positions\n";
-    f << "  Payoff      : U_i = 1/(1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)  (higher = better)\n";
+    f << "  Payoff      : U_i = 1/(1 + a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i)  (higher = better)\n";
     f << "  Game        : all jobs competing for the shared machines\n";
     f << "  Solution    : the decoded schedule once every job fixes its strategy\n";
-    f << "  Equilibrium : a stable schedule where no job can raise its payoff alone\n";
+    f << "  Decision    : each player plays its BEST RESPONSE; the NASH EQUILIBRIUM\n";
+    f << "                (no job can raise its own payoff alone) is the decision rule\n";
     f << "Two jobs interact whenever their operations meet on the same machine: the\n";
     f << "earlier one delays the other, so each job re-routes / re-sequences to raise\n";
     f << "its OWN payoff, and the schedule settles at an equilibrium.\n\n";
 
     f << "MODEL\n-----\n" << payoff.description() << "\n\n";
-    f << "Search (TWO-PLAYER INTERACTION FIRST):\n"
-      << "Run 0 starts from a fully RANDOM profile; later runs are seeded by the\n"
-      << "players' learned beliefs and greedy heuristics. Each step the two rival jobs\n"
-      << "that share a critical machine PLAY THEIR 2-PLAYER GAME first - swapping order\n"
-      << "or jointly re-routing to the joint best response that most lowers Cmax. A\n"
-      << "single job acting ALONE is only a fallback, used when no rival pair can\n"
-      << "improve. When neither helps, the profile is a Nash equilibrium; a RANDOM KICK\n"
-      << "then perturbs it and the game is played again (iterated local search over\n"
-      << "many runs). The single best run is reported below; one payoff drives all.\n\n";
+    if (selfish) {
+        f << "Search (PURE SELFISH NON-COOPERATIVE GAME - own-payoff best response):\n"
+          << "Every job is an INDEPENDENT, self-interested player. Acting on its own and one\n"
+          << "at a time (asynchronous best response), a job makes the single unilateral move\n"
+          << "(reroute or reposition one of its operations) that most raises its OWN payoff\n"
+          << "U_i = 1/(1 + a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i) - accepted ONLY IF\n"
+          << "U_i strictly improves. The makespan is NOT the acceptance rule, so equilibria\n"
+          << "may be inefficient (the PRICE OF ANARCHY); the congestion toll t*Toll_i pulls\n"
+          << "them toward efficiency. No cooperation, no joint moves. A sweep in which no job\n"
+          << "can improve is a pure-strategy NASH EQUILIBRIUM under U_i; the best one (by\n"
+          << "Cmax) over many random restarts is reported.\n\n";
+    } else {
+        f << "Search (COORDINATED MAKESPAN ENGINE):\n"
+          << "Run 0 starts from a fully RANDOM profile; later runs are seeded by the\n"
+          << "players' learned beliefs and greedy heuristics. Each step the two rival jobs\n"
+          << "that share a critical machine play their 2-player game - swapping order or\n"
+          << "jointly re-routing to the joint best response that most lowers Cmax - with a\n"
+          << "single-job move as fallback. Moves are accepted by the makespan potential.\n"
+          << "When none helps, a RANDOM KICK perturbs the profile and the search repeats.\n\n";
+    }
 
     // ---- initial random profile ----------------------------------------
     f << "INITIAL RANDOM PROFILE (restart 0)\n----------------------------------\n";
@@ -422,8 +434,14 @@ void InstanceReport::write(const string& path, const Instance& inst,
                 f << "  (sequencing move: the operations' dispatch order changed, routing is\n"
                      "   unchanged - so there is no routing bimatrix; the completion change above\n"
                      "   is the effect of the re-ordering.)\n";
-            f << "  decision    : kept because it lowers the makespan-dominated cost (Cmax "
-              << (long long)m.oldCost << " -> " << (long long)m.newCost << ").\n";
+            if (selfish || m.moveType.rfind("selfish", 0) == 0)
+                f << "  decision    : kept because the moving job's OWN payoff U_i strictly\n"
+                     "                increased (unilateral best response toward the Nash\n"
+                     "                equilibrium); the makespan was NOT the acceptance rule\n"
+                     "                (Cmax " << (long long)m.oldCost << " -> " << (long long)m.newCost << ").\n";
+            else
+                f << "  decision    : kept because it lowers the makespan-dominated cost (Cmax "
+                  << (long long)m.oldCost << " -> " << (long long)m.newCost << ").\n";
         }
         if (shownIters == 0)
             f << "\n  (no accepted moves were captured for detailing.)\n";

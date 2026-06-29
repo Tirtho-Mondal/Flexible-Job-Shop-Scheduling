@@ -24,10 +24,11 @@ namespace fjs {
 
 class InstanceReport {
 public:
-    // bestKnown < 0 means "not available".
+    // bestKnown < 0 means "not available". selfish = true when the pure
+    // non-cooperative Nash game produced the result (changes the narrative).
     static void write(const string& path, const Instance& inst,
                       const SolveResult& result, const PayoffFunction& payoff,
-                      int bestKnown);
+                      int bestKnown, bool selfish = false);
 };
 
 } // namespace fjs

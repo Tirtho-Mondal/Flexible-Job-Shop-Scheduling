@@ -28,6 +28,7 @@
 #include "BeliefModel.h"
 #include "TaskPool.h"
 #include "RandomKick.h"
+#include "AlgorithmConfig.h"
 #include <vector>
 #include <string>
 #include <random>
@@ -83,12 +84,17 @@ public:
     long evaluations   = 0;          // schedule decodes performed
     vector<int> runBests;       // best makespan of each individual run
 
+    // ---- game-theoretic certification of the reported best schedule ----
+    bool nashStable          = false; // true iff no profitable unilateral deviation
+    int  profitableDeviations = -1;   // count of profitable unilateral deviations (-1 = not checked)
+
     vector<MoveRecord> trace;   // capped trace for the per-instance log
 };
 
 class GameSolver {
 public:
-    GameSolver(const Instance& inst, const PayoffFunction& payoff, unsigned seed);
+    GameSolver(const Instance& inst, const PayoffFunction& payoff, unsigned seed,
+               const AlgorithmConfig& cfg = {});
 
     SolveResult solve();
 
@@ -109,6 +115,15 @@ private:
     void descend(StrategyProfile& state, int run,
                  SolveResult& result, long long& bestFit, int& iteration);
 
+    // PURE SELFISH non-cooperative best response: every job plays independently
+    // (simultaneous), making the single UNILATERAL move (reroute/resequence one own
+    // operation) that most raises its OWN payoff U_i, accepted only if U_i strictly
+    // improves. No joint moves, no makespan in the rule. Returns TRUE iff the game
+    // settled on a pure-strategy Nash equilibrium (no profitable deviation remains);
+    // FALSE means it hit the round cap (state set to the best feasible profile seen).
+    bool descendSelfish(StrategyProfile& state, int run,
+                        SolveResult& result, int& iteration);
+
     // Consider `cand` as the new global incumbent.
     void considerIncumbent(SolveResult& result, long long& bestFit,
                            const StrategyProfile& state, const Schedule& sched);
@@ -116,9 +131,10 @@ private:
     const Instance&       inst;
     const PayoffFunction& payoff;
     mt19937          rng;
+    AlgorithmConfig  cfg;     // all tunable parameters (from AlgorithmSetting.txt)
 
     long evals        = 0;   // schedule decodes performed (reported, not a cap)
-    int  maxTraceRows = 2500;
+    int  maxTraceRows = 2500; // set from cfg.traceRows in the constructor
     int  detailRows   = 2500; // = maxTraceRows: capture full detail for EVERY traced move
 };
 

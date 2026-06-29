@@ -31,12 +31,38 @@ Payoff PayoffFunction::forPlayer(const Schedule& s, const Instance& inst, int jo
     for (const Operation& op : inst.job(job).operations())
         Conf += (double)load[s.machineOf(op.globalId)];
 
+    // Toll_i (NOVELTY - Pigouvian congestion toll): the delay externality job i
+    // imposes on OTHER jobs that share its machines. For each operation of job i
+    // we charge its processing time once for every later operation of a rival job
+    // queued behind it on the same machine (each such rival is pushed back by at
+    // least that processing time). Internalising this externality steers the
+    // selfish best response toward the socially efficient (low-makespan) outcome
+    // and provably reduces the price of anarchy. Computed only when tau != 0.
+    double Toll = 0;
+    if (tau != 0.0) {
+        for (const Operation& op : inst.job(job).operations()) {
+            const int gid = op.globalId;
+            const int mr  = s.machineOf(gid);
+            const int st  = s.startOf(gid);
+            const int p   = s.endOf(gid) - st;
+            int laterRivals = 0;
+            for (int g2 = 0; g2 < inst.totalOperations(); ++g2) {
+                if (s.machineOf(g2) != mr) continue;            // same machine only
+                if (s.startOf(g2) <= st) continue;              // strictly behind it
+                if (inst.operationByGlobalId(g2).jobIndex == job) continue;  // rival jobs only
+                ++laterRivals;
+            }
+            Toll += (double)p * laterRivals;
+        }
+    }
+
     Payoff p;
     p.completion = Ci;
     p.waiting    = Wi;
     p.conflict   = Conf;
     p.makespan   = s.makespan();
-    p.cost       = alpha * Ci + beta * Wi + gamma * Conf + delta * p.makespan;
+    p.toll       = Toll;
+    p.cost       = alpha * Ci + beta * Wi + gamma * Conf + delta * p.makespan + tau * Toll;
     p.utility    = 1.0 / (1.0 + p.cost);
     return p;
 }
@@ -53,13 +79,15 @@ string PayoffFunction::description() const {
     return
         "ONE payoff function. Each job is a self-interested player; machines are\n"
         "shared resources the jobs compete for. Job i's payoff is\n"
-        "    U_i = 1 / ( 1 + a*C_i + b*W_i + g*Conf_i + d*Cmax )\n"
+        "    U_i = 1 / ( 1 + a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i )\n"
         "with C_i = completion, W_i = waiting (= C_i - processing), Conf_i =\n"
-        "machine-conflict load (busier chosen machines cost more), and Cmax the\n"
-        "shared makespan that links each job's payoff to global quality. A schedule\n"
-        "is a Nash equilibrium when no job can raise U_i by changing its own\n"
-        "machine assignment or sequence position alone. The reported social\n"
-        "objective is the makespan Cmax.";
+        "machine-conflict load (busier chosen machines cost more), Cmax the shared\n"
+        "makespan, and Toll_i the Pigouvian CONGESTION TOLL: the delay externality\n"
+        "job i imposes on rival jobs queued behind it on its machines (the novel\n"
+        "coordination device that reduces the price of anarchy). A schedule is a\n"
+        "Nash equilibrium when no job can raise U_i by changing its own machine\n"
+        "assignment or sequence position alone. The reported social objective is\n"
+        "the makespan Cmax.";
 }
 
 } // namespace fjs

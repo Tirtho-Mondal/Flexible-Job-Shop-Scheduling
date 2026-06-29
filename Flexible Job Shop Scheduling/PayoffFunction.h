@@ -37,18 +37,19 @@ public:
     double waiting    = 0;   // W_i
     double conflict   = 0;   // Conf_i
     double makespan   = 0;   // Cmax (the shared global term)
-    double cost       = 0;   // a*C_i + b*W_i + g*Conf_i + d*Cmax
+    double toll       = 0;   // Toll_i (Pigouvian congestion toll - NOVELTY)
+    double cost       = 0;   // a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i
     double utility    = 0;   // U_i = 1 / (1 + cost)   <-- the payoff value
 };
 
 class PayoffFunction {
 public:
-    // The four payoff weights are public data (a, b, g, d in U_i's cost term).
-    double alpha, beta, gamma, delta;
+    // The payoff weights are public data (a, b, g, d, t in U_i's cost term).
+    double alpha, beta, gamma, delta, tau;
 
-    PayoffFunction(double alpha = 1.0, double beta = 0.3,
-                   double gamma = 0.05, double delta = 0.5)
-        : alpha(alpha), beta(beta), gamma(gamma), delta(delta) {}
+    PayoffFunction(double alpha = 1.0, double beta = 0.3, double gamma = 0.05,
+                   double delta = 0.5, double tau = 0.0)
+        : alpha(alpha), beta(beta), gamma(gamma), delta(delta), tau(tau) {}
 
     // THE payoff function: player `job`'s payoff U_i (and its parts) under `s`.
     Payoff forPlayer(const Schedule& s, const Instance& inst, int job) const;

@@ -29,8 +29,10 @@ GlobalReport::GlobalReport(const string& allResultPath)
          << setw(9)  << "OurCmax"
          << setw(11) << "BestKnown"
          << setw(9)  << "Gap%"
+         << setw(7)  << "Nash"
+         << setw(6)  << "Dev"
          << "  Status\n";
-    out << string(96, '-') << "\n";
+    out << string(109, '-') << "\n";
     out.flush();
 }
 
@@ -43,6 +45,8 @@ void GlobalReport::append(const Instance& inst, const SolveResult& result, int b
     row.ourMakespan = result.bestMakespan;
     row.bestKnown = bestKnown;
     row.equilibrium = result.equilibriumReached;
+    row.nashStable = result.nashStable;
+    row.profitableDeviations = result.profitableDeviations;
     rows.push_back(row);
 
     ostringstream gap, status;
@@ -68,6 +72,8 @@ void GlobalReport::append(const Instance& inst, const SolveResult& result, int b
          << setw(9)  << row.ourMakespan
          << setw(11) << (bestKnown >= 0 ? to_string(bestKnown) : string("N/A"))
          << setw(9)  << gap.str()
+         << setw(7)  << (row.nashStable ? "yes" : "no")
+         << setw(6)  << (row.profitableDeviations >= 0 ? to_string(row.profitableDeviations) : string("-"))
          << "  " << status.str() << "\n";
     out.flush();
 }
@@ -124,8 +130,10 @@ void GlobalReport::writeReadme(const string& readmePath) const {
 
     // ---- full results table --------------------------------------------
     md << "## Full results\n\n";
-    md << "| Instance | Group | Jobs | Mch | Ops | Init Cmax | Our Cmax | Best-known | Gap % | Eq |\n";
-    md << "|---|---|---:|---:|---:|---:|---:|---:|---:|:--:|\n";
+    md << "Nash = the reported schedule is a pure-strategy Nash equilibrium of the job game; "
+          "Dev = number of profitable unilateral deviations that remain (0 = stable).\n\n";
+    md << "| Instance | Group | Jobs | Mch | Ops | Init Cmax | Our Cmax | Best-known | Gap % | Nash | Dev |\n";
+    md << "|---|---|---:|---:|---:|---:|---:|---:|---:|:--:|---:|\n";
     md << fixed << setprecision(2);
     for (const ResultRow& r : rows) {
         md << "| " << r.name << " | " << r.group << " | " << r.jobs << " | "
@@ -136,7 +144,9 @@ void GlobalReport::writeReadme(const string& readmePath) const {
         } else {
             md << "N/A | -";
         }
-        md << " | " << (r.equilibrium ? "Y" : "~") << " |\n";
+        md << " | " << (r.nashStable ? "yes" : "no")
+           << " | " << (r.profitableDeviations >= 0 ? to_string(r.profitableDeviations) : string("-"))
+           << " |\n";
     }
     md << "\n";
 }

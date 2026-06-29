@@ -29,6 +29,8 @@ public:
     int  initialMakespan = 0, ourMakespan = 0;
     int  bestKnown = -1;       // -1 == unavailable
     bool equilibrium = false;
+    bool nashStable  = false;  // reported schedule is a pure-strategy Nash equilibrium
+    int  profitableDeviations = -1;  // unilateral deviations that still pay (0 = stable)
 };
 
 class GlobalReport {
