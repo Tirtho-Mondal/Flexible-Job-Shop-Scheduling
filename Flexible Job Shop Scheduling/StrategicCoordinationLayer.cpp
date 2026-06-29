@@ -186,7 +186,7 @@ SolveResult StrategicCoordinationLayer::solve() {
     const int kickStrength = max(cfg.kickMin, inst.totalOperations() / max(1, cfg.kickDiv));
 
     // Fictitious-play memory, the ILS kick, and the crossover operators.
-    FictitiousPlay belief(inst, cfg.beliefPool);
+    FictitiousPlay belief(inst, cfg.memorySize);
     RandomKick     kick(inst, rng);
     Crossover      xover(inst, payoff);
 

@@ -272,7 +272,8 @@ static AlgorithmConfig loadAlgorithmConfig(const fs::path& dataDir, fs::path& us
             else if (k == "crossover")        cfg.crossover       = stoi(v);
             else if (k == "crossover_type")   cfg.crossoverType   = (v == "pox") ? 0 : (v == "oox") ? 2 : 1;
             else if (k == "runs")             cfg.runs            = stoi(v);
-            else if (k == "belief_pool")      cfg.beliefPool      = stoi(v);
+            else if (k == "memory")           cfg.memorySize      = stoi(v);
+            else if (k == "belief_pool")      cfg.memorySize      = stoi(v);   // legacy alias
             else if (k == "ils_patience")     cfg.ilsPatienceBase = stoi(v);
             else if (k == "ils_patience_div") cfg.ilsPatienceDiv  = stoi(v);
             else if (k == "kick_min")         cfg.kickMin         = stoi(v);
@@ -352,7 +353,7 @@ int main() {
                  : algo.crossoverType == 2 ? "CROSSOVER=OOX one-point (memetic) + light kick"
                  :                           "CROSSOVER=OUX payoff-guided (memetic) + light kick")
                 : "random kick (ILS)") << "\n"
-         << "  search   : runs=" << algo.runs << " belief_pool=" << algo.beliefPool
+         << "  search   : runs=" << algo.runs << " memory=" << algo.memorySize
          << " ils_patience=" << algo.ilsPatienceBase << "(+ops/" << algo.ilsPatienceDiv << ")"
          << " kick=max(" << algo.kickMin << ",ops/" << algo.kickDiv << ")"
          << " trace_rows=" << algo.traceRows << "\n\n";

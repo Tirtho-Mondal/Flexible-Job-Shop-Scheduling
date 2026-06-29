@@ -58,7 +58,9 @@ public:
 
     // ---- search control -------------------------------------------------
     int runs            = 50;   // independent multi-start runs per instance
-    int beliefPool      = 30;   // elite-pool size for fictitious-play learning
+    int memorySize      = 30;   // fictitious-play MEMORY: how many past equilibria the
+                            //     players recall to form their beliefs (bounded-memory
+                            //     fictitious play). Was "beliefPool".
     int ilsPatienceBase = 60;   // ILS stops after (base + ops/div) non-improving kicks
     int ilsPatienceDiv  = 4;
     int kickMin         = 4;    // ILS kick strength = max(kickMin, ops/kickDiv)
