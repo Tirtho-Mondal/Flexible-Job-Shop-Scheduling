@@ -25,10 +25,11 @@
 #include "Instance.h"
 #include "StrategyProfile.h"
 #include "PayoffFunction.h"
-#include "BeliefModel.h"
+#include "FictitiousPlay.h"
 #include "TaskPool.h"
 #include "RandomKick.h"
 #include "AlgorithmConfig.h"
+#include "Crossover.h"
 #include <vector>
 #include <string>
 #include <random>
@@ -103,7 +104,8 @@ private:
     void      fillRandomSequence(StrategyProfile& state);        // precedence-feasible order
     StrategyProfile greedyGlobalProfile();   // load-balancing machine selection (Reijnen "Global")
     StrategyProfile greedyLocalProfile();    // shortest-processing-time machine selection ("Local")
-    StrategyProfile beliefProfile(const BeliefModel& belief);    // fictitious-play seeded start
+    StrategyProfile beliefProfile(const FictitiousPlay& belief);    // fictitious-play seeded start
+
     Schedule  evaluate(const StrategyProfile& state);            // decode + count
 
     // Operations lying on a critical path of `sched` (those that can change Cmax).

@@ -93,12 +93,14 @@ StrategyProfile GameSolver::greedyLocalProfile() {
 }
 
 // Fictitious-play seed: routing drawn from the players' learned beliefs.
-StrategyProfile GameSolver::beliefProfile(const BeliefModel& belief) {
+StrategyProfile GameSolver::beliefProfile(const FictitiousPlay& belief) {
     StrategyProfile state(inst.totalOperations());
     state.routing = belief.sampleRouting(rng);
     fillRandomSequence(state);
     return state;
 }
+
+// (Crossover operators POX / OUX / OOX now live in Crossover.h / Crossover.cpp.)
 
 vector<int> GameSolver::criticalOperations(const Schedule& sched) const {
     const int n = inst.totalOperations();
@@ -714,8 +716,9 @@ SolveResult GameSolver::solve() {
     const int kickStrength = max(cfg.kickMin, inst.totalOperations() / max(1, cfg.kickDiv));
 
     // Fictitious-play memory of the best equilibria found so far, plus the ILS kick.
-    BeliefModel belief(inst, cfg.beliefPool);
+    FictitiousPlay belief(inst, cfg.beliefPool);
     RandomKick  kick(inst, rng);
+    Crossover   xover(inst, payoff);   // POX / OUX / OOX recombination (cfg.crossoverType)
 
     // totalRun controls the whole search: every instance performs this many
     // independent runs. There is no evaluation budget - each run descends to a
@@ -780,8 +783,18 @@ SolveResult GameSolver::solve() {
         // dynamics stay purely selfish, and a non-converged game is never reported).
         int stagnantKicks = 0;
         while (stagnantKicks < ILS_PATIENCE) {
-            StrategyProfile work = runBest;
-            kick.apply(work, kickStrength, &belief);
+            // Perturbation: CROSSOVER (recombine the run's best with a random elite
+            // equilibrium) when memetic mode is on and the pool has parents; else a
+            // random kick. A light kick after crossover keeps diversity.
+            StrategyProfile work;
+            if (cfg.crossover && belief.ready()) {
+                uniform_int_distribution<int> pick(0, belief.eliteCount() - 1);
+                work = xover.recombine(cfg.crossoverType, runBest, belief.elite(pick(rng)), rng);
+                kick.apply(work, max(1, kickStrength / 3), &belief);
+            } else {
+                work = runBest;
+                kick.apply(work, kickStrength, &belief);
+            }
             bool c2;
             if (cfg.selfish) c2 = descendSelfish(work, run, result, iteration);
             else           { descend(work, run, result, bestFit, iteration); c2 = true; }

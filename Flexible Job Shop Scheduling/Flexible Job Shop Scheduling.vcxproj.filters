@@ -25,12 +25,13 @@
     <ClCompile Include="PayoffFunction.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="GameSolver.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="FjsInstanceReader.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="BeliefModel.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="FictitiousPlay.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="BestKnownRegistry.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="InstanceReport.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="GlobalReport.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="CodeExplanation.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="GanttChart.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Crossover.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="main.cpp"><Filter>Source Files</Filter></ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,11 +51,14 @@
     <ClInclude Include="PayoffFunction.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="GameSolver.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="FjsInstanceReader.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="BeliefModel.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="FictitiousPlay.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="BestKnownRegistry.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="InstanceReport.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="GlobalReport.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="CodeExplanation.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="GanttChart.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="AlgorithmConfig.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="NashChecker.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Crossover.h"><Filter>Header Files</Filter></ClInclude>
   </ItemGroup>
 </Project>

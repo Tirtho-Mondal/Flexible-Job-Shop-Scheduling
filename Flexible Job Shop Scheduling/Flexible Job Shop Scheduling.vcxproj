@@ -153,12 +153,13 @@
     <ClCompile Include="PayoffFunction.cpp" />
     <ClCompile Include="GameSolver.cpp" />
     <ClCompile Include="FjsInstanceReader.cpp" />
-    <ClCompile Include="BeliefModel.cpp" />
+    <ClCompile Include="FictitiousPlay.cpp" />
     <ClCompile Include="BestKnownRegistry.cpp" />
     <ClCompile Include="InstanceReport.cpp" />
     <ClCompile Include="GlobalReport.cpp" />
     <ClCompile Include="CodeExplanation.cpp" />
     <ClCompile Include="GanttChart.cpp" />
+    <ClCompile Include="Crossover.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -178,12 +179,15 @@
     <ClInclude Include="PayoffFunction.h" />
     <ClInclude Include="GameSolver.h" />
     <ClInclude Include="FjsInstanceReader.h" />
-    <ClInclude Include="BeliefModel.h" />
+    <ClInclude Include="FictitiousPlay.h" />
     <ClInclude Include="BestKnownRegistry.h" />
     <ClInclude Include="InstanceReport.h" />
     <ClInclude Include="GlobalReport.h" />
     <ClInclude Include="CodeExplanation.h" />
     <ClInclude Include="GanttChart.h" />
+    <ClInclude Include="AlgorithmConfig.h" />
+    <ClInclude Include="NashChecker.h" />
+    <ClInclude Include="Crossover.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

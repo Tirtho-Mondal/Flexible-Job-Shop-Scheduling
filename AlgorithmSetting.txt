@@ -18,6 +18,17 @@ acceptance  potential   # "potential" = COORDINATED engine = BEST makespan (defa
                         #               price of anarchy (worse makespan) - use only to
                         #               MEASURE the PoA / the toll's effect.
 
+# ---- perturbation (how Iterated Local Search escapes a Nash equilibrium)
+crossover   0           # (1)  1 = MEMETIC: recombine two elite equilibria then replay the
+                        #      Nash game on the offspring. 0 = plain RANDOM-KICK ILS.
+crossover_type  pox     # (oux) which operator when crossover=1:
+                        #   pox = uniform crossover on routing + random-partition POX on
+                        #         sequence (more diversity).
+                        #   oux = payoff-guided: each job inherits its whole strategy from
+                        #         the parent where that job-player's payoff U_j is higher.
+                        #   oox = order-based one-point: random cut, prefix from parent 1
+                        #         (ops + machines), remainder from parent 2 in order.
+
 # ---- search control
 runs              20    # (50)   independent multi-start runs per instance (raise for quality)
 belief_pool       30    # (30)   elite-pool size for fictitious-play learning

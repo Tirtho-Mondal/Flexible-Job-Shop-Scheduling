@@ -11,7 +11,7 @@
 
 #include "Instance.h"
 #include "StrategyProfile.h"
-#include "BeliefModel.h"
+#include "FictitiousPlay.h"
 #include <random>
 
 using namespace std;
@@ -24,7 +24,7 @@ public:
 
     // Apply `strength` random moves to `profile`. If `belief` is non-null, the
     // re-routing part is drawn from the players' beliefs (intensified kick).
-    void apply(StrategyProfile& profile, int strength, const BeliefModel* belief);
+    void apply(StrategyProfile& profile, int strength, const FictitiousPlay* belief);
 
 private:
     const Instance& instance;

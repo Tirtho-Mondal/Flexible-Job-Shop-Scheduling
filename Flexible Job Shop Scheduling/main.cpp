@@ -28,6 +28,15 @@
 #include <functional>
 #include <fstream>
 #include <set>
+#include <system_error>
+
+#ifdef _WIN32
+// Minimal declaration instead of <windows.h>, which clashes with std::byte under
+// `using namespace std;` (ambiguous-symbol errors). GetModuleFileNameA lives in
+// kernel32, linked by default.
+extern "C" __declspec(dllimport) unsigned long __stdcall
+GetModuleFileNameA(void* hModule, char* lpFilename, unsigned long nSize);
+#endif
 
 using namespace std;
 namespace fs = filesystem;
@@ -36,6 +45,36 @@ using namespace fjs;
 static string toLower(string s) {
     for (char& c : s) c = (char)tolower((unsigned char)c);
     return s;
+}
+
+// Folder that contains the running executable - so data/ and the *.txt settings are
+// found regardless of the working directory the program was launched from (e.g. when
+// Visual Studio runs the exe from a build sub-folder).
+static fs::path exeDirectory() {
+#ifdef _WIN32
+    char buf[1024];
+    unsigned long n = GetModuleFileNameA(nullptr, buf, (unsigned long)sizeof(buf));
+    if (n > 0 && n < sizeof(buf)) return fs::path(string(buf, n)).parent_path();
+#endif
+    return {};
+}
+
+// Find a file by name, starting at each `start` directory and walking up to `levels`
+// parents. Returns the first existing match, or an empty path.
+static fs::path findFileUpwards(const string& name, const vector<fs::path>& starts, int levels = 6) {
+    for (const fs::path& s : starts) {
+        if (s.empty()) continue;
+        error_code ec;
+        fs::path d = fs::absolute(s, ec);
+        if (ec) continue;
+        for (int i = 0; i <= levels; ++i) {
+            const fs::path cand = d / name;
+            if (fs::is_regular_file(cand)) return cand;
+            if (!d.has_parent_path() || d.parent_path() == d) break;
+            d = d.parent_path();
+        }
+    }
+    return {};
 }
 
 // We accept the original .fjs benchmarks as well as the same data saved as .txt.
@@ -51,13 +90,25 @@ static fs::path locateDataFolder() {
         fs::path p(env);
         if (fs::exists(p)) return p;
     }
-    for (const char* guess : { "data", "../data", "../../data", "../../../data", "../../../../data",
-                               "input", "../input", "../../input", "../../../input", "../../../../input" }) {
-        fs::path p(guess);
-        if (!fs::is_directory(p)) continue;
-        for (auto& entry : fs::recursive_directory_iterator(p))
-            if (entry.is_regular_file() && looksLikeInstance(entry.path()))
-                return p;
+    // Walk up from BOTH the current directory and the executable's directory,
+    // looking for a data/ (or input/) folder that actually contains instances.
+    for (const fs::path& start : { fs::current_path(), exeDirectory() }) {
+        if (start.empty()) continue;
+        error_code ec;
+        fs::path d = fs::absolute(start, ec);
+        if (ec) continue;
+        for (int i = 0; i <= 6; ++i) {
+            for (const char* folder : { "data", "input" }) {
+                const fs::path cand = d / folder;
+                if (fs::is_directory(cand)) {
+                    for (auto& entry : fs::recursive_directory_iterator(cand, ec))
+                        if (!ec && entry.is_regular_file() && looksLikeInstance(entry.path()))
+                            return cand;
+                }
+            }
+            if (!d.has_parent_path() || d.parent_path() == d) break;
+            d = d.parent_path();
+        }
     }
     return {};
 }
@@ -93,14 +144,12 @@ static fs::path locateDatasetSetting(const fs::path& dataDir) {
         fs::path p(env);
         if (fs::is_regular_file(p)) return p;
     }
-    const fs::path candidates[] = {
-        fs::path("DatasetSetting.txt"),                                   // current dir
-        fs::absolute(dataDir).parent_path() / "DatasetSetting.txt",       // next to data/ (and output/)
-        dataDir / "DatasetSetting.txt",                                   // inside data/
+    // Search from the current dir, the exe's dir, the data folder and its parent,
+    // walking up parents - so it's found wherever the exe is launched from.
+    const vector<fs::path> starts = {
+        fs::current_path(), exeDirectory(), dataDir, dataDir.parent_path()
     };
-    for (const auto& p : candidates)
-        if (fs::is_regular_file(p)) return p;
-    return {};
+    return findFileUpwards("DatasetSetting.txt", starts);
 }
 
 // Split a string on commas / whitespace into lower-cased tokens.
@@ -192,12 +241,10 @@ static AlgorithmConfig loadAlgorithmConfig(const fs::path& dataDir, fs::path& us
     fs::path file;
     if (const char* env = getenv("FJS_ALGO")) { fs::path p(env); if (fs::is_regular_file(p)) file = p; }
     if (file.empty()) {
-        const fs::path candidates[] = {
-            fs::path("AlgorithmSetting.txt"),
-            fs::absolute(dataDir).parent_path() / "AlgorithmSetting.txt",
-            dataDir / "AlgorithmSetting.txt",
+        const vector<fs::path> starts = {
+            fs::current_path(), exeDirectory(), dataDir, dataDir.parent_path()
         };
-        for (const auto& p : candidates) if (fs::is_regular_file(p)) { file = p; break; }
+        file = findFileUpwards("AlgorithmSetting.txt", starts);
     }
     usedFile = file;
     if (file.empty()) return cfg;
@@ -220,6 +267,8 @@ static AlgorithmConfig loadAlgorithmConfig(const fs::path& dataDir, fs::path& us
             else if (k == "acceptance")       cfg.selfish         = (v == "selfish") ? 1 : 0;
             else if (k == "selfish")          cfg.selfish         = stoi(v);
             else if (k == "inertia")          cfg.inertia         = stod(v);
+            else if (k == "crossover")        cfg.crossover       = stoi(v);
+            else if (k == "crossover_type")   cfg.crossoverType   = (v == "pox") ? 0 : (v == "oox") ? 2 : 1;
             else if (k == "runs")             cfg.runs            = stoi(v);
             else if (k == "belief_pool")      cfg.beliefPool      = stoi(v);
             else if (k == "ils_patience")     cfg.ilsPatienceBase = stoi(v);
@@ -277,6 +326,10 @@ int main() {
                     "data/ folder (e.g. brandimarte, vdata, hurink, or an instance like Mk01).\n";
             return 1;
         }
+    } else {
+        cout << "Dataset filter: " << (settingFile.empty()
+                ? "(DatasetSetting.txt not found - running ALL instances)"
+                : settingFile.string() + " (empty - running ALL instances)") << "\n";
     }
 
     // Load all tunable parameters (payoff weights + search control).
@@ -291,6 +344,11 @@ int main() {
                                               : "coordinated makespan engine") << "\n"
          << "  payoff   : alpha=" << algo.alpha << " beta=" << algo.beta
          << " gamma=" << algo.gamma << " delta=" << algo.delta << " tau=" << algo.tau << "\n"
+         << "  perturb  : " << (algo.crossover
+                ? (algo.crossoverType == 0 ? "CROSSOVER=POX (memetic) + light kick"
+                 : algo.crossoverType == 2 ? "CROSSOVER=OOX one-point (memetic) + light kick"
+                 :                           "CROSSOVER=OUX payoff-guided (memetic) + light kick")
+                : "random kick (ILS)") << "\n"
          << "  search   : runs=" << algo.runs << " belief_pool=" << algo.beliefPool
          << " ils_patience=" << algo.ilsPatienceBase << "(+ops/" << algo.ilsPatienceDiv << ")"
          << " kick=max(" << algo.kickMin << ",ops/" << algo.kickDiv << ")"

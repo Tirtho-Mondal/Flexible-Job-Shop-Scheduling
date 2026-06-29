@@ -11,7 +11,7 @@ namespace fjs {
 RandomKick::RandomKick(const Instance& inst, mt19937& engine)
     : instance(inst), rng(engine) {}
 
-void RandomKick::apply(StrategyProfile& profile, int strength, const BeliefModel* belief) {
+void RandomKick::apply(StrategyProfile& profile, int strength, const FictitiousPlay* belief) {
     const int n = instance.totalOperations();
     uniform_int_distribution<int> coin(0, 1);
 

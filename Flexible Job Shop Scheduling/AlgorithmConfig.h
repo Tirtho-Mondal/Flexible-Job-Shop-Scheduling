@@ -38,6 +38,18 @@ public:
     // equilibrium. 1.0 = fully synchronous; ~0.5 is a good default.
     double inertia      = 0.5;
 
+    // Memetic mode: when 1, the iterated-local-search perturbation is a CROSSOVER
+    // (recombination of two elite equilibria) instead of a random kick, then the
+    // game is replayed on the offspring - a genetic/memetic algorithm whose local
+    // search is the Nash game. 0 = plain random-kick ILS.
+    int crossover       = 1;
+
+    // Which crossover operator (when crossover = 1):
+    //   0 = POX : uniform crossover on routing + random-partition POX on sequence.
+    //   1 = OUX : payoff-guided - each job inherits its whole strategy from the
+    //             parent where that job-player earns the higher payoff U_j.
+    int crossoverType   = 1;
+
     // ---- search control -------------------------------------------------
     int runs            = 50;   // independent multi-start runs per instance
     int beliefPool      = 30;   // elite-pool size for fictitious-play learning
