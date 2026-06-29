@@ -264,8 +264,10 @@ static AlgorithmConfig loadAlgorithmConfig(const fs::path& dataDir, fs::path& us
             else if (k == "gamma")            cfg.gamma           = stod(v);
             else if (k == "delta")            cfg.delta           = stod(v);
             else if (k == "tau")              cfg.tau             = stod(v);
-            else if (k == "acceptance")       cfg.selfish         = (v == "selfish") ? 1 : 0;
+            else if (k == "acceptance")     { cfg.selfish = (v == "selfish") ? 1 : 0;
+                                              cfg.bilevel = (v == "bilevel") ? 1 : 0; }
             else if (k == "selfish")          cfg.selfish         = stoi(v);
+            else if (k == "bilevel")          cfg.bilevel         = stoi(v);
             else if (k == "inertia")          cfg.inertia         = stod(v);
             else if (k == "crossover")        cfg.crossover       = stoi(v);
             else if (k == "crossover_type")   cfg.crossoverType   = (v == "pox") ? 0 : (v == "oox") ? 2 : 1;
@@ -340,7 +342,8 @@ int main() {
          << "Output dir  : " << outDir.string() << "\n"
          << "Instances   : " << instances.size() << "\n"
          << "Algo config : " << (algoFile.empty() ? string("(built-in defaults)") : algoFile.string()) << "\n"
-         << "  mode     : " << (algo.selfish ? "PURE-SELFISH non-cooperative game"
+         << "  mode     : " << (algo.bilevel ? "BILEVEL GAME (global routing game + local sequencing game)"
+                                : algo.selfish ? "PURE-SELFISH non-cooperative game"
                                               : "coordinated makespan engine") << "\n"
          << "  payoff   : alpha=" << algo.alpha << " beta=" << algo.beta
          << " gamma=" << algo.gamma << " delta=" << algo.delta << " tau=" << algo.tau << "\n"

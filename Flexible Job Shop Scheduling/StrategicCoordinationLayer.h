@@ -42,6 +42,13 @@ private:
     void considerIncumbent(SolveResult& result, long long& bestFit,
                            const StrategyProfile& state, const Schedule& sched);
 
+    // GLOBAL ROUTING GAME (bilevel upper level): each job best-responds on its OWN
+    // payoff by re-routing one operation, anticipating that the LOCAL sequencing game
+    // re-equilibrates for the new routing. Iterates to a routing Nash equilibrium - a
+    // subgame-perfect equilibrium of the two-stage game. Game theory on BOTH layers.
+    void playRoutingGame(StrategyProfile& state, int run,
+                         SolveResult& result, long long& bestFit, int& iteration);
+
     const Instance&       inst;
     const PayoffFunction& payoff;
     mt19937               rng;

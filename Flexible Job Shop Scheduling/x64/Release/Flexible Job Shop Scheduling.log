@@ -4,7 +4,6 @@
   Player.cpp
   Instance.cpp
   ScheduleBuilder.cpp
-  TaskPool.cpp
   RandomKick.cpp
   Strategy.cpp
   Solution.cpp
@@ -18,12 +17,12 @@
   InstanceReport.cpp
   GlobalReport.cpp
   CodeExplanation.cpp
-  Compiling...
   GanttChart.cpp
+  Compiling...
   Crossover.cpp
   main.cpp
   Generating code
   Previous IPDB not found, fall back to full compilation.
-  All 2987 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 2995 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   Flexible Job Shop Scheduling.vcxproj -> D:\Thesis\Flexible Job Shop Scheduling\x64\Release\Flexible Job Shop Scheduling.exe

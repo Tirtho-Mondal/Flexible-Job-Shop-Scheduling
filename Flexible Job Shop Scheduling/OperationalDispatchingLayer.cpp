@@ -603,5 +603,111 @@ bool OperationalDispatchingLayer::descendSelfish(StrategyProfile& state, int run
     return false;   // hit the round cap (rare)
 }
 
+// ----------------------------------------------------------------------------
+//  LOCAL SEQUENCING GAME  (bilevel lower level) - routing FIXED.
+//  Steepest descent of the global potential Phi over the two strongest sequencing
+//  moves on the critical path: (1) RESEQUENCE a critical operation within its
+//  precedence window, and (2) the critical-block SWAP (N5) - two adjacent critical
+//  rival operations exchange their order on a machine. Apply the single best move
+//  until none lowers Phi: a sequencing Nash equilibrium E2(a) = a makespan local
+//  optimum for the fixed routing. (No reroute moves - that is the routing game.)
+// ----------------------------------------------------------------------------
+bool OperationalDispatchingLayer::sequencingGame(StrategyProfile& state, int run,
+                                                 SolveResult& result, int& iteration) {
+    while (true) {
+        Schedule cur = evaluate(state);
+        const long long curFit = payoff.globalPotential(cur);
+        const int curMk = cur.makespan();
+        vector<int> posOf(inst.totalOperations(), -1);
+        for (int i = 0; i < (int)state.sequence.size(); ++i) posOf[state.sequence[i]] = i;
+        vector<int> crit = criticalOperations(cur);
+
+        long long bestFit = curFit;
+        int bKind = 0, bJob = -1, bRival = -1, bMach = -1, bMk = curMk, bCBefore = 0;
+        long long bSum = cur.totalCompletion();
+        vector<int> bSeq; string bAction;
+
+        // (1) RESEQUENCE a critical operation within its window
+        for (int gid : crit) {
+            const Operation& op = inst.operationByGlobalId(gid);
+            const int j = op.jobIndex;
+            const int pos = posOf[gid];
+            const int p   = op.positionInJob;
+            const int predPos = (p == 0) ? -1
+                              : posOf[inst.job(j).operation(p - 1).globalId];
+            const int succPos = (p + 1 >= inst.job(j).operationCount())
+                              ? (int)state.sequence.size()
+                              : posOf[inst.job(j).operation(p + 1).globalId];
+            const int slots[4] = { predPos + 1, succPos - 1, pos - 1, pos + 1 };
+            int lastT = -999;
+            for (int t : slots) {
+                if (t <= predPos || t >= succPos || t == pos || t < 0 || t == lastT) continue;
+                lastT = t;
+                vector<int> cand = state.resequenced(pos, t);
+                state.sequence.swap(cand);
+                const Schedule s = evaluate(state);
+                const long long f = payoff.globalPotential(s);
+                state.sequence.swap(cand);
+                if (f < bestFit) {
+                    bestFit = f; bKind = 1; bSeq = cand; bJob = j; bRival = -1; bMach = -1;
+                    bMk = s.makespan(); bSum = s.totalCompletion(); bCBefore = cur.jobCompletion(j);
+                    bAction = "seq move " + op.label() + " to slot " + to_string(t + 1);
+                }
+            }
+        }
+
+        // (2) critical-block SWAP (N5): two adjacent CRITICAL rival ops swap order
+        {
+            vector<char> isCrit(inst.totalOperations(), 0);
+            for (int g : crit) isCrit[g] = 1;
+            vector<vector<int>> perM(inst.numMachines());
+            for (int gid = 0; gid < inst.totalOperations(); ++gid) perM[cur.machineOf(gid)].push_back(gid);
+            for (auto& v : perM)
+                sort(v.begin(), v.end(), [&](int a, int b){ return cur.startOf(a) < cur.startOf(b); });
+            for (int m = 0; m < inst.numMachines(); ++m) {
+                auto& v = perM[m];
+                for (size_t q = 0; q + 1 < v.size(); ++q) {
+                    const int u = v[q], w = v[q + 1];
+                    if (!isCrit[u] || !isCrit[w]) continue;
+                    const Operation& ou = inst.operationByGlobalId(u);
+                    const Operation& ow = inst.operationByGlobalId(w);
+                    if (ou.jobIndex == ow.jobIndex) continue;
+                    vector<int> cand = state.resequenced(posOf[w], posOf[u]);
+                    if (!precedenceOK(inst, cand)) continue;
+                    state.sequence.swap(cand);
+                    const Schedule s = evaluate(state);
+                    const long long f = payoff.globalPotential(s);
+                    state.sequence.swap(cand);
+                    if (f < bestFit) {
+                        bestFit = f; bKind = 2; bSeq = cand; bJob = ou.jobIndex; bRival = ow.jobIndex;
+                        bMach = m; bMk = s.makespan(); bSum = s.totalCompletion();
+                        bCBefore = cur.jobCompletion(ou.jobIndex);
+                        bAction = "seq swap " + ow.label() + " ahead of " + ou.label() +
+                                  " on M" + to_string(m + 1);
+                    }
+                }
+            }
+        }
+
+        if (bKind == 0) { result.equilibriumReached = true; return true; }   // sequencing NE (Phi local min)
+
+        state.sequence = bSeq;
+        ++result.acceptedMoves;
+        if ((int)result.trace.size() < maxTraceRows) {
+            const Schedule after = evaluate(state);
+            MoveRecord rec;
+            rec.iteration = ++iteration; rec.run = run; rec.job = bJob;
+            rec.rival = bRival; rec.contestMachine = bMach;
+            rec.action = bAction; rec.oldCost = curMk; rec.newCost = bMk;
+            rec.makespan = bMk; rec.sumCompletion = bSum;
+            rec.moveType = (bKind == 2) ? "seq-swap" : "seq-move";
+            rec.moverCBefore = bCBefore; rec.moverCAfter = after.jobCompletion(bJob);
+            if (bRival >= 0) { rec.rivalCBefore = cur.jobCompletion(bRival);
+                               rec.rivalCAfter  = after.jobCompletion(bRival); }
+            result.trace.push_back(rec);
+        } else { ++iteration; }
+    }
+}
+
 
 } // namespace fjs

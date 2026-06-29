@@ -48,6 +48,12 @@ public:
     bool descendSelfish(StrategyProfile& state, int run,
                         SolveResult& result, int& iteration);
 
+    // LOCAL SEQUENCING GAME (bilevel lower level): with the ROUTING FIXED, each job
+    // best-responds on its OWN payoff by re-sequencing one of its operations, until
+    // no job can improve - a sequencing Nash equilibrium E2(a). No reroute moves.
+    bool sequencingGame(StrategyProfile& state, int run,
+                        SolveResult& result, int& iteration);
+
     long evaluations() const { return evals; }
 
 private:

@@ -32,6 +32,12 @@ public:
     //     MEASURE the PoA / the toll's effect, not to get the best makespan.
     int selfish         = 0;
 
+    // BILEVEL GAME (game theory on BOTH layers): the GLOBAL layer is a routing game
+    // (jobs best-respond on their machine assignment, anticipating the sequencing
+    // equilibrium) wrapped around the LOCAL sequencing game. Converges to a subgame-
+    // perfect Nash equilibrium. 1 = on (overrides selfish/potential engine).
+    int bilevel         = 0;
+
     // Inertia for the simultaneous (independent) selfish game: probability that a
     // job which wants to deviate actually moves in a given round. <1 damps the
     // oscillation of fully-synchronous play so the dynamics converge to a Nash
