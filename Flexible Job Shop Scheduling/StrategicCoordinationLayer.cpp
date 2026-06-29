@@ -13,6 +13,7 @@
 #include <climits>
 #include <numeric>
 #include <cstdlib>
+#include <ostream>
 
 using namespace std;
 
@@ -21,6 +22,18 @@ namespace fjs {
 StrategicCoordinationLayer::StrategicCoordinationLayer(const Instance& inst,
         const PayoffFunction& payoff, unsigned seed, const AlgorithmConfig& cfg)
     : inst(inst), payoff(payoff), rng(seed), cfg(cfg), op(inst, payoff, cfg) {}
+
+// Stream one accepted routing move to the live per-instance file (flushed at once so
+// the file grows in real time). No-op when no live sink is attached.
+void StrategicCoordinationLayer::logLive(const MoveRecord& rec) const {
+    if (!liveOut) return;
+    (*liveOut) << "iter " << rec.iteration << "  run " << rec.run << "  "
+               << (rec.layer.empty() ? "-" : rec.layer) << "  "
+               << inst.job(rec.job).label() << "  " << rec.action
+               << "   Cmax " << (long long)rec.oldCost << " -> " << (long long)rec.newCost
+               << "\n";
+    liveOut->flush();
+}
 
 // ---- routing-plan proposals ------------------------------------------------
 
@@ -79,8 +92,26 @@ void StrategicCoordinationLayer::considerIncumbent(SolveResult& result, long lon
 // two-stage game.
 void StrategicCoordinationLayer::playRoutingGame(StrategyProfile& state, int run,
         SolveResult& result, long long& bestFit, int& iteration) {
-    const double EPS = 1e-9;
     const int MAX_SWEEPS = 80;
+
+    // Record one accepted routing move as a trace row, tagged Layer 1 (Strategic
+    // Coordination Layer = the routing game). The caller fills the BEFORE-known fields
+    // of `rec` (job/rival/op/alts/oldCost/moveType + the before-completions); this
+    // finalises the AFTER fields and captures stateBefore so the report can redraw the
+    // routing-game BIMATRIX for this move (mirrors the coordinated engine's detail).
+    auto logRouting = [&](MoveRecord rec, const StrategyProfile& before, const Schedule& aft) {
+        const bool wantDetail = ((int)result.trace.size() < cfg.traceRows);
+        ++result.acceptedMoves;
+        if ((int)result.trace.size() < cfg.traceRows) {
+            rec.iteration = ++iteration; rec.run = run; rec.layer = "L1(SCL)";
+            rec.newCost  = aft.makespan(); rec.makespan = aft.makespan();
+            rec.sumCompletion = aft.totalCompletion();
+            rec.moverCAfter = aft.jobCompletion(rec.job);
+            if (rec.rival >= 0) rec.rivalCAfter = aft.jobCompletion(rec.rival);
+            if (wantDetail) { rec.hasDetail = true; rec.stateBefore = before; }
+            result.trace.push_back(rec); logLive(rec);
+        } else { ++iteration; }
+    };
 
     for (int sweep = 0; sweep < MAX_SWEEPS; ++sweep) {
         // LOCAL layer: re-equilibrate the SEQUENCING GAME once for the current routing.
@@ -113,7 +144,22 @@ void StrategicCoordinationLayer::playRoutingGame(StrategyProfile& state, int run
                 state.reroute(gid, curAlt);                    // revert (one decode per candidate)
                 if (f < bestFit) { bestFit = f; bestAlt = alt; }
             }
-            if (bestAlt >= 0) { state.reroute(gid, bestAlt); improvedAny = true; ++result.acceptedMoves; }
+            if (bestAlt >= 0) {
+                const Schedule bef = op.evaluate(state);
+                MoveRecord rec;
+                rec.job = opc.jobIndex; rec.rival = -1;
+                rec.contestMachine = opc.machineOfAlternative(bestAlt);
+                rec.action = "route " + opc.label() + " to M" +
+                             to_string(opc.machineOfAlternative(bestAlt) + 1);
+                rec.oldCost = bef.makespan(); rec.moveType = "reroute";
+                rec.moverOp = gid; rec.rivalOp = -1;
+                rec.moverAltBefore = curAlt; rec.moverAltAfter = bestAlt;
+                rec.moverCBefore = bef.jobCompletion(opc.jobIndex);
+                StrategyProfile before = state;
+                state.reroute(gid, bestAlt);
+                improvedAny = true;
+                logRouting(rec, before, op.evaluate(state));
+            }
         }
 
         // (2) MUTUAL reroute: two adjacent CRITICAL rival ops on a machine jointly
@@ -151,8 +197,23 @@ void StrategicCoordinationLayer::playRoutingGame(StrategyProfile& state, int run
                             state.reroute(u, cu); state.reroute(w, cw);
                             if (f < bestF) { bestF = f; bAu = au; bAw = aw; }
                         }
-                    if (bAu >= 0) { state.reroute(u, bAu); state.reroute(w, bAw);
-                                    improvedAny = true; ++result.acceptedMoves; }
+                    if (bAu >= 0) {
+                        const Schedule bef = op.evaluate(state);
+                        MoveRecord rec;
+                        rec.job = ou.jobIndex; rec.rival = ow.jobIndex; rec.contestMachine = m;
+                        rec.action = "joint reroute " + ou.label() + " & " + ow.label() +
+                                     " on M" + to_string(m + 1);
+                        rec.oldCost = bef.makespan(); rec.moveType = "mutual";
+                        rec.moverOp = u; rec.rivalOp = w;
+                        rec.moverAltBefore = cu; rec.moverAltAfter = bAu;
+                        rec.rivalAltBefore = cw; rec.rivalAltAfter = bAw;
+                        rec.moverCBefore = bef.jobCompletion(ou.jobIndex);
+                        rec.rivalCBefore = bef.jobCompletion(ow.jobIndex);
+                        StrategyProfile before = state;
+                        state.reroute(u, bAu); state.reroute(w, bAw);
+                        improvedAny = true;
+                        logRouting(rec, before, op.evaluate(state));
+                    }
                 }
             }
         }

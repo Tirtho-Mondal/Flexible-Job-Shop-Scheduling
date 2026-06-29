@@ -22,6 +22,7 @@
 #include "AlgorithmConfig.h"
 #include "SolveResult.h"
 #include <vector>
+#include <iosfwd>
 
 using namespace std;
 
@@ -56,11 +57,19 @@ public:
 
     long evaluations() const { return evals; }
 
+    // Optional LIVE trace: if set, every accepted move is streamed (and flushed) to
+    // this stream as it happens, so the per-instance file updates in real time.
+    void setLiveTrace(std::ostream* os) { liveOut = os; }
+
 private:
     const Instance&       inst;
     const PayoffFunction& payoff;
     AlgorithmConfig       cfg;
 
+    // Stream one accepted move to the live trace (no-op if liveOut is null).
+    void logLive(const MoveRecord& rec) const;
+
+    std::ostream* liveOut = nullptr;   // live per-move trace sink (not owned)
     long evals        = 0;   // schedule decodes performed
     int  maxTraceRows = 2500; // set from cfg.traceRows in the constructor
     int  detailRows   = 2500;

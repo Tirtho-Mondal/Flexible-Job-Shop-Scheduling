@@ -376,11 +376,25 @@ int main() {
             // Same instance name -> same seed, so re-running reproduces the numbers.
             const unsigned seed = (unsigned)(hash<string>{}(family + "/" + name) ^ 0x9E3779B9u);
             StrategicCoordinationLayer solver(inst, payoff, seed, algo);
+
+            // LIVE per-instance trace: open the log now and stream every accepted move
+            // into it as the two-layer game plays, so the file updates in REAL TIME.
+            // When the instance finishes it is overwritten with the full report below.
+            const string logPath = (outDir / (family + "_" + name + "_log.txt")).string();
+            ofstream live(logPath);
+            live << "LIVE TRACE - accepted best-response moves stream here as the game plays.\n"
+                    "(replaced by the full structured report when this instance finishes)\n\n"
+                    "format:  iter <n>  run <r>  <Layer>  <Job>  <action>   Cmax old -> new\n"
+                    "  Layer: L1(SCL) = routing game | L2(ODL) = sequencing game\n"
+                    "------------------------------------------------------------------------\n";
+            live.flush();
+            solver.setLiveTrace(&live);
             const SolveResult result = solver.solve();
+            solver.setLiveTrace(nullptr);
+            live.close();
 
             const int bks = literature.lookup(family, name);
-            InstanceReport::write((outDir / (family + "_" + name + "_log.txt")).string(),
-                                  inst, result, payoff, bks, algo.selfish != 0);
+            InstanceReport::write(logPath, inst, result, payoff, bks, algo.selfish != 0);
             summary.append(inst, result, bks);
 
             // Gantt chart of the best schedule (one colour per job).

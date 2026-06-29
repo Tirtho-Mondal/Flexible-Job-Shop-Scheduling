@@ -34,6 +34,8 @@ public:
     int    rival          = -1;    // the rival job in a two-player move, else -1 (solo move)
     int    contestMachine = -1;    // the contested machine (0-based) for a two-player move
     string moveType;          // "reroute" | "resequence" | "swap" | "mutual" | "reroute+swap" | ...
+    string layer;             // which game layer produced it: "L1(SCL)" routing game |
+                              //   "L2(ODL)" sequencing game. Empty = derive from moveType.
     int    moverCBefore   = 0, moverCAfter = 0;   // mover job's completion C before/after
     int    rivalCBefore   = 0, rivalCAfter = 0;   // rival job's completion C before/after
 

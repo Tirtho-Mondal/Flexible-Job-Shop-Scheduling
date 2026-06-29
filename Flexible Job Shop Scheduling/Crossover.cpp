@@ -63,10 +63,14 @@ StrategyProfile Crossover::oux(const StrategyProfile& a, const StrategyProfile& 
 
     const Schedule sa = ScheduleBuilder::build(inst, a);
     const Schedule sb = ScheduleBuilder::build(inst, b);
+    // Per-job parent selection by the OWN-interest cost (not the makespan-aligned U_i,
+    // which is nearly identical across jobs under the stable payoff and would collapse
+    // the recombination): a job inherits from the parent where IT is individually
+    // happier - i.e. where its own cost is lower.
     vector<char> fromA(inst.numJobs(), 0);
     for (int j = 0; j < inst.numJobs(); ++j)
-        fromA[j] = (payoff.forPlayer(sa, inst, j).utility >=
-                    payoff.forPlayer(sb, inst, j).utility) ? 1 : 0;
+        fromA[j] = (payoff.forPlayer(sa, inst, j).ownCost <=
+                    payoff.forPlayer(sb, inst, j).ownCost) ? 1 : 0;
 
     for (int gid = 0; gid < n; ++gid) {
         const int j = inst.operationByGlobalId(gid).jobIndex;

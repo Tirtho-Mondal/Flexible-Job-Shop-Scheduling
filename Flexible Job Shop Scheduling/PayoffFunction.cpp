@@ -62,8 +62,29 @@ Payoff PayoffFunction::forPlayer(const Schedule& s, const Instance& inst, int jo
     p.conflict   = Conf;
     p.makespan   = s.makespan();
     p.toll       = Toll;
-    p.cost       = alpha * Ci + beta * Wi + gamma * Conf + delta * p.makespan + tau * Toll;
-    p.utility    = 1.0 / (1.0 + p.cost);
+
+    // Own-interest cost: the part a job cares about for itself (lower = better).
+    const double own = alpha * Ci + beta * Wi + gamma * Conf + tau * Toll;
+    p.ownCost = own;
+
+    if (delta > 0.0) {
+        // STABLE, makespan-aligned payoff (LEXICOGRAPHIC). The integer makespan is the
+        // PRIMARY key; the own-interest cost is squashed into [0,1) via own/(1+own) and
+        // only breaks ties between EQUAL-makespan cells. Because that tie-breaker is
+        // strictly < 1, a strictly lower Cmax ALWAYS lowers the cost - so it ALWAYS
+        // gives a strictly HIGHER U_i for EVERY player. Hence the minimum-Cmax cell is
+        // always the best response / Nash equilibrium: payoff and makespan can never
+        // disagree (no more "[A] != NE" inconsistency). delta scales the makespan key
+        // (kept >= 1 so the integer ordering is never overturned).
+        const double w = (delta >= 1.0) ? delta : 1.0;
+        p.cost = w * (double)p.makespan + own / (1.0 + own);
+    } else {
+        // Pure SELFISH game (delta = 0): own cost only, makespan is NOT in the payoff,
+        // so equilibria may be inefficient - the PRICE OF ANARCHY (use for the PoA /
+        // congestion-toll study). Set delta > 0 for the stable makespan-aligned payoff.
+        p.cost = own;
+    }
+    p.utility = 1.0 / (1.0 + p.cost);
     return p;
 }
 
@@ -79,16 +100,24 @@ long long PayoffFunction::globalPotential(const Schedule& s) const {
 string PayoffFunction::description() const {
     return
         "ONE payoff function. Each job is a self-interested player; machines are\n"
-        "shared resources the jobs compete for. Job i's payoff is\n"
-        "    U_i = 1 / ( 1 + a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i )\n"
+        "shared resources the jobs compete for. Let the job's OWN-interest cost be\n"
+        "    own_i = a*C_i + b*W_i + g*Conf_i + t*Toll_i        (lower = better)\n"
         "with C_i = completion, W_i = waiting (= C_i - processing), Conf_i =\n"
-        "machine-conflict load (busier chosen machines cost more), Cmax the shared\n"
-        "makespan, and Toll_i the Pigouvian CONGESTION TOLL: the delay externality\n"
-        "job i imposes on rival jobs queued behind it on its machines (the novel\n"
-        "coordination device that reduces the price of anarchy). A schedule is a\n"
-        "Nash equilibrium when no job can raise U_i by changing its own machine\n"
-        "assignment or sequence position alone. The reported social objective is\n"
-        "the makespan Cmax.";
+        "machine-conflict load (busier chosen machines cost more), and Toll_i the\n"
+        "Pigouvian CONGESTION TOLL (the delay externality job i imposes on rivals\n"
+        "queued behind it - the coordination device that lowers the price of anarchy).\n"
+        "\n"
+        "The payoff is a STABLE, makespan-aligned LEXICOGRAPHIC form:\n"
+        "    d > 0 :  U_i = 1 / ( 1 + d*Cmax + own_i/(1+own_i) )   (default, STABLE)\n"
+        "    d = 0 :  U_i = 1 / ( 1 + own_i )                      (pure selfish)\n"
+        "When d>0 the integer makespan is the PRIMARY key and own_i/(1+own_i) in [0,1)\n"
+        "only breaks ties between equal-makespan cells. Therefore a strictly lower Cmax\n"
+        "ALWAYS gives a strictly higher U_i for EVERY player: payoff and makespan can\n"
+        "never disagree, so the minimum-makespan cell is always the Nash equilibrium.\n"
+        "When d=0 the makespan is absent from the payoff, so selfish equilibria may be\n"
+        "inefficient (the PRICE OF ANARCHY). A schedule is a Nash equilibrium when no\n"
+        "job can raise U_i by changing its own machine/sequence alone. The reported\n"
+        "social objective is the makespan Cmax.";
 }
 
 } // namespace fjs

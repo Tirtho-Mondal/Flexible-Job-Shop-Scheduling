@@ -16,6 +16,21 @@ using namespace std;
 
 namespace fjs {
 
+// Which game layer an accepted move belongs to: L1(SCL) = routing game (Strategic
+// Coordination Layer), L2(ODL) = sequencing game (Operational Dispatching Layer).
+// Uses the explicit tag when present, else infers it from the move type.
+static string layerOf(const MoveRecord& m) {
+    if (!m.layer.empty()) return m.layer;
+    const string& t = m.moveType;
+    const bool routing = t.find("reroute") != string::npos || t.find("mutual") != string::npos;
+    const bool seq     = t.find("seq")     != string::npos || t.find("swap")   != string::npos
+                       || t.find("resequence") != string::npos;
+    if (routing && seq) return "L1+L2";
+    if (routing)        return "L1(SCL)";
+    if (seq)            return "L2(ODL)";
+    return "-";
+}
+
 static double flexibilityOf(const Instance& inst) {
     long alt = 0, ops = 0;
     for (int j = 0; j < inst.numJobs(); ++j)
@@ -126,13 +141,13 @@ static bool writePairGame(ofstream& f, const Instance& inst, const PayoffFunctio
     f << "====================================================================\n";
 
     // ---- (1) the payoff bimatrix in the Job1 x Job2 table layout ----
-    const int WL = 13, WC = 24;
+    const int WL = 13, WC = 30;
     auto bar = [&]() {
         f << "  +" << string(WL, '-') << "+";
         for (int b = 0; b < nb; ++b) f << string(WC, '-') << "+";
         f << "\n";
     };
-    f << "\n(1) PAYOFF BIMATRIX   (each cell = payoff of Player 1 , payoff of Player 2)\n";
+    f << "\n(1) PAYOFF BIMATRIX   (each cell = payoff of Player 1 , payoff of Player 2 ; C<Cmax>)\n";
     bar();
     f << "  |" << pad(" Job1 \\ Job2", WL) << "|";
     for (int b = 0; b < nb; ++b)
@@ -142,7 +157,7 @@ static bool writePairGame(ofstream& f, const Instance& inst, const PayoffFunctio
     for (int a = 0; a < na; ++a) {
         f << "  |" << pad(" Job1: M" + to_string(oa.machineOfAlternative(a) + 1), WL) << "|";
         for (int b = 0; b < nb; ++b) {
-            string cell = fmtU(Ua[a][b]) + ", " + fmtU(Ub[a][b]);
+            string cell = fmtU(Ua[a][b]) + ", " + fmtU(Ub[a][b]) + "  C" + to_string(Cm[a][b]);
             if (a == a0 && b == b0) cell += " *";
             if (isNash(a, b))       cell += " NASH";
             f << pad(" " + cell, WC) << "|";
@@ -154,8 +169,9 @@ static bool writePairGame(ofstream& f, const Instance& inst, const PayoffFunctio
 
     // ---- (2) how every payoff in the table is calculated ----
     f << "\n(2) PAYOFF CALCULATION   (how each cell above is obtained)\n";
-    f << "  U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax)   with  a=" << fmtU(payoff.alpha)
-      << "  b=" << fmtU(payoff.beta) << "  g=" << fmtU(payoff.gamma) << "  d=" << fmtU(payoff.delta) << "\n";
+    f << "  U_i = 1/(1 + d*Cmax + own_i/(1+own_i)),  own_i = a*C_i + b*W_i + g*Conf_i + t*Toll_i   with  a="
+      << fmtU(payoff.alpha) << "  b=" << fmtU(payoff.beta) << "  g=" << fmtU(payoff.gamma)
+      << "  d=" << fmtU(payoff.delta) << "  (d>0 => lower Cmax always gives higher U_i)\n";
     f << "  " << pad("strategy pair", 24) << pad("C_" + LA, 8) << pad("C_" + LB, 8)
       << pad("Cmax", 8) << pad("U_" + LA, 10) << pad("U_" + LB, 10) << "note\n";
     for (int a = 0; a < na; ++a)
@@ -241,26 +257,28 @@ static void writeMoveBimatrix(ofstream& f, const Instance& inst, const PayoffFun
     if (na > 6 || nb > 6) { f << "  (routing game too large to print)\n"; return; }
 
     vector<vector<double>> Ua(na, vector<double>(nb)), Ub(na, vector<double>(nb));
+    vector<vector<int>>    Cm(na, vector<int>(nb));
     for (int a = 0; a < na; ++a)
         for (int b = 0; b < nb; ++b) {
             StrategyProfile p = base; p.reroute(oaGid, a); p.reroute(obGid, b);
             Schedule s = ScheduleBuilder::build(inst, p);
             Ua[a][b] = payoff.forPlayer(s, inst, jobA).utility;
             Ub[a][b] = payoff.forPlayer(s, inst, jobB).utility;
+            Cm[a][b] = s.makespan();
         }
     auto isNash = [&](int a, int b) {
         for (int x = 0; x < na; ++x) if (Ua[x][b] > Ua[a][b] + 1e-12) return false;
         for (int y = 0; y < nb; ++y) if (Ub[a][y] > Ub[a][b] + 1e-12) return false;
         return true;
     };
-    const int WL = 13, WC = 26;
+    const int WL = 13, WC = 30;
     auto bar = [&]() {
         f << "  +" << string(WL, '-') << "+";
         for (int b = 0; b < nb; ++b) f << string(WC, '-') << "+";
         f << "\n";
     };
     f << "  routing bimatrix " << LA << " (Job1) x " << LB << " (Job2)   cell = U_"
-      << LA << ", U_" << LB << "\n";
+      << LA << ", U_" << LB << " ; C<Cmax>\n";
     bar();
     f << "  |" << pad(" Job1 \\ Job2", WL) << "|";
     for (int b = 0; b < nb; ++b)
@@ -270,7 +288,7 @@ static void writeMoveBimatrix(ofstream& f, const Instance& inst, const PayoffFun
     for (int a = 0; a < na; ++a) {
         f << "  |" << pad(" Job1: M" + to_string(oa.machineOfAlternative(a) + 1), WL) << "|";
         for (int b = 0; b < nb; ++b) {
-            string cell = fmtU(Ua[a][b]) + ", " + fmtU(Ub[a][b]);
+            string cell = fmtU(Ua[a][b]) + ", " + fmtU(Ub[a][b]) + "  C" + to_string(Cm[a][b]);
             if (a == aBefore && b == bBefore) cell += " [B]";
             if (a == aAfter  && b == bAfter)  cell += " [A]";
             if (isNash(a, b))                 cell += " NE";
@@ -280,7 +298,9 @@ static void writeMoveBimatrix(ofstream& f, const Instance& inst, const PayoffFun
     }
     bar();
     f << "  legend: [B] = before this move,  [A] = after (the cell the solver chose),"
-      << "  NE = Nash equilibrium\n";
+      << "  NE = own-payoff Nash equilibrium,  C<n> = makespan of that cell\n";
+    f << "  note: the solver picks the LOWEST-Cmax cell [A], which need not be the\n"
+      << "  own-payoff NE - when [A] != NE that gap is the price of anarchy.\n";
 }
 
 void InstanceReport::write(const string& path, const Instance& inst,
@@ -308,7 +328,9 @@ void InstanceReport::write(const string& path, const Instance& inst,
     f << "-------------------------------------------------\n";
     f << "  Player      : a job - the decision-maker\n";
     f << "  Strategy    : its machine choice per operation + its dispatch positions\n";
-    f << "  Payoff      : U_i = 1/(1 + a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i)  (higher = better)\n";
+    f << "  Payoff      : U_i = 1/(1 + d*Cmax + own_i/(1+own_i)),  own_i = a*C_i + b*W_i + g*Conf_i + t*Toll_i\n";
+    f << "                (d>0: STABLE makespan-aligned - lower Cmax => higher U_i for every player;\n";
+    f << "                 d=0: pure selfish own_i only, with a price of anarchy)\n";
     f << "  Game        : all jobs competing for the shared machines\n";
     f << "  Solution    : the decoded schedule once every job fixes its strategy\n";
     f << "  Decision    : each player plays its BEST RESPONSE; the NASH EQUILIBRIUM\n";
@@ -358,23 +380,27 @@ void InstanceReport::write(const string& path, const Instance& inst,
     f << "CRITICAL-PATH BEST-RESPONSE ITERATIONS (one row per accepted move)\n";
     f << "Each row: the makespan-critical player re-routes or re-sequences a\n";
     f << "critical operation, lowering the makespan.\n";
+    f << "Layer: L1(SCL) = Strategic Coordination Layer (routing game) | "
+         "L2(ODL) = Operational Dispatching Layer (sequencing game).\n";
     f << "-----------------------------------------------------------------\n";
     f << left
       << setw(7)  << "Iter"
       << setw(5)  << "Run"
+      << setw(9)  << "Layer"
       << setw(6)  << "Job"
       << setw(46) << "Action (critical-path deviation)"
       << right
       << setw(9)  << "Cmax_old"
       << setw(9)  << "Cmax_new"
       << setw(11) << "SumC" << "\n";
-    f << string(101, '-') << "\n";
+    f << string(110, '-') << "\n";
     for (const MoveRecord& m : result.trace) {
         string act = m.action;
         if (act.size() > 45) act = act.substr(0, 42) + "...";
         f << left
           << setw(7)  << m.iteration
           << setw(5)  << m.run
+          << setw(9)  << layerOf(m)
           << setw(6)  << inst.job(m.job).label()
           << setw(46) << act
           << right

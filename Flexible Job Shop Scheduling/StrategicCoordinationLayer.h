@@ -20,6 +20,7 @@
 #include "FictitiousPlay.h"
 #include "OperationalDispatchingLayer.h"
 #include <random>
+#include <iosfwd>
 
 using namespace std;
 
@@ -31,6 +32,10 @@ public:
                                unsigned seed, const AlgorithmConfig& cfg = {});
 
     SolveResult solve();
+
+    // Optional LIVE trace: stream every accepted move (routing AND sequencing) to this
+    // stream as it happens, so the per-instance file updates in real time during solve().
+    void setLiveTrace(std::ostream* os) { liveOut = os; op.setLiveTrace(os); }
 
 private:
     // ---- routing-plan proposals (the strategic decisions; NO greedy construction) ----
@@ -49,11 +54,15 @@ private:
     void playRoutingGame(StrategyProfile& state, int run,
                          SolveResult& result, long long& bestFit, int& iteration);
 
+    // Stream one accepted routing move to the live trace (no-op if liveOut is null).
+    void logLive(const MoveRecord& rec) const;
+
     const Instance&       inst;
     const PayoffFunction& payoff;
     mt19937               rng;
     AlgorithmConfig       cfg;
     OperationalDispatchingLayer op;   // Layer 2: the local conflict game
+    std::ostream*         liveOut = nullptr;   // live per-move trace sink (not owned)
 };
 
 } // namespace fjs

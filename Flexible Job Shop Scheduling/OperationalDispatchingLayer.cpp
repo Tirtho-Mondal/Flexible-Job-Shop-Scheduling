@@ -9,6 +9,7 @@
 #include <climits>
 #include <numeric>
 #include <string>
+#include <ostream>
 
 using namespace std;
 
@@ -19,6 +20,18 @@ OperationalDispatchingLayer::OperationalDispatchingLayer(const Instance& inst,
     : inst(inst), payoff(payoff), cfg(cfg) {
     maxTraceRows = max(0, cfg.traceRows);
     detailRows   = maxTraceRows;
+}
+
+// Stream one accepted move to the live per-instance file (flushed immediately so the
+// file grows in real time). No-op when no live sink is attached.
+void OperationalDispatchingLayer::logLive(const MoveRecord& rec) const {
+    if (!liveOut) return;
+    (*liveOut) << "iter " << rec.iteration << "  run " << rec.run << "  "
+               << (rec.layer.empty() ? "-" : rec.layer) << "  "
+               << inst.job(rec.job).label() << "  " << rec.action
+               << "   Cmax " << (long long)rec.oldCost << " -> " << (long long)rec.newCost
+               << "\n";
+    liveOut->flush();
 }
 
 Schedule OperationalDispatchingLayer::evaluate(const StrategyProfile& state) {
@@ -355,7 +368,7 @@ void OperationalDispatchingLayer::descend(StrategyProfile& state, int run,
                 rec.rivalAltAfter  = (movePartnerGid >= 0) ? state.alternativeOf(movePartnerGid) : -1;
                 rec.stateBefore    = beforeProfile;
             }
-            result.trace.push_back(rec);
+            result.trace.push_back(rec); logLive(rec);
         } else { ++iteration; }
 
         long long f = (long long)moveMk * 1000000LL + moveSum;
@@ -483,7 +496,7 @@ bool OperationalDispatchingLayer::descendSelfish(StrategyProfile& state, int run
                 rec.rival = -1;
                 rec.moveType = (bKind == 1) ? "selfish-reroute" : "selfish-resequence";
                 rec.moverCBefore = cBefore; rec.moverCAfter = after.jobCompletion(j);
-                result.trace.push_back(rec);
+                result.trace.push_back(rec); logLive(rec);
             } else { ++iteration; }
         }
 
@@ -592,7 +605,7 @@ bool OperationalDispatchingLayer::descendSelfish(StrategyProfile& state, int run
                     rec.moveType = (pKind == 2) ? "pairwise-swap" : "pairwise-mutual";
                     rec.moverCBefore = cBeforeI; rec.moverCAfter = after.jobCompletion(pI);
                     rec.rivalCBefore = cBeforeJ; rec.rivalCAfter = after.jobCompletion(pJ);
-                    result.trace.push_back(rec);
+                    result.trace.push_back(rec); logLive(rec);
                 } else { ++iteration; }
             }
         }
@@ -701,10 +714,12 @@ bool OperationalDispatchingLayer::sequencingGame(StrategyProfile& state, int run
             rec.action = bAction; rec.oldCost = curMk; rec.newCost = bMk;
             rec.makespan = bMk; rec.sumCompletion = bSum;
             rec.moveType = (bKind == 2) ? "seq-swap" : "seq-move";
+            rec.layer = "L2(ODL)";                 // local Sequencing Game (Operational Dispatching Layer)
+            if ((int)result.trace.size() < detailRows) rec.hasDetail = true;  // show in per-iteration detail
             rec.moverCBefore = bCBefore; rec.moverCAfter = after.jobCompletion(bJob);
             if (bRival >= 0) { rec.rivalCBefore = cur.jobCompletion(bRival);
                                rec.rivalCAfter  = after.jobCompletion(bRival); }
-            result.trace.push_back(rec);
+            result.trace.push_back(rec); logLive(rec);
         } else { ++iteration; }
     }
 }

@@ -38,7 +38,10 @@ public:
     double conflict   = 0;   // Conf_i
     double makespan   = 0;   // Cmax (the shared global term)
     double toll       = 0;   // Toll_i (Pigouvian congestion toll - NOVELTY)
-    double cost       = 0;   // a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i
+    double ownCost    = 0;   // a*C_i + b*W_i + g*Conf_i + t*Toll_i (own-interest only,
+                             //   NO makespan) - a per-job discriminating signal for the
+                             //   payoff-guided crossover, independent of the stable U_i.
+    double cost       = 0;   // the cost inside U_i (makespan-dominated when delta>0)
     double utility    = 0;   // U_i = 1 / (1 + cost)   <-- the payoff value
 };
 
