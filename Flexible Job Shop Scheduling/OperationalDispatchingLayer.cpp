@@ -85,7 +85,7 @@ void OperationalDispatchingLayer::descend(StrategyProfile& state, int run,
     // the loop ends only when the schedule has converged (kind == 0).
     while (true) {
         Schedule cur = evaluate(state);
-        const long long curFit = payoff.fitness(cur);
+        const long long curFit = payoff.globalPotential(cur);
         const int curMk = cur.makespan();
 
         // Positions of every operation in the current dispatch order.
@@ -162,7 +162,7 @@ void OperationalDispatchingLayer::descend(StrategyProfile& state, int run,
                     if (swapOK) {
                         state.sequence.swap(swapSeq);
                         Schedule s = evaluate(state);
-                        long long f = payoff.fitness(s);
+                        long long f = payoff.globalPotential(s);
                         state.sequence.swap(swapSeq);
                         if (f < pairFit) {
                             pairFit = f; pairKind = 2; pairGid = u; pairSeq = swapSeq;
@@ -183,7 +183,7 @@ void OperationalDispatchingLayer::descend(StrategyProfile& state, int run,
                                 if (au == curU && aw == curW) continue;
                                 state.reroute(u, au); state.reroute(w, aw);
                                 Schedule s = evaluate(state);
-                                long long f = payoff.fitness(s);
+                                long long f = payoff.globalPotential(s);
                                 state.reroute(u, curU); state.reroute(w, curW);   // revert
                                 if (f < pairFit) {
                                     pairFit = f; pairKind = 3;
@@ -207,7 +207,7 @@ void OperationalDispatchingLayer::descend(StrategyProfile& state, int run,
                             state.reroute(u, au);
                             state.sequence.swap(swapSeq);
                             Schedule s = evaluate(state);
-                            long long f = payoff.fitness(s);
+                            long long f = payoff.globalPotential(s);
                             state.sequence.swap(swapSeq);
                             state.reroute(u, curU);
                             if (f < pairFit) {
@@ -245,7 +245,7 @@ void OperationalDispatchingLayer::descend(StrategyProfile& state, int run,
                     if (alt == curAlt) continue;
                     state.reroute(gid, alt);
                     Schedule s = evaluate(state);
-                    long long f = payoff.fitness(s);
+                    long long f = payoff.globalPotential(s);
                     state.reroute(gid, curAlt);
                     if (f < soloFit) {
                         soloFit = f; soloKind = 1; soloGid = gid; soloAlt = alt;
@@ -272,7 +272,7 @@ void OperationalDispatchingLayer::descend(StrategyProfile& state, int run,
                     vector<int> cand = state.resequenced(pos, t);
                     state.sequence.swap(cand);
                     Schedule s = evaluate(state);
-                    long long f = payoff.fitness(s);
+                    long long f = payoff.globalPotential(s);
                     state.sequence.swap(cand);
                     if (f < soloFit) {
                         soloFit = f; soloKind = 2; soloGid = gid; soloSeq = move(cand);

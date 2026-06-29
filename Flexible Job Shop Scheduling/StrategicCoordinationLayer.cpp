@@ -7,7 +7,6 @@
 #include "StrategicCoordinationLayer.h"
 #include "ScheduleBuilder.h"
 #include "NashChecker.h"
-#include "TaskPool.h"
 #include "RandomKick.h"
 #include "Crossover.h"
 #include <algorithm>
@@ -53,38 +52,6 @@ StrategyProfile StrategicCoordinationLayer::randomProfile() {
     return state;
 }
 
-// Reijnen et al. "Global" machine selection: greedily balance the machine workloads.
-StrategyProfile StrategicCoordinationLayer::greedyGlobalProfile() {
-    StrategyProfile state(inst.totalOperations());
-    vector<long long> load(inst.numMachines(), 0);
-    for (int gid = 0; gid < inst.totalOperations(); ++gid) {
-        const Operation& op2 = inst.operationByGlobalId(gid);
-        int bestAlt = 0; long long bestFinish = LLONG_MAX;
-        for (int a = 0; a < op2.alternativeCount(); ++a) {
-            long long f = load[op2.machineOfAlternative(a)] + op2.timeOfAlternative(a);
-            if (f < bestFinish) { bestFinish = f; bestAlt = a; }
-        }
-        state.routing[gid] = bestAlt;
-        load[op2.machineOfAlternative(bestAlt)] += op2.timeOfAlternative(bestAlt);
-    }
-    fillRandomSequence(state);
-    return state;
-}
-
-// Reijnen et al. "Local" machine selection: shortest processing time per operation.
-StrategyProfile StrategicCoordinationLayer::greedyLocalProfile() {
-    StrategyProfile state(inst.totalOperations());
-    for (int gid = 0; gid < inst.totalOperations(); ++gid) {
-        const Operation& op2 = inst.operationByGlobalId(gid);
-        int bestAlt = 0, bestTime = INT_MAX;
-        for (int a = 0; a < op2.alternativeCount(); ++a)
-            if (op2.timeOfAlternative(a) < bestTime) { bestTime = op2.timeOfAlternative(a); bestAlt = a; }
-        state.routing[gid] = bestAlt;
-    }
-    fillRandomSequence(state);
-    return state;
-}
-
 // Fictitious-play seed: routing drawn from the players' learned beliefs.
 StrategyProfile StrategicCoordinationLayer::beliefProfile(const FictitiousPlay& belief) {
     StrategyProfile state(inst.totalOperations());
@@ -95,7 +62,7 @@ StrategyProfile StrategicCoordinationLayer::beliefProfile(const FictitiousPlay& 
 
 void StrategicCoordinationLayer::considerIncumbent(SolveResult& result, long long& bestFit,
                                    const StrategyProfile& state, const Schedule& sched) {
-    long long f = payoff.fitness(sched);
+    long long f = payoff.globalPotential(sched);
     if (f < bestFit) {
         bestFit = f;
         result.bestState           = state;
@@ -123,7 +90,7 @@ SolveResult StrategicCoordinationLayer::solve() {
     StrategyProfile fallbackState;
     auto updateFallback = [&](long long& ff, StrategyProfile& fs,
                               const StrategyProfile& st, const Schedule& sc) {
-        const long long f = payoff.fitness(sc);
+        const long long f = payoff.globalPotential(sc);
         if (f < ff) { ff = f; fs = st; }
     };
     const int kickStrength = max(cfg.kickMin, inst.totalOperations() / max(1, cfg.kickDiv));
@@ -140,24 +107,14 @@ SolveResult StrategicCoordinationLayer::solve() {
         : cfg.ilsPatienceBase + inst.totalOperations() / max(1, cfg.ilsPatienceDiv);
 
     for (run = 0; run < totalRun; ++run) {
-        // STRATEGIC LAYER: propose a routing plan. Run 0 is always fully random;
-        // later runs use beliefs / greedy / task-pool / crossover.
+        // STRATEGIC LAYER: propose a routing plan. NO GREEDY CONSTRUCTION - run 0 is
+        // always fully RANDOM (the required random initialisation); later runs are
+        // seeded either from the players' LEARNED BELIEFS (fictitious play) or again
+        // at random. The Nash game (Layer 2), the beliefs and the crossover are what
+        // drive the search - there is no greedy/dispatching-rule constructor.
         StrategyProfile state;
-        if (cfg.selfish) {
-            if (run > 0 && belief.ready() && (run % 2 == 0)) state = beliefProfile(belief);
-            else                                            state = randomProfile();
-        } else if (run == 0) {
-            state = randomProfile();
-        } else if (run == 1) {
-            state = TaskPool::build(inst);
-        } else {
-            int mode = run % 6;
-            if (mode == 1 && belief.ready()) state = beliefProfile(belief);
-            else if (mode == 2)              state = greedyGlobalProfile();
-            else if (mode == 3)              state = greedyLocalProfile();
-            else if (mode == 4)              state = TaskPool::build(inst);
-            else                             state = randomProfile();
-        }
+        if (run > 0 && belief.ready() && (run % 2 == 0)) state = beliefProfile(belief);
+        else                                            state = randomProfile();
 
         Schedule s0 = op.evaluate(state);
         if (run == 0) { result.initialMakespan = s0.makespan(); result.initialState = state; }
@@ -172,7 +129,7 @@ SolveResult StrategicCoordinationLayer::solve() {
         Schedule sd = op.evaluate(state);
         if (conv) considerIncumbent(result, bestFit, state, sd);     // NE only
         if (cfg.selfish) updateFallback(fallbackFit, fallbackState, state, sd);
-        long long runBestFit = payoff.fitness(sd);
+        long long runBestFit = payoff.globalPotential(sd);
 
         // Iterated local search: perturb the run's best (crossover or random kick),
         // replay the operational game, keep the best Nash endpoint by Cmax.
@@ -193,7 +150,7 @@ SolveResult StrategicCoordinationLayer::solve() {
             Schedule sw = op.evaluate(work);
             if (c2) considerIncumbent(result, bestFit, work, sw);    // NE only
             if (cfg.selfish) updateFallback(fallbackFit, fallbackState, work, sw);
-            long long f = payoff.fitness(sw);
+            long long f = payoff.globalPotential(sw);
             if (f < runBestFit) { runBestFit = f; runBest = work; stagnantKicks = 0; }
             else                ++stagnantKicks;
         }

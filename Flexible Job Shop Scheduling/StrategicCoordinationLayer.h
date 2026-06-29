@@ -33,11 +33,9 @@ public:
     SolveResult solve();
 
 private:
-    // ---- routing-plan proposals (the strategic decisions) ----
+    // ---- routing-plan proposals (the strategic decisions; NO greedy construction) ----
     StrategyProfile randomProfile();
     void            fillRandomSequence(StrategyProfile& state);
-    StrategyProfile greedyGlobalProfile();   // Reijnen "Global": load-balancing routing
-    StrategyProfile greedyLocalProfile();    // Reijnen "Local": shortest-processing-time
     StrategyProfile beliefProfile(const FictitiousPlay& belief);  // fictitious-play seed
 
     // Keep `state` if its schedule is the new global best (by makespan, then sumC).

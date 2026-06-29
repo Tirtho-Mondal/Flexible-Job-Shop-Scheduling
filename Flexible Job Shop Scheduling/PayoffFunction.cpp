@@ -67,10 +67,11 @@ Payoff PayoffFunction::forPlayer(const Schedule& s, const Instance& inst, int jo
     return p;
 }
 
-long long PayoffFunction::fitness(const Schedule& s) const {
-    // Makespan dominates (so the reported objective and best-known comparison are
-    // unaffected); total completion time breaks ties toward schedules where jobs
-    // finish earlier on average. This is the selection key, NOT a payoff.
+long long PayoffFunction::globalPotential(const Schedule& s) const {
+    // The global potential Phi: makespan dominates (so the reported objective and
+    // best-known comparison are unaffected); total completion time breaks ties toward
+    // schedules where jobs finish earlier on average. NOT a payoff - it is the
+    // potential the best-response dynamics descends.
     const long long kMakespanWeight = 1000000LL;
     return (long long)s.makespan() * kMakespanWeight + s.totalCompletion();
 }

@@ -18,9 +18,9 @@
 //  forPlayer() is that single function: it returns the payoff U_i together with
 //  the parts it is built from, so there is ONE place that defines the payoff.
 //
-//  fitness() is NOT a payoff - it is the makespan-dominated SELECTION key used to
-//  decide which schedule to keep, so the reported makespan / best-known
-//  comparison is never affected by the richer payoff.
+//  globalPotential() is NOT a payoff - it is the makespan-dominated GLOBAL POTENTIAL
+//  Phi that best-response moves descend and the solver keeps the minimum of, so the
+//  reported makespan / best-known comparison is never affected by the richer payoff.
 // ============================================================================
 
 #include "Schedule.h"
@@ -54,9 +54,11 @@ public:
     // THE payoff function: player `job`'s payoff U_i (and its parts) under `s`.
     Payoff forPlayer(const Schedule& s, const Instance& inst, int job) const;
 
-    // SELECTION key (not a payoff): makespan dominates, total completion breaks
-    // ties. This is what the solver keeps the best of.
-    long long fitness(const Schedule& s) const;
+    // GLOBAL POTENTIAL function Phi (not a payoff): makespan dominates, total
+    // completion breaks ties. Best-response moves are accepted when they lower Phi,
+    // and the solver keeps the schedule of minimum Phi - the potential-game selection
+    // key. (Formerly named fitness().)
+    long long globalPotential(const Schedule& s) const;
 
     // The reported social objective.
     int socialObjective(const Schedule& s) const { return s.makespan(); }

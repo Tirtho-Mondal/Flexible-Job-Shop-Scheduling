@@ -32,7 +32,7 @@ StableSolution::StableSolution(const Instance& inst, const StrategyProfile& prof
                 StrategyProfile deviation = profile;     // copy, change one choice
                 deviation.setAlternativeOf(gid, a);
                 Schedule s = ScheduleBuilder::build(inst, deviation);
-                if (payoff.fitness(s) < baseFit) {
+                if (payoff.globalPotential(s) < baseFit) {
                     ostringstream os;
                     os << job.label() << " could re-route " << op.label()
                        << " to M" << (op.machineOfAlternative(a) + 1)

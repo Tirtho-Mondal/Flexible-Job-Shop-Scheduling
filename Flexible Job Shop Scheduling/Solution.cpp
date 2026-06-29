@@ -37,7 +37,7 @@ Solution Solution::decode(const Instance& inst, const StrategyProfile& profile,
     sol.totalPayoff = total;
 
     // 4. the makespan-dominated fitness used to keep the best solution
-    sol.fitness = payoff.fitness(sched);
+    sol.fitness = payoff.globalPotential(sched);
     return sol;
 }
 

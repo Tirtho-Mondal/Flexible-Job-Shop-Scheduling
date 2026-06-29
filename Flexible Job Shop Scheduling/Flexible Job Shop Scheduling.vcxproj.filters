@@ -17,7 +17,6 @@
     <ClCompile Include="Player.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Instance.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="ScheduleBuilder.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="TaskPool.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="RandomKick.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Strategy.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Solution.cpp"><Filter>Source Files</Filter></ClCompile>
@@ -47,7 +46,6 @@
     <ClInclude Include="StableSolution.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="Schedule.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="ScheduleBuilder.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="TaskPool.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="RandomKick.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="PayoffFunction.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="SolveResult.h"><Filter>Header Files</Filter></ClInclude>

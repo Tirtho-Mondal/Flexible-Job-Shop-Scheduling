@@ -45,7 +45,7 @@ double Player::utility(const Schedule& sched, const PayoffFunction& payoff) cons
 bool Player::canImprove(const StrategyProfile& profile, const PayoffFunction& payoff,
                         string* how) const {
     // Fitness of the current joint outcome.
-    const long long baseFit = payoff.fitness(ScheduleBuilder::build(*inst, profile));
+    const long long baseFit = payoff.globalPotential(ScheduleBuilder::build(*inst, profile));
 
     // Try every unilateral single-operation re-route of THIS player's operations.
     const Job& job = inst->job(index);
@@ -57,7 +57,7 @@ bool Player::canImprove(const StrategyProfile& profile, const PayoffFunction& pa
             StrategyProfile deviation = profile;          // copy, change one choice
             deviation.setAlternativeOf(gid, a);
             Schedule s = ScheduleBuilder::build(*inst, deviation);
-            if (payoff.fitness(s) < baseFit) {
+            if (payoff.globalPotential(s) < baseFit) {
                 if (how) {
                     ostringstream os;
                     os << "re-route " << op.label()

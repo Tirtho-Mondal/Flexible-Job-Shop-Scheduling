@@ -332,11 +332,12 @@ void InstanceReport::write(const string& path, const Instance& inst,
     } else {
         f << "Search (COORDINATED MAKESPAN ENGINE):\n"
           << "Run 0 starts from a fully RANDOM profile; later runs are seeded by the\n"
-          << "players' learned beliefs and greedy heuristics. Each step the two rival jobs\n"
-          << "that share a critical machine play their 2-player game - swapping order or\n"
-          << "jointly re-routing to the joint best response that most lowers Cmax - with a\n"
-          << "single-job move as fallback. Moves are accepted by the makespan potential.\n"
-          << "When none helps, a RANDOM KICK perturbs the profile and the search repeats.\n\n";
+          << "players' learned beliefs (fictitious play) or at random - NO greedy/dispatch-\n"
+          << "rule construction. Each step the two rival jobs that share a critical machine\n"
+          << "play their 2-player game - swapping order or jointly re-routing to the joint\n"
+          << "best response that most lowers Cmax - with a single-job move as fallback. Moves\n"
+          << "are accepted by the makespan potential. When none helps, a CROSSOVER/random\n"
+          << "KICK perturbs the profile and the search repeats.\n\n";
     }
 
     // ---- initial random profile ----------------------------------------
