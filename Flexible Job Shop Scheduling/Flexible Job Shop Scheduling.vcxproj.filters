@@ -23,7 +23,8 @@
     <ClCompile Include="Solution.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="StableSolution.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="PayoffFunction.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="GameSolver.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="OperationalDispatchingLayer.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="StrategicCoordinationLayer.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="FjsInstanceReader.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="FictitiousPlay.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="BestKnownRegistry.cpp"><Filter>Source Files</Filter></ClCompile>
@@ -49,7 +50,9 @@
     <ClInclude Include="TaskPool.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="RandomKick.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="PayoffFunction.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="GameSolver.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="SolveResult.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="OperationalDispatchingLayer.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="StrategicCoordinationLayer.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="FjsInstanceReader.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="FictitiousPlay.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="BestKnownRegistry.h"><Filter>Header Files</Filter></ClInclude>

@@ -8,7 +8,7 @@
 // own log; allresult.txt collects the makespan-vs-best-known comparison.
 
 #include "FjsInstanceReader.h"
-#include "GameSolver.h"
+#include "StrategicCoordinationLayer.h"
 #include "PayoffFunction.h"
 #include "BestKnownRegistry.h"
 #include "InstanceReport.h"
@@ -371,7 +371,7 @@ int main() {
 
             // Same instance name -> same seed, so re-running reproduces the numbers.
             const unsigned seed = (unsigned)(hash<string>{}(family + "/" + name) ^ 0x9E3779B9u);
-            GameSolver solver(inst, payoff, seed, algo);
+            StrategicCoordinationLayer solver(inst, payoff, seed, algo);
             const SolveResult result = solver.solve();
 
             const int bks = literature.lookup(family, name);

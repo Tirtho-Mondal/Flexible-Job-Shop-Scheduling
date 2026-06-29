@@ -151,7 +151,8 @@
     <ClCompile Include="Solution.cpp" />
     <ClCompile Include="StableSolution.cpp" />
     <ClCompile Include="PayoffFunction.cpp" />
-    <ClCompile Include="GameSolver.cpp" />
+    <ClCompile Include="OperationalDispatchingLayer.cpp" />
+    <ClCompile Include="StrategicCoordinationLayer.cpp" />
     <ClCompile Include="FjsInstanceReader.cpp" />
     <ClCompile Include="FictitiousPlay.cpp" />
     <ClCompile Include="BestKnownRegistry.cpp" />
@@ -177,7 +178,9 @@
     <ClInclude Include="TaskPool.h" />
     <ClInclude Include="RandomKick.h" />
     <ClInclude Include="PayoffFunction.h" />
-    <ClInclude Include="GameSolver.h" />
+    <ClInclude Include="SolveResult.h" />
+    <ClInclude Include="OperationalDispatchingLayer.h" />
+    <ClInclude Include="StrategicCoordinationLayer.h" />
     <ClInclude Include="FjsInstanceReader.h" />
     <ClInclude Include="FictitiousPlay.h" />
     <ClInclude Include="BestKnownRegistry.h" />

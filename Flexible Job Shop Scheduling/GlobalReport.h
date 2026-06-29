@@ -12,7 +12,7 @@
 // ============================================================================
 
 #include "Instance.h"
-#include "GameSolver.h"
+#include "SolveResult.h"
 #include <string>
 #include <vector>
 #include <fstream>

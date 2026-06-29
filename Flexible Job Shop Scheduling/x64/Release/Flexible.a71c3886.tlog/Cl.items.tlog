@@ -10,9 +10,10 @@ D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Strategy.cpp
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\Solution.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\Solution.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\StableSolution.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\StableSolution.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\PayoffFunction.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\PayoffFunction.obj
-D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\GameSolver.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\GameSolver.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\OperationalDispatchingLayer.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\OperationalDispatchingLayer.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\StrategicCoordinationLayer.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\StrategicCoordinationLayer.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\FjsInstanceReader.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\FjsInstanceReader.obj
-D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\BeliefModel.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\BeliefModel.obj
+D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\FictitiousPlay.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\FictitiousPlay.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\BestKnownRegistry.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\BestKnownRegistry.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\InstanceReport.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\InstanceReport.obj
 D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\GlobalReport.cpp;D:\Thesis\Flexible Job Shop Scheduling\Flexible Job Shop Scheduling\x64\Release\GlobalReport.obj
