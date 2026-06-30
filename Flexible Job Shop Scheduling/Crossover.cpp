@@ -53,9 +53,11 @@ StrategyProfile Crossover::pox(const StrategyProfile& a, const StrategyProfile& 
 
 // ---------------------------------------------------------------------------
 //  OUX (payoff-guided): decode both parents and, for each job-player, compare its
-//  payoff U_j between them. The job inherits its WHOLE strategy (machine choices +
-//  sequence positions) from the parent in which it is "happier" (higher U_j). The
-//  job partition is decided by payoff rather than a fixed 0.5 mixing ratio.
+//  OWN-interest cost own_j between them. The job inherits its WHOLE strategy (machine
+//  choices + sequence positions) from the parent in which it is "happier" (lower
+//  own_j). The job partition is decided by payoff rather than a fixed 0.5 mixing
+//  ratio. (own_j, not the full U_i, because the stable makespan-aligned U_i is nearly
+//  identical across jobs and would collapse the recombination.)
 // ---------------------------------------------------------------------------
 StrategyProfile Crossover::oux(const StrategyProfile& a, const StrategyProfile& b, mt19937&) const {
     const int n = inst.totalOperations();

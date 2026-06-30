@@ -136,13 +136,13 @@ void StrategicCoordinationLayer::playRoutingGame(StrategyProfile& state, int run
             const int curAlt = state.alternativeOf(gid);
             const long long curFit = payoff.globalPotential(op.evaluate(state));   // global potential Phi
 
-            int bestAlt = -1; long long bestFit = curFit;
+            int bestAlt = -1; long long bestF = curFit;        // best Phi for THIS op's reroute
             for (int alt = 0; alt < opc.alternativeCount(); ++alt) {
                 if (alt == curAlt) continue;
                 state.reroute(gid, alt);
                 const long long f = payoff.globalPotential(op.evaluate(state));
                 state.reroute(gid, curAlt);                    // revert (one decode per candidate)
-                if (f < bestFit) { bestFit = f; bestAlt = alt; }
+                if (f < bestF) { bestF = f; bestAlt = alt; }
             }
             if (bestAlt >= 0) {
                 const Schedule bef = op.evaluate(state);

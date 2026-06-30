@@ -388,9 +388,9 @@ void OperationalDispatchingLayer::descend(StrategyProfile& state, int run,
 //
 //   PHASE 1 (unilateral): each job, acting ALONE, makes the single move - reroute
 //     one operation or shift one within its window - that most raises its OWN payoff
-//        U_i = 1 / (1 + a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i),
-//     accepted ONLY IF U_i strictly improves (makespan is NOT the rule, so equilibria
-//     may be inefficient = the PRICE OF ANARCHY; the toll t*Toll_i pulls them down).
+//     U_i (the stable payoff; see PayoffFunction), accepted ONLY IF U_i strictly
+//     improves. With delta = 0 the makespan is absent from U_i, so equilibria may be
+//     inefficient = the PRICE OF ANARCHY; the toll t*Toll_i pulls them down.
 //
 //   PHASE 2 (pairwise, job-vs-job): when no single job can improve, two RIVAL jobs on
 //     a shared machine deviate TOGETHER (swap order / joint reroute), accepted ONLY IF
@@ -481,6 +481,13 @@ bool OperationalDispatchingLayer::descendSelfish(StrategyProfile& state, int run
 
             if (bKind == 0) continue;          // job j already plays its best response
 
+            // Snapshot the pre-move profile so the report can redraw this job's routing
+            // game (the per-iteration NE bimatrix) for a selfish REROUTE move.
+            const bool wantDetail = ((int)result.trace.size() < detailRows);
+            const int  mAltBefore = (bKind == 1) ? state.alternativeOf(bGid) : -1;
+            StrategyProfile beforeProfile;
+            if (wantDetail) beforeProfile = state;
+
             const int cBefore = cur.jobCompletion(j);
             if (bKind == 1) state.reroute(bGid, bAlt);
             else            state.sequence = bSeq;
@@ -496,6 +503,13 @@ bool OperationalDispatchingLayer::descendSelfish(StrategyProfile& state, int run
                 rec.rival = -1;
                 rec.moveType = (bKind == 1) ? "selfish-reroute" : "selfish-resequence";
                 rec.moverCBefore = cBefore; rec.moverCAfter = after.jobCompletion(j);
+                if (wantDetail) {
+                    rec.hasDetail = true;
+                    rec.stateBefore = beforeProfile;
+                    if (bKind == 1) {                 // reroute -> routing bimatrix
+                        rec.moverOp = bGid; rec.moverAltBefore = mAltBefore; rec.moverAltAfter = bAlt;
+                    }
+                }
                 result.trace.push_back(rec); logLive(rec);
             } else { ++iteration; }
         }
@@ -591,6 +605,14 @@ bool OperationalDispatchingLayer::descendSelfish(StrategyProfile& state, int run
 
             if (pKind != 0) {
                 const int cBeforeI = cur.jobCompletion(pI), cBeforeJ = cur.jobCompletion(pJ);
+                // Snapshot for the per-iteration 2-player bimatrix (mutual reroute only).
+                const bool wantDetail = ((int)result.trace.size() < detailRows);
+                StrategyProfile beforeProfile;
+                int mAltB = -1, rAltB = -1;
+                if (wantDetail) {
+                    beforeProfile = state;
+                    if (pKind == 3) { mAltB = state.alternativeOf(pGid); rAltB = state.alternativeOf(pGid2); }
+                }
                 if (pKind == 2) state.sequence = pSeq;
                 else { state.reroute(pGid, pAlt); state.reroute(pGid2, pAlt2); }
                 pairImproved = true;
@@ -605,6 +627,15 @@ bool OperationalDispatchingLayer::descendSelfish(StrategyProfile& state, int run
                     rec.moveType = (pKind == 2) ? "pairwise-swap" : "pairwise-mutual";
                     rec.moverCBefore = cBeforeI; rec.moverCAfter = after.jobCompletion(pI);
                     rec.rivalCBefore = cBeforeJ; rec.rivalCAfter = after.jobCompletion(pJ);
+                    if (wantDetail) {
+                        rec.hasDetail = true;
+                        rec.stateBefore = beforeProfile;
+                        if (pKind == 3) {             // mutual reroute -> 2-player bimatrix
+                            rec.moverOp = pGid; rec.rivalOp = pGid2;
+                            rec.moverAltBefore = mAltB; rec.moverAltAfter = pAlt;
+                            rec.rivalAltBefore = rAltB; rec.rivalAltAfter = pAlt2;
+                        }
+                    }
                     result.trace.push_back(rec); logLive(rec);
                 } else { ++iteration; }
             }

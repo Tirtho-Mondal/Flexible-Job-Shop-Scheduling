@@ -9,8 +9,10 @@
 //
 //      POX - uniform crossover on the routing + random-partition POX on the order.
 //      OUX - payoff-guided order-based uniform crossover: each job inherits its
-//            whole strategy from the parent where that job-player's payoff U_j is
-//            higher (partition decided by payoff, not a fixed mixing ratio).
+//            whole strategy from the parent where it is individually happier - i.e.
+//            where its OWN-interest cost own_j is lower (partition decided by payoff,
+//            not a fixed mixing ratio). own_j is used instead of the full U_i because
+//            the stable U_i is makespan-aligned and barely differs between jobs.
 //      OOX - order-based one-point crossover: a random cut point; the left part is
 //            copied from parent 1 (operations + machines), the remainder filled
 //            from parent 2 in order (skipping operations already placed).

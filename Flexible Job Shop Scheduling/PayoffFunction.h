@@ -3,20 +3,28 @@
 //  PayoffFunction.h   <<<  THE HEART OF THE GAME-THEORETIC MODEL  >>>
 //  ---------------------------------------------------------------------------
 //  There is exactly ONE payoff function. Each JOB is a self-interested player;
-//  machines are shared resources the jobs compete for. A player's payoff is
-//  higher when it finishes earlier, waits less, causes less machine conflict,
-//  and the overall makespan is smaller:
+//  machines are shared resources the jobs compete for. The player's OWN-interest
+//  cost (lower = better) is
 //
-//        U_i = 1 / ( 1 + a*C_i + b*W_i + g*Conf_i + d*Cmax )
+//        own_i = a*C_i + b*W_i + g*Conf_i + t*Toll_i
 //
 //    C_i   = completion time of job i (its last operation's finish),
 //    W_i   = waiting time          = C_i - (sum of its processing times),
 //    Conf_i= machine-conflict load = sum over its operations of the total
 //            processing booked on the machine each one chose,
-//    Cmax  = makespan (the shared term linking each player to global quality).
+//    Toll_i= Pigouvian congestion toll (delay externality on machine rivals).
+//
+//  The payoff is a STABLE, makespan-aligned LEXICOGRAPHIC form:
+//        d > 0 :  U_i = 1 / ( 1 + d*Cmax + own_i/(1+own_i) )   (default, STABLE)
+//        d = 0 :  U_i = 1 / ( 1 + own_i )                      (pure selfish, PoA)
+//  When d>0 the integer makespan is the PRIMARY key and own_i/(1+own_i) in [0,1) only
+//  breaks ties, so a strictly lower Cmax ALWAYS gives a strictly higher U_i for every
+//  player (payoff and makespan can never disagree). When d=0 the makespan is absent,
+//  so selfish equilibria may be inefficient (the price of anarchy).
 //
 //  forPlayer() is that single function: it returns the payoff U_i together with
-//  the parts it is built from, so there is ONE place that defines the payoff.
+//  the parts it is built from (including own_i in ownCost), so there is ONE place
+//  that defines the payoff.
 //
 //  globalPotential() is NOT a payoff - it is the makespan-dominated GLOBAL POTENTIAL
 //  Phi that best-response moves descend and the solver keeps the minimum of, so the

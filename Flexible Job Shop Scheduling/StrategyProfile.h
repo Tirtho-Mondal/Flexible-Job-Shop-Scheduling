@@ -47,8 +47,8 @@ public:
 
     // ---- strategy moves (named operations on the strategy data) --------
     // A move is one player changing its strategy. These edit the profile's two
-    // vectors; the solver (GameSolver) decides WHICH move to make (best response)
-    // and a swap / mutual reroute is just two of these applied to a rival pair.
+    // vectors; the dispatching/coordination layers decide WHICH move to make (best
+    // response) and a swap / mutual reroute is just two of these applied to a rival pair.
 
     // ROUTING move (MAV): pick a different eligible machine for one operation.
     void reroute(int globalId, int alt) { routing[globalId] = alt; }

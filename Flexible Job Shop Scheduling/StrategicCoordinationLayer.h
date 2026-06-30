@@ -6,10 +6,10 @@
 //  operational-layer Nash equilibrium has the lowest makespan,
 //        a* = argmin_a  Cmax( E(a) ),
 //  where E(a) is the equilibrium returned by the Operational Dispatching Layer
-//  for the routing plan a. It proposes routing plans (random / greedy / task-pool
-//  / fictitious-play beliefs / crossover), hands each to Layer 2 to be played to a
-//  Nash equilibrium, keeps the best by makespan, and feeds the result back into the
-//  beliefs - a bilevel (Stackelberg-style) game wrapped in multi-start + ILS.
+//  for the routing plan a. It proposes routing plans (random or fictitious-play
+//  beliefs or crossover - NO greedy/dispatch-rule construction), hands each to Layer 2
+//  to be played to a Nash equilibrium, keeps the best by makespan, and feeds the
+//  result back into the beliefs - a bilevel game wrapped in multi-start + ILS.
 // ============================================================================
 
 #include "Instance.h"
@@ -47,10 +47,11 @@ private:
     void considerIncumbent(SolveResult& result, long long& bestFit,
                            const StrategyProfile& state, const Schedule& sched);
 
-    // GLOBAL ROUTING GAME (bilevel upper level): each job best-responds on its OWN
-    // payoff by re-routing one operation, anticipating that the LOCAL sequencing game
-    // re-equilibrates for the new routing. Iterates to a routing Nash equilibrium - a
-    // subgame-perfect equilibrium of the two-stage game. Game theory on BOTH layers.
+    // GLOBAL ROUTING GAME (bilevel upper level): jobs re-route their CRITICAL
+    // operations (solo, or two rivals jointly = mutual) whenever it lowers the global
+    // potential Phi, anticipating that the LOCAL sequencing game re-equilibrates for
+    // the new routing (the two games ALTERNATE). Iterates to a routing Nash
+    // equilibrium - a subgame-perfect equilibrium of the two-stage game. Both layers.
     void playRoutingGame(StrategyProfile& state, int run,
                          SolveResult& result, long long& bestFit, int& iteration);
 

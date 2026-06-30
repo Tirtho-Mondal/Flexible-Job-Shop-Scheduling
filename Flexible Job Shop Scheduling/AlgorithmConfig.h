@@ -28,20 +28,21 @@ public:
     //     optimum on several instances (use this to get the best results).
     // 1 = pure SELFISH non-cooperative game: unilateral then pairwise (Pareto) best
     //     response on each job's OWN payoff U_i. Converges to a certified Nash
-    //     equilibrium but has a PRICE OF ANARCHY (worse makespan) - use this to
-    //     MEASURE the PoA / the toll's effect, not to get the best makespan.
+    //     equilibrium. NOTE: a genuine price of anarchy appears only with delta = 0
+    //     (the makespan absent from U_i); with delta > 0 the stable payoff is
+    //     makespan-aligned, so set delta 0 for the PoA / toll study.
     int selfish         = 0;
 
     // BILEVEL GAME (game theory on BOTH layers): the GLOBAL layer is a routing game
-    // (jobs best-respond on their machine assignment, anticipating the sequencing
-    // equilibrium) wrapped around the LOCAL sequencing game. Converges to a subgame-
-    // perfect Nash equilibrium. 1 = on (overrides selfish/potential engine).
+    // (jobs re-route their critical operations - solo or mutual - whenever it lowers
+    // the global potential Phi, anticipating the sequencing equilibrium) ALTERNATING
+    // with the LOCAL sequencing game. Converges to a subgame-perfect equilibrium.
+    // 1 = on (overrides selfish/potential engine).
     int bilevel         = 0;
 
-    // Inertia for the simultaneous (independent) selfish game: probability that a
-    // job which wants to deviate actually moves in a given round. <1 damps the
-    // oscillation of fully-synchronous play so the dynamics converge to a Nash
-    // equilibrium. 1.0 = fully synchronous; ~0.5 is a good default.
+    // (UNUSED) Inertia knob from the old simultaneous (synchronous) selfish game,
+    // which was replaced by asynchronous best response (descendSelfish) and is no
+    // longer read by any engine. Kept only so old settings files still parse.
     double inertia      = 0.5;
 
     // Memetic mode: when 1, the iterated-local-search perturbation is a CROSSOVER
@@ -52,8 +53,10 @@ public:
 
     // Which crossover operator (when crossover = 1):
     //   0 = POX : uniform crossover on routing + random-partition POX on sequence.
-    //   1 = OUX : payoff-guided - each job inherits its whole strategy from the
-    //             parent where that job-player earns the higher payoff U_j.
+    //   1 = OUX : payoff-guided - each job inherits its whole strategy from the parent
+    //             where it is individually happier (lower own-interest cost own_j).
+    //   2 = OOX : order-based one-point - prefix (ops + machines) from parent 1, the
+    //             remainder from parent 2 in order.
     int crossoverType   = 1;
 
     // ---- search control -------------------------------------------------

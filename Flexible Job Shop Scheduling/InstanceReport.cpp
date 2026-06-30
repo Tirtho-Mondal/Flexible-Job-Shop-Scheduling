@@ -345,12 +345,12 @@ void InstanceReport::write(const string& path, const Instance& inst,
           << "Every job is an INDEPENDENT, self-interested player. Acting on its own and one\n"
           << "at a time (asynchronous best response), a job makes the single unilateral move\n"
           << "(reroute or reposition one of its operations) that most raises its OWN payoff\n"
-          << "U_i = 1/(1 + a*C_i + b*W_i + g*Conf_i + d*Cmax + t*Toll_i) - accepted ONLY IF\n"
-          << "U_i strictly improves. The makespan is NOT the acceptance rule, so equilibria\n"
-          << "may be inefficient (the PRICE OF ANARCHY); the congestion toll t*Toll_i pulls\n"
-          << "them toward efficiency. No cooperation, no joint moves. A sweep in which no job\n"
-          << "can improve is a pure-strategy NASH EQUILIBRIUM under U_i; the best one (by\n"
-          << "Cmax) over many random restarts is reported.\n\n";
+          << "U_i (see MODEL above) - accepted ONLY IF U_i strictly improves. With delta = 0\n"
+          << "the makespan is absent from U_i, so equilibria may be inefficient (the PRICE OF\n"
+          << "ANARCHY); the congestion toll t*Toll_i pulls them toward efficiency. No\n"
+          << "cooperation, no joint moves. A sweep in which no job can improve is a pure-\n"
+          << "strategy NASH EQUILIBRIUM under U_i; the best one (by Cmax) over many random\n"
+          << "restarts is reported.\n\n";
     } else {
         f << "Search (COORDINATED MAKESPAN ENGINE):\n"
           << "Run 0 starts from a fully RANDOM profile; later runs are seeded by the\n"
@@ -444,13 +444,19 @@ void InstanceReport::write(const string& path, const Instance& inst,
             if (m.rival >= 0)
                 f << "      " << inst.job(m.rival).label() << ": completion C "
                   << m.rivalCBefore << " -> " << m.rivalCAfter << "\n";
-            if (m.moveType == "reroute")
+            // Classify the move so the routing bimatrix is drawn for ANY re-routing
+            // move - coordinated ("reroute"/"mutual"), bilevel, OR selfish
+            // ("selfish-reroute"/"pairwise-mutual"). Sequencing-only moves get a note.
+            const bool isCombo   = (m.moveType == "reroute+swap");
+            const bool isMutual  = (m.moveType.find("mutual")  != string::npos);
+            const bool isReroute = (!isCombo && !isMutual && m.moveType.find("reroute") != string::npos);
+            if (isReroute && m.moverOp >= 0)
                 writeMoveBimatrix(f, inst, payoff, m.stateBefore, m.moverOp, -1,
                                   m.moverAltBefore, -1, m.moverAltAfter, -1);
-            else if (m.moveType == "mutual")
+            else if (isMutual && m.moverOp >= 0 && m.rivalOp >= 0)
                 writeMoveBimatrix(f, inst, payoff, m.stateBefore, m.moverOp, m.rivalOp,
                                   m.moverAltBefore, m.rivalAltBefore, m.moverAltAfter, m.rivalAltAfter);
-            else if (m.moveType == "reroute+swap") {
+            else if (isCombo && m.moverOp >= 0) {
                 f << "  (combined move: the mover RE-ROUTES while the two players SWAP their\n"
                      "   dispatch order. The mover's routing game is shown below; the swap is the\n"
                      "   sequencing half of the same two-player interaction.)\n";
@@ -586,8 +592,8 @@ void InstanceReport::write(const string& path, const Instance& inst,
           << (best.jobCompletion(j) == best.makespan() ? "   <- makespan-critical job\n" : "\n");
     f << "\n";
 
-    // per-job payoff breakdown (JC-NCGS hybrid payoff)
-    f << "Per-job payoff  U_i = 1/(a*C_i + b*W_i + g*Conf_i + d*Cmax):\n";
+    // per-job payoff breakdown (stable makespan-aligned payoff)
+    f << "Per-job payoff  U_i = 1/(1 + d*Cmax + own_i/(1+own_i)),  own_i = a*C_i + b*W_i + g*Conf_i + t*Toll_i:\n";
     f << left << setw(6) << "Job" << right << setw(8) << "C_i"
       << setw(8) << "W_i" << setw(10) << "Conf_i" << setw(10) << "U_i" << "\n";
     f << fixed << setprecision(4);
