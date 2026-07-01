@@ -1,37 +1,51 @@
 # Algorithm parameters - "key value" per line. '#' = comment.
 # Delete a line (or this whole file) to use the built-in default shown in ().
 
-# ---- payoff weights:  U_i = 1 / (1 + alpha*C_i + beta*W_i + gamma*Conf_i + delta*Cmax)
+# ---- payoff weights:  own_i = alpha*C_i + beta*W_i + gamma*Conf_i + tau*Toll_i
+#      delta>0 (STABLE):  U_i = 1 / (1 + delta*Cmax + own_i/(1+own_i))   (makespan-aligned)
+#      delta=0 (SELFISH): U_i = 1 / (1 + own_i)                          (own cost only, PoA)
 alpha  1.0      # (1.0)   completion-time weight
 beta   0.3      # (0.3)   waiting-time weight
 gamma  0.05     # (0.05)  machine-conflict weight
 delta  0.5      # (0.5)   shared-makespan coupling (set 0 = pure-selfish)
-tau    0.02     # (0.0)   NOVELTY: congestion-toll weight (delay externality on
+tau    0        # (0.0)   NOVELTY: congestion-toll weight (delay externality on
                 #          machine rivals). Pigouvian coordination device: keeps the
                 #          selfish game pure (own payoff) while pulling equilibria to
                 #          LOW makespan (lowers price of anarchy). 0 = off.
 
 # ---- game mode
-acceptance  potential   # "potential" = COORDINATED engine = BEST makespan (default; use
-                        #               this to beat results / reach optima).
+acceptance  bilevel     # "potential" = COORDINATED engine = BEST makespan (default).
                         # "selfish"   = pure non-cooperative game (own payoff U_i); has a
-                        #               price of anarchy (worse makespan) - use only to
-                        #               MEASURE the PoA / the toll's effect.
+                        #               price of anarchy - use to MEASURE PoA / toll effect.
+                        # "bilevel"   = GAME ON BOTH LAYERS: a global ROUTING GAME over a
+                        #               local SEQUENCING GAME, both descending the global
+                        #               potential Phi (makespan) -> an efficient subgame-
+                        #               perfect equilibrium. Fast + good makespan.
 
 # ---- perturbation (how Iterated Local Search escapes a Nash equilibrium)
 crossover   0           # (1)  1 = MEMETIC: recombine two elite equilibria then replay the
                         #      Nash game on the offspring. 0 = plain RANDOM-KICK ILS.
-crossover_type  pox     # (oux) which operator when crossover=1:
+crossover_type  oux     # (oux) which operator when crossover=1:
                         #   pox = uniform crossover on routing + random-partition POX on
                         #         sequence (more diversity).
                         #   oux = payoff-guided: each job inherits its whole strategy from
-                        #         the parent where that job-player's payoff U_j is higher.
+                        #         the parent where it is happier (lower own-interest cost).
                         #   oox = order-based one-point: random cut, prefix from parent 1
                         #         (ops + machines), remainder from parent 2 in order.
+                        #   pwx = payoff-WEIGHTED (roulette OUX): each job inherits from a
+                        #         parent with probability proportional to its payoff there.
+                        #   rmx = REGRET-MATCHING (Hart & Mas-Colell): each job inherits from
+                        #         the parent where it has lower regret (closer to best response).
+                        #   wgx = WELFARE-GUIDED (NOVEL): each job inherits from the parent where
+                        #         its social cost own_j + Toll_j (private + externality) is lower.
+                        #   cpx = COALITIONAL PAYOFF (NOVEL, payoff-guided): interacting jobs are
+                        #         inherited together from the parent with higher coalition payoff.
 
 # ---- search control
-runs              20    # (50)   independent multi-start runs per instance (raise for quality)
-belief_pool       30    # (30)   elite-pool size for fictitious-play learning
+runs              50    # (50)   independent multi-start runs per instance (raise for quality)
+memory            30    # (30)   ELITE-POOL size: how many of the best past equilibria the
+                        #         ElitePlay pool keeps and learns machine-choice ELITE
+                        #         FREQUENCIES from, to seed new runs (elite-pool learning).
 ils_patience      60    # (60)   ILS stops after (this + ops/ils_patience_div) idle kicks
 ils_patience_div  4     # (4)
 kick_min          4     # (4)    ILS kick strength = max(kick_min, ops/kick_div)
