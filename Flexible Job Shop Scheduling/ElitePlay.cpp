@@ -1,7 +1,7 @@
 // ============================================================================
-//  FictitiousPlay.cpp - elite pool + belief (frequency) maps for fictitious play.
+//  ElitePlay.cpp - elite pool + elitePool (frequency) maps for elite-pool learning.
 // ============================================================================
-#include "FictitiousPlay.h"
+#include "ElitePlay.h"
 #include <algorithm>
 #include <climits>
 
@@ -9,16 +9,16 @@ using namespace std;
 
 namespace fjs {
 
-FictitiousPlay::FictitiousPlay(const Instance& inst, int capacity)
+ElitePlay::ElitePlay(const Instance& inst, int capacity)
     : inst(inst), capacity(max(1, capacity)) {}
 
-int FictitiousPlay::bestMakespan() const {
+int ElitePlay::bestMakespan() const {
     int b = INT_MAX;
     for (int m : makespans) b = min(b, m);
     return b;
 }
 
-void FictitiousPlay::consider(const StrategyProfile& state, int makespan) {
+void ElitePlay::consider(const StrategyProfile& state, int makespan) {
     // Reject exact duplicates (same routing) to keep the pool diverse.
     for (const StrategyProfile& e : pool)
         if (e.routing == state.routing) return;
@@ -35,13 +35,13 @@ void FictitiousPlay::consider(const StrategyProfile& state, int makespan) {
             pool[worst]      = state;
             makespans[worst] = makespan;
         } else {
-            return;   // not good enough to change the beliefs
+            return;   // not good enough to change the elite frequencies
         }
     }
     rebuild();
 }
 
-void FictitiousPlay::rebuild() {
+void ElitePlay::rebuild() {
     const int n = inst.totalOperations();
     const double alpha = 0.5;   // Laplace smoothing -> keeps exploration alive
     freq.assign(n, {});
@@ -56,21 +56,21 @@ void FictitiousPlay::rebuild() {
     }
 }
 
-vector<int> FictitiousPlay::sampleRouting(mt19937& rng) const {
+vector<int> ElitePlay::sampleRouting(mt19937& rng) const {
     vector<int> routing(inst.totalOperations(), 0);
     for (int gid = 0; gid < inst.totalOperations(); ++gid)
         routing[gid] = sampleAlternative(gid, rng);
     return routing;
 }
 
-int FictitiousPlay::sampleAlternative(int globalId, mt19937& rng) const {
+int ElitePlay::sampleAlternative(int globalId, mt19937& rng) const {
     if (freq.empty() || freq[globalId].empty())
         return 0;
     discrete_distribution<int> dist(freq[globalId].begin(), freq[globalId].end());
     return dist(rng);
 }
 
-int FictitiousPlay::argmaxAlternative(int globalId) const {
+int ElitePlay::argmaxAlternative(int globalId) const {
     if (freq.empty() || freq[globalId].empty()) return 0;
     const vector<double>& p = freq[globalId];
     return (int)(max_element(p.begin(), p.end()) - p.begin());

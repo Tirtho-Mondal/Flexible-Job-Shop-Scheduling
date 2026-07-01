@@ -1,6 +1,6 @@
 // ============================================================================
 //  StrategicCoordinationLayer.cpp  (Layer 1) - global routing search:
-//  multi-start + fictitious-play beliefs + crossover, with the Operational
+//  multi-start + elite-pool learning + crossover, with the Operational
 //  Dispatching Layer (the Nash game) as the local optimiser for each plan.
 // ============================================================================
 #define _CRT_SECURE_NO_WARNINGS   // getenv below
@@ -65,10 +65,10 @@ StrategyProfile StrategicCoordinationLayer::randomProfile() {
     return state;
 }
 
-// Fictitious-play seed: routing drawn from the players' learned beliefs.
-StrategyProfile StrategicCoordinationLayer::beliefProfile(const FictitiousPlay& belief) {
+// elite-pool learning seed: routing drawn from the players' learned elite frequencies.
+StrategyProfile StrategicCoordinationLayer::eliteProfile(const ElitePlay& elitePool) {
     StrategyProfile state(inst.totalOperations());
-    state.routing = belief.sampleRouting(rng);
+    state.routing = elitePool.sampleRouting(rng);
     fillRandomSequence(state);
     return state;
 }
@@ -246,8 +246,8 @@ SolveResult StrategicCoordinationLayer::solve() {
     };
     const int kickStrength = max(cfg.kickMin, inst.totalOperations() / max(1, cfg.kickDiv));
 
-    // Fictitious-play memory, the ILS kick, and the crossover operators.
-    FictitiousPlay belief(inst, cfg.memorySize);
+    // elite-pool learning memory, the ILS kick, and the crossover operators.
+    ElitePlay elitePool(inst, cfg.memorySize);
     RandomKick     kick(inst, rng);
     Crossover      xover(inst, payoff);
 
@@ -260,11 +260,11 @@ SolveResult StrategicCoordinationLayer::solve() {
     for (run = 0; run < totalRun; ++run) {
         // STRATEGIC LAYER: propose a routing plan. NO GREEDY CONSTRUCTION - run 0 is
         // always fully RANDOM (the required random initialisation); later runs are
-        // seeded either from the players' LEARNED BELIEFS (fictitious play) or again
-        // at random. The Nash game (Layer 2), the beliefs and the crossover are what
+        // seeded either from the players' learned elite frequencies (elite-pool learning) or again
+        // at random. The Nash game (Layer 2), the elite frequencies and the crossover are what
         // drive the search - there is no greedy/dispatching-rule constructor.
         StrategyProfile state;
-        if (run > 0 && belief.ready() && (run % 2 == 0)) state = beliefProfile(belief);
+        if (run > 0 && elitePool.ready() && (run % 2 == 0)) state = eliteProfile(elitePool);
         else                                            state = randomProfile();
 
         Schedule s0 = op.evaluate(state);
@@ -290,13 +290,13 @@ SolveResult StrategicCoordinationLayer::solve() {
         int stagnantKicks = 0;
         while (stagnantKicks < ILS_PATIENCE) {
             StrategyProfile work;
-            if (cfg.crossover && belief.ready()) {
-                uniform_int_distribution<int> pick(0, belief.eliteCount() - 1);
-                work = xover.recombine(cfg.crossoverType, runBest, belief.elite(pick(rng)), rng);
-                kick.apply(work, max(1, kickStrength / 3), &belief);
+            if (cfg.crossover && elitePool.ready()) {
+                uniform_int_distribution<int> pick(0, elitePool.eliteCount() - 1);
+                work = xover.recombine(cfg.crossoverType, runBest, elitePool.elite(pick(rng)), rng);
+                kick.apply(work, max(1, kickStrength / 3), &elitePool);
             } else {
                 work = runBest;
-                kick.apply(work, kickStrength, &belief);
+                kick.apply(work, kickStrength, &elitePool);
             }
             bool c2;
             if (cfg.bilevel)      { playRoutingGame(work, run, result, bestFit, iteration); c2 = true; }
@@ -312,7 +312,7 @@ SolveResult StrategicCoordinationLayer::solve() {
 
         const int runBestMk = (int)(runBestFit / 1000000LL);
         result.runBests.push_back(runBestMk);
-        belief.consider(runBest, runBestMk);   // feedback: learn from this run's best
+        elitePool.consider(runBest, runBestMk);   // feedback: learn from this run's best
     }
 
     // Safety net for selfish mode: if no certified Nash endpoint was found, report

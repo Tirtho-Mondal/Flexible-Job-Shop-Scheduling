@@ -270,7 +270,9 @@ static AlgorithmConfig loadAlgorithmConfig(const fs::path& dataDir, fs::path& us
             else if (k == "bilevel")          cfg.bilevel         = stoi(v);
             else if (k == "inertia")          cfg.inertia         = stod(v);
             else if (k == "crossover")        cfg.crossover       = stoi(v);
-            else if (k == "crossover_type")   cfg.crossoverType   = (v == "pox") ? 0 : (v == "oox") ? 2 : 1;
+            else if (k == "crossover_type")   cfg.crossoverType   =
+                         (v == "pox") ? 0 : (v == "oox") ? 2 : (v == "pwx") ? 3 :
+                         (v == "rmx") ? 4 : (v == "wgx") ? 5 : (v == "cpx") ? 6 : 1;
             else if (k == "runs")             cfg.runs            = stoi(v);
             else if (k == "memory")           cfg.memorySize      = stoi(v);
             else if (k == "belief_pool")      cfg.memorySize      = stoi(v);   // legacy alias
@@ -351,6 +353,10 @@ int main() {
          << "  perturb  : " << (algo.crossover
                 ? (algo.crossoverType == 0 ? "CROSSOVER=POX (memetic) + light kick"
                  : algo.crossoverType == 2 ? "CROSSOVER=OOX one-point (memetic) + light kick"
+                 : algo.crossoverType == 3 ? "CROSSOVER=PWX payoff-weighted/roulette (memetic) + light kick"
+                 : algo.crossoverType == 4 ? "CROSSOVER=RMX regret-matching (memetic) + light kick"
+                 : algo.crossoverType == 5 ? "CROSSOVER=WGX welfare-guided/social-cost (memetic) + light kick"
+                 : algo.crossoverType == 6 ? "CROSSOVER=CPX coalitional-payoff (memetic) + light kick"
                  :                           "CROSSOVER=OUX payoff-guided (memetic) + light kick")
                 : "random kick (ILS)") << "\n"
          << "  search   : runs=" << algo.runs << " memory=" << algo.memorySize

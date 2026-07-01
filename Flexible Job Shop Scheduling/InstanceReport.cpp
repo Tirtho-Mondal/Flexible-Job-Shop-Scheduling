@@ -354,7 +354,7 @@ void InstanceReport::write(const string& path, const Instance& inst,
     } else {
         f << "Search (COORDINATED MAKESPAN ENGINE):\n"
           << "Run 0 starts from a fully RANDOM profile; later runs are seeded by the\n"
-          << "players' learned beliefs (fictitious play) or at random - NO greedy/dispatch-\n"
+          << "players' learned elite frequencies (elite-pool learning) or at random - NO greedy/dispatch-\n"
           << "rule construction. Each step the two rival jobs that share a critical machine\n"
           << "play their 2-player game - swapping order or jointly re-routing to the joint\n"
           << "best response that most lowers Cmax - with a single-job move as fallback. Moves\n"

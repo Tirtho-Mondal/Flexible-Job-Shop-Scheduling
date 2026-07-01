@@ -6,10 +6,10 @@
 //  operational-layer Nash equilibrium has the lowest makespan,
 //        a* = argmin_a  Cmax( E(a) ),
 //  where E(a) is the equilibrium returned by the Operational Dispatching Layer
-//  for the routing plan a. It proposes routing plans (random or fictitious-play
-//  beliefs or crossover - NO greedy/dispatch-rule construction), hands each to Layer 2
+//  for the routing plan a. It proposes routing plans (random or elite-pool learning
+//  elite frequencies or crossover - NO greedy/dispatch-rule construction), hands each to Layer 2
 //  to be played to a Nash equilibrium, keeps the best by makespan, and feeds the
-//  result back into the beliefs - a bilevel game wrapped in multi-start + ILS.
+//  result back into the elite frequencies - a bilevel game wrapped in multi-start + ILS.
 // ============================================================================
 
 #include "Instance.h"
@@ -17,7 +17,7 @@
 #include "PayoffFunction.h"
 #include "AlgorithmConfig.h"
 #include "SolveResult.h"
-#include "FictitiousPlay.h"
+#include "ElitePlay.h"
 #include "OperationalDispatchingLayer.h"
 #include <random>
 #include <iosfwd>
@@ -41,7 +41,7 @@ private:
     // ---- routing-plan proposals (the strategic decisions; NO greedy construction) ----
     StrategyProfile randomProfile();
     void            fillRandomSequence(StrategyProfile& state);
-    StrategyProfile beliefProfile(const FictitiousPlay& belief);  // fictitious-play seed
+    StrategyProfile eliteProfile(const ElitePlay& elitePool);  // elite-pool learning seed
 
     // Keep `state` if its schedule is the new global best (by makespan, then sumC).
     void considerIncumbent(SolveResult& result, long long& bestFit,

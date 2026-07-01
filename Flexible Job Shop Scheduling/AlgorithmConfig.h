@@ -57,13 +57,23 @@ public:
     //             where it is individually happier (lower own-interest cost own_j).
     //   2 = OOX : order-based one-point - prefix (ops + machines) from parent 1, the
     //             remainder from parent 2 in order.
+    //   3 = PWX : payoff-WEIGHTED (roulette OUX) - each job inherits from a parent with
+    //             probability proportional to its payoff there (diversity + guidance).
+    //   4 = RMX : REGRET-MATCHING (Hart & Mas-Colell) - each job inherits from the parent
+    //             where it has lower regret (closer to its best response / more stable).
+    //   5 = WGX : WELFARE-GUIDED (NOVEL) - each job inherits from the parent where its
+    //             internalised social cost own_j + Toll_j (private + Pigouvian externality)
+    //             is lower; recombines socially-efficient, low-PoA strategy slices.
+    //   6 = CPX : COALITIONAL PAYOFF (NOVEL, payoff-guided) - interacting jobs form a
+    //             coalition inherited together from the parent with higher coalition payoff,
+    //             preserving the joint machine-sharing configurations (best quality).
     int crossoverType   = 1;
 
     // ---- search control -------------------------------------------------
     int runs            = 50;   // independent multi-start runs per instance
-    int memorySize      = 30;   // fictitious-play MEMORY: how many past equilibria the
-                            //     players recall to form their beliefs (bounded-memory
-                            //     fictitious play). Was "beliefPool".
+    int memorySize      = 30;   // elite-pool learning MEMORY: how many past equilibria the
+                            //     players recall to form their elite frequencies (bounded-memory
+                            //     elite-pool learning). Was "beliefPool".
     int ilsPatienceBase = 60;   // ILS stops after (base + ops/div) non-improving kicks
     int ilsPatienceDiv  = 4;
     int kickMin         = 4;    // ILS kick strength = max(kickMin, ops/kickDiv)

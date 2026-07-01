@@ -153,7 +153,7 @@
     <ClCompile Include="OperationalDispatchingLayer.cpp" />
     <ClCompile Include="StrategicCoordinationLayer.cpp" />
     <ClCompile Include="FjsInstanceReader.cpp" />
-    <ClCompile Include="FictitiousPlay.cpp" />
+    <ClCompile Include="ElitePlay.cpp" />
     <ClCompile Include="BestKnownRegistry.cpp" />
     <ClCompile Include="InstanceReport.cpp" />
     <ClCompile Include="GlobalReport.cpp" />
@@ -180,7 +180,7 @@
     <ClInclude Include="OperationalDispatchingLayer.h" />
     <ClInclude Include="StrategicCoordinationLayer.h" />
     <ClInclude Include="FjsInstanceReader.h" />
-    <ClInclude Include="FictitiousPlay.h" />
+    <ClInclude Include="ElitePlay.h" />
     <ClInclude Include="BestKnownRegistry.h" />
     <ClInclude Include="InstanceReport.h" />
     <ClInclude Include="GlobalReport.h" />

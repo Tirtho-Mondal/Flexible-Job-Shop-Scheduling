@@ -25,7 +25,7 @@
     <ClCompile Include="OperationalDispatchingLayer.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="StrategicCoordinationLayer.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="FjsInstanceReader.cpp"><Filter>Source Files</Filter></ClCompile>
-    <ClCompile Include="FictitiousPlay.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="ElitePlay.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="BestKnownRegistry.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="InstanceReport.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="GlobalReport.cpp"><Filter>Source Files</Filter></ClCompile>
@@ -52,7 +52,7 @@
     <ClInclude Include="OperationalDispatchingLayer.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="StrategicCoordinationLayer.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="FjsInstanceReader.h"><Filter>Header Files</Filter></ClInclude>
-    <ClInclude Include="FictitiousPlay.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="ElitePlay.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="BestKnownRegistry.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="InstanceReport.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="GlobalReport.h"><Filter>Header Files</Filter></ClInclude>

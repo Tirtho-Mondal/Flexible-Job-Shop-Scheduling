@@ -11,7 +11,7 @@ namespace fjs {
 RandomKick::RandomKick(const Instance& inst, mt19937& engine)
     : instance(inst), rng(engine) {}
 
-void RandomKick::apply(StrategyProfile& profile, int strength, const FictitiousPlay* belief) {
+void RandomKick::apply(StrategyProfile& profile, int strength, const ElitePlay* elitePool) {
     const int n = instance.totalOperations();
     uniform_int_distribution<int> coin(0, 1);
 
@@ -21,10 +21,10 @@ void RandomKick::apply(StrategyProfile& profile, int strength, const FictitiousP
         const Operation& op = instance.operationByGlobalId(gid);
 
         if (op.alternativeCount() > 1 && coin(rng) == 0) {
-            // Re-route: draw from beliefs when available (aim the kick at the
+            // Re-route: draw from elite frequencies when available (aim the kick at the
             // machine assignments good solutions agree on), else uniformly.
-            if (belief && belief->ready())
-                profile.reroute(gid, belief->sampleAlternative(gid, rng));
+            if (elitePool && elitePool->ready())
+                profile.reroute(gid, elitePool->sampleAlternative(gid, rng));
             else {
                 uniform_int_distribution<int> pickAlt(0, op.alternativeCount() - 1);
                 profile.reroute(gid, pickAlt(rng));
